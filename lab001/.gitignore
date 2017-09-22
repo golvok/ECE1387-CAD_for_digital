@@ -1,0 +1,18 @@
+# Compiled Object files
+build/OBJ/**/*.o
+build/OBJ/**/*.so
+
+# Dependency Files
+build/DEPS/**/*.d
+
+# Executables
+build/EXE/maize-router
+
+# YCM compiled config
+.ycm_extra_conf.pyc
+
+# misc
+*.sublime-workspace
+test/runs/*
+*.xoj.bak
+*.autosave.xoj
