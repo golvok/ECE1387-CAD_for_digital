@@ -12,8 +12,12 @@
 # include <cairo-xlib.h>
 #else
 //Graphics disabled, may not have access to cairo headers so define a dummy type
+namespace graphics {
 typedef void cairo_surface_t;
+}
 #endif
+
+namespace graphics {
 
 class SurfaceImpl {
     public:
@@ -29,5 +33,7 @@ class SurfaceImpl {
     private:
         std::shared_ptr<cairo_surface_t> mSurface;
 };
+
+}
 
 #endif

@@ -1,6 +1,8 @@
-#include "SurfaceImpl.h"
+#include "SurfaceImpl.hpp"
 
 #include <iostream>
+
+namespace graphics {
 
 SurfaceImpl::SurfaceImpl(const char* filePath)
     : SurfaceImpl::SurfaceImpl() {
@@ -52,4 +54,6 @@ void SurfaceImpl::setSurface(
 
 cairo_surface_t* SurfaceImpl::getSurface() const {
     return mSurface.get();
+}
+
 }

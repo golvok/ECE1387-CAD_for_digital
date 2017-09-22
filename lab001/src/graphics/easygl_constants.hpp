@@ -1,6 +1,8 @@
 #ifndef EASYGL_CONSTANTS_H
 #define EASYGL_CONSTANTS_H
 
+namespace graphics {
+
 /**
  * Some typical (and non typical...) colours, mostly taken from the X11 colours, and put in an enum,
  * so that you can get some reasonable colours from an index variable or something, and so you
@@ -77,5 +79,6 @@ typedef struct {
     /* scroll wheel backward is 5. */
 } t_event_buttonPressed; 
 
+}
 
 #endif // EASYGL_CONSTANTS_H

@@ -1,4 +1,5 @@
-#include "fontcache.h"
+#include "fontcache.hpp"
+
 
 /**
  * Linux/Mac:
@@ -19,18 +20,25 @@
  *   Check your installed fonts if the program exits immediately or while changing font size.
  *
  */
+namespace graphics {
 const char* const fontname_config[]{
     "helvetica",
     "lucida sans",
     "schumacher"
 };
+}
 
 /******************************************
  * begin FontCache function definitions *
  ******************************************/
 
 #ifdef X11
-#include "graphics_state.h"
+#include "graphics_state.hpp"
+#endif
+
+namespace graphics {
+
+#ifdef X11
 void FontCache::close_font(font_ptr font) {
     XftFontClose(t_x11_state::getInstance()->display, font);
 }
@@ -226,4 +234,4 @@ font_ptr FontCache::get_font_info(
     }
 }
 
-
+}

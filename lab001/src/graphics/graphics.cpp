@@ -203,6 +203,7 @@ close_graphics() to release all drawing structures and close the graphics.*/
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wfloat-conversion"
 
+
 #ifndef NO_GRAPHICS  // Strip everything out and just put in stubs if NO_GRAPHICS defined
 
 /**********************************
@@ -219,13 +220,14 @@ close_graphics() to release all drawing structures and close the graphics.*/
 #include <queue>
 #include <unordered_map>
 #include <sys/timeb.h>
-#include "graphics.h"
-#include "graphics_state.h"
-#include "graphics_automark.h"
+#include "graphics.hpp"
+#include "graphics_state.hpp"
+#include "graphics_automark.hpp"
 
-#include "SurfaceImpl.h" //Needed by draw_surface to access the underlying surface type
+#include "SurfaceImpl.hpp" //Needed by draw_surface to access the underlying surface type
 
 using namespace std;
+namespace graphics {
 
 
 #if defined(X11) || defined(WIN32)
@@ -5194,12 +5196,15 @@ void win32_fillcurve(t_point *points,
 #endif /******** Win32 Specific Definitions ********************/
 
 
+}
 #else  /***** NO_GRAPHICS *******/
 /* No graphics at all. Stub everything out so calling program doesn't have to change
  * but of course graphics won't do anything.
  */
 
-#include "graphics.h"
+#include "graphics.hpp"
+
+namespace graphics {
 
 void event_loop(void (* /*act_on_mousebutton*/) (float x, float y, t_event_buttonPressed button_info),
     void (* /*act_on_mousemove*/) (float x, float y),
@@ -5370,6 +5375,8 @@ void win32_fillcurve(t_point* points, int npoints) {
 
 #endif  // WIN32 (subset of commands)
 
+}
+
 #endif  // NO_GRAPHICS
 
 
@@ -5379,5 +5386,6 @@ COLORREF convert_to_win_color(const t_color& src) {
     return RGB(src.red, src.green, src.blue);
 }
 #endif /* WIN32 */
+
 
 #pragma GCC diagnostic pop

@@ -1,8 +1,10 @@
-#include "graphics/graphics_types.h"
+#include "graphics/graphics_types.hpp"
 
 #include "math.h"
 
 using namespace std;
+
+namespace graphics {
 
 // Predefined colours
 const std::array<t_color,29> t_color::predef_colors = {
@@ -320,4 +322,6 @@ bool t_color::operator==(color_types /*rhs*/) const {
 
 bool t_color::operator!=(color_types rhs) const {
     return !(*this == rhs);
+}
+
 }

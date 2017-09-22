@@ -5,7 +5,9 @@
 #include <array>
 #include <iostream>
 
-#include "easygl_constants.h"
+#include "easygl_constants.hpp"
+
+namespace graphics {
 
 /**************** USEFUL TYPES YOU CAN PASS TO GRAPHICS FUNCTIONS **********/
 
@@ -165,6 +167,8 @@ public:
     
     static const std::array<t_color,29> predef_colors;
 };
+
+}
 
 #endif /* GRAPHICS_TYPES_H */
 

@@ -37,6 +37,8 @@
 #include <windowsx.h>
 #endif
 
+namespace graphics {
+
 /**
  * Maximum sizes for the font cache. The "ZEROS" one is for fonts of zero rotation, and
  * the "ROTATED" one is for fonts with other rotation. If you plan on rotating text to
@@ -142,5 +144,7 @@ private:
     std::deque<font_descriptor> order_rotated;
     std::unordered_map<font_descriptor, font_ptr, fontdesc_hasher> descriptor2font_rotated;
 };
+
+}
 
 #endif // FONTCACHE_H

@@ -5,9 +5,9 @@
 #include <cstdint>
 #include <cfloat>  // For FLT_MAX
 
-#include "easygl_constants.h"
-#include "graphics_types.h"
-#include "Surface.h"
+#include "easygl_constants.hpp"
+#include "graphics_types.hpp"
+#include "Surface.hpp"
 
 // Set X11 by default, if neither NO_GRAPHICS nor WIN32 are defined
 #ifndef NO_GRAPHICS
@@ -19,6 +19,8 @@
 #endif // !NO_GRAPHICS
 
 #define PI 3.141592654
+
+namespace graphics {
 
 /************** ESSENTIAL FUNCTIONS: SET UP AND CLOSE DOWN ******************/
 
@@ -493,5 +495,7 @@ void win32_fillcurve(t_point *points, int npoints);
 /* Error message reporter */
 void WIN32_DELETE_ERROR();
 #endif // WIN32 or CYGWIN
+
+}
 
 #endif // GRAPHICS_H

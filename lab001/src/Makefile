@@ -71,7 +71,7 @@ LDFLAGS  += $(EXTRA_FLAGS) $(WARNING_FLAGS) $(LIBRARY_LINK_FLAGS)
 .PRECIOUS: $(OBJ_DIR)%.o
 
 # define source directories
-SOURCE_DIRS = graphics/ ./
+SOURCE_DIRS = graphics/ parsing/ util/ ./
 
 ALL_OBJ_DIRS  = $(addprefix $(OBJ_DIR),  $(SOURCE_DIRS))
 ALL_DEPS_DIRS = $(addprefix $(DEPS_DIR), $(SOURCE_DIRS))
@@ -101,6 +101,8 @@ $(EXE_DIR)maize-router: \
 	$(OBJ_DIR)graphics/graphics_types.o \
 	$(OBJ_DIR)graphics/Surface.o \
 	$(OBJ_DIR)graphics/SurfaceImpl.o \
+	$(OBJ_DIR)parsing/cmdargs_parser.o \
+	$(OBJ_DIR)util/logging.o \
 
 
 # define extra flags for particular object files

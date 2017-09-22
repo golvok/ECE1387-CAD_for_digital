@@ -1,9 +1,9 @@
 #ifndef GRAPHICS_STATE_H
 #define GRAPHICS_STATE_H
 
-#include "easygl_constants.h"
-#include "fontcache.h"
-#include "graphics_types.h"
+#include "easygl_constants.hpp"
+#include "fontcache.hpp"
+#include "graphics_types.hpp"
 
 /**********************************
  * Common Preprocessor Directives *
@@ -44,6 +44,8 @@
 #endif
 
 #define BUFSIZE 1000
+
+namespace graphics {
 
 #ifdef X11
 
@@ -242,5 +244,7 @@ struct t_gl_state {
     bool disable_event_loop = false;
     bool redirect_to_postscript = false;
 };
+
+}
 
 #endif // GRAPHICS_STATE_H

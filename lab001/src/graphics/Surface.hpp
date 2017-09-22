@@ -3,6 +3,8 @@
 
 #include <memory>
 
+namespace graphics{
+
 class SurfaceImpl;
 
 // This class implements a Cairo surface (buffer of pixel data for graphics)
@@ -12,6 +14,7 @@ class SurfaceImpl;
 // The std::shared_ptr reference counts how many copies of a surface have been
 // made through assignment and copy construction, and deallocates the cairo
 // data representing the surface only when the last copy is destroyed.
+
 
 class Surface {
     public:
@@ -35,5 +38,7 @@ class Surface {
         //may not be availabe if graphics is disabled
         std::unique_ptr<SurfaceImpl> impl_;
 };
+
+}
 
 #endif

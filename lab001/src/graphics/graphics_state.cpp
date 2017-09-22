@@ -1,4 +1,6 @@
-#include "graphics_state.h"
+#include "graphics_state.hpp"
+
+namespace graphics {
 
 #ifdef X11
 t_x11_state *t_x11_state::instance = NULL;
@@ -44,3 +46,5 @@ t_win32_state *t_win32_state::getInstance()
 	return instance;
 }
 #endif // WIN32
+
+}

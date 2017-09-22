@@ -1,6 +1,8 @@
 #include <iostream>
-#include "Surface.h"
-#include "SurfaceImpl.h"
+#include "Surface.hpp"
+#include "SurfaceImpl.hpp"
+
+namespace graphics {
 
 Surface::Surface(const char* filePath)
     : impl_(new SurfaceImpl(filePath)) {
@@ -33,4 +35,6 @@ Surface& Surface::operator=(Surface rhs) {
 
 void swap(Surface& lhs, Surface& rhs) {
     std::swap(lhs.impl_, rhs.impl_);
+}
+
 }
