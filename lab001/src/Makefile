@@ -102,6 +102,7 @@ $(EXE_DIR)maize-router: \
 	$(OBJ_DIR)graphics/Surface.o \
 	$(OBJ_DIR)graphics/SurfaceImpl.o \
 	$(OBJ_DIR)parsing/cmdargs_parser.o \
+	$(OBJ_DIR)parsing/input_parser.o \
 	$(OBJ_DIR)util/logging.o \
 
 

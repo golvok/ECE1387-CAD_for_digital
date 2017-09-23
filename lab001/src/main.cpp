@@ -1,8 +1,12 @@
 
 #include <graphics/graphics.hpp>
 #include <parsing/cmdargs_parser.hpp>
+#include <parsing/input_parser.hpp>
 #include <util/logging.hpp>
 
+#include <iostream>
+#include <fstream>
+#include <string>
 #include <thread>
 
 int program_main(const std::string& data_file_name);
@@ -45,6 +49,16 @@ int main(int argc, char const** argv) {
 }
 
 int program_main(const std::string& data_file_name) {
-	dout(DL::INFO) << data_file_name << '\n';
+	dout(DL::INFO) << "using input file: " << data_file_name << '\n';
+
+	std::ifstream data_file(data_file_name);
+
+	auto parse_result = parsing::input::parse_data(data_file);
+	if (!(std::get<0>(parse_result))) {
+		util::print_and_throw<std::invalid_argument>([&](auto&& str) {
+			str << "input file parsing failure";
+		});
+	}
+
 	return 0;
 }
