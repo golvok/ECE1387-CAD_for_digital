@@ -37,28 +37,30 @@ std::tuple<bool, bool> parse_data(std::istream& is) {
 
 	namespace x3 = boost::spirit::x3;
 	namespace chars = boost::spirit::x3::ascii;
+	using util::XID;
+	using util::YID;
+	using util::BlockPinID;
+	using util::BlockID;
+	using util::PinGID;
 
 	std::tuple<int, int, std::vector< std::tuple<
-		int, int, int, int, int, int
+		XID::IDType, YID::IDType, BlockPinID::IDType, XID::IDType, YID::IDType, BlockPinID::IDType
 	> > > parse_results;
 
 	auto it = begin(is_as_string);
 	const auto it_end = end(is_as_string);
 	const bool is_match = x3::phrase_parse( it, it_end,
 		x3::int_ >> '\n' >> x3::int_ >> '\n' >> (
-			x3::int_ >> x3::int_ >> x3::int_ >> x3::int_ >> x3::int_ >> x3::int_
+			x3::short_ >> x3::short_ >> x3::short_ >> x3::short_ >> x3::short_ >> x3::short_
 		) % '\n' >> x3::omit[*chars::space],
 		x3::lit(' '),
 		parse_results
 	);
 
-	using util::BlockID;
-	using util::XID;
-	using util::YID;
 	using std::begin;
 	using std::end;
 
-	util::Netlist<BlockID> netlist;
+	util::Netlist<PinGID> netlist;
 
 	for (const auto& route_request_parse : get<2>(parse_results)) {
 
@@ -67,8 +69,20 @@ std::tuple<bool, bool> parse_data(std::istream& is) {
 		}
 
 		netlist.add_connection(
-			util::make_id<BlockID>(util::make_id<XID>(get<0>(route_request_parse)), util::make_id<YID>(get<1>(route_request_parse))),
-			util::make_id<BlockID>(util::make_id<XID>(get<3>(route_request_parse)), util::make_id<YID>(get<4>(route_request_parse)))
+			util::make_id<PinGID>(
+				util::make_id<BlockID>(
+					util::make_id<XID>(get<0>(route_request_parse)),
+					util::make_id<YID>(get<1>(route_request_parse))
+				),
+				util::make_id<BlockPinID>(get<2>(route_request_parse))
+			),
+			util::make_id<PinGID>(
+				util::make_id<BlockID>(
+					util::make_id<XID>(get<3>(route_request_parse)),
+					util::make_id<YID>(get<4>(route_request_parse))
+				),
+				util::make_id<BlockPinID>(get<5>(route_request_parse))
+			)
 		);
 	}
 
