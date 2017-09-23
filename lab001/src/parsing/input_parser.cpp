@@ -1,6 +1,6 @@
-#include <device/device.hpp>
 #include "input_parser.hpp"
 
+#include <device/device.hpp>
 #include <util/logging.hpp>
 #include <util/netlist.hpp>
 
@@ -38,11 +38,11 @@ std::tuple<bool, bool> parse_data(std::istream& is) {
 
 	namespace x3 = boost::spirit::x3;
 	namespace chars = boost::spirit::x3::ascii;
-	using util::XID;
-	using util::YID;
-	using util::BlockPinID;
-	using util::BlockID;
-	using util::PinGID;
+	using device::XID;
+	using device::YID;
+	using device::BlockPinID;
+	using device::BlockID;
+	using device::PinGID;
 
 	std::tuple<int, int, std::vector< std::tuple<
 		XID::IDType, YID::IDType, BlockPinID::IDType, XID::IDType, YID::IDType, BlockPinID::IDType
