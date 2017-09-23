@@ -1,12 +1,18 @@
 #ifndef UTIL__ID_H
 #define UTIL__ID_H
 
+#include <util/my_hash.hpp>
+
+#include <climits>
+#include <cstdint>
+#include <type_traits>
+
 namespace util {
 
 class IDBase {
 public:
 	int getValue() const;
-	void print(std::ostream& os);
+	template<typename STREAM> void print(STREAM& os);
 };
 
 template<typename id_type, typename TAG>
@@ -24,7 +30,7 @@ public:
 	using IDType = id_type;
 	using ThisIDType = ID<id_type,TAG>;
 	const static id_type DEFAULT_VALUE = TAG::DEFAULT_VALUE;
-	const static size_t bit_size = sizeof(IDType)*CHAR_BIT;
+	const static auto bit_size = sizeof(IDType)*CHAR_BIT;
 
 	ID() : value(TAG::DEFAULT_VALUE) { }
 	ID(const ID&) = default;
@@ -35,7 +41,7 @@ public:
 
 	explicit operator id_type() const { return value; }
 	id_type getValue() const { return value; }
-	void print(std::ostream& os) { os << value; }
+	template<typename STREAM> void print(STREAM& os) { os << value; }
 };
 
 template<typename ID_TYPE, typename... ARGS>
@@ -83,13 +89,10 @@ struct IDHasher;
 
 template<class T>
 struct IDHasher<T, std::enable_if_t<std::is_base_of<IDBase, T>::value>> {
-	size_t operator()(const T& id) const {
+	std::size_t operator()(const T& id) const {
 		return std::hash<decltype(id.getValue())>()(id.getValue());
 	}
 };
-
-template<class T, typename>
-struct MyHash;
 
 template<class T>
 struct MyHash<T, std::enable_if_t<std::is_base_of<IDBase, T>::value>> {

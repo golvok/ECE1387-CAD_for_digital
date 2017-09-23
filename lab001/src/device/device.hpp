@@ -4,8 +4,6 @@
 
 #include <cstdint>
 #include <iosfwd>
-#include <unordered_map>
-#include <unordered_set>
 
 namespace util {
 
@@ -35,7 +33,8 @@ public:
 	auto getX() const { return xFromValue(getValue()); }
 	auto getY() const { return yFromValue(getValue()); }
 
-	void print(std::ostream& os) const {
+	template<typename STREAM>
+	void print(STREAM& os) const {
 		os << "{x" << getX().getValue() << ",y" << getY().getValue() << '}';
 	}
 };
@@ -57,7 +56,8 @@ public:
 	auto getBlock()    const { return blockFromValue(getValue()); }
 	auto getBlockPin() const { return blockPinFromValue(getValue()); }
 
-	void print(std::ostream& os) const {
+	template<typename STREAM>
+	void print(STREAM& os) const {
 		os << "{x" << getBlock().getX().getValue() << ",y" << getBlock().getY().getValue() << ",p" << getBlockPin().getValue() << '}';
 	}
 };
@@ -65,6 +65,7 @@ public:
 } // end namespace util
 
 namespace std {
+	template<typename> struct hash;
 	template<> struct hash<util::BlockID> : util::MyHash<util::BlockID>::type { };
 	template<> struct hash<util::PinGID> : util::MyHash<util::PinGID>::type { };
 }

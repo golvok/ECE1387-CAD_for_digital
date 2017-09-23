@@ -1,3 +1,4 @@
+#include <device/device.hpp>
 #include "input_parser.hpp"
 
 #include <util/logging.hpp>
