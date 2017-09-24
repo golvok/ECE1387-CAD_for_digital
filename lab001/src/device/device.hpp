@@ -7,16 +7,16 @@
 
 namespace device {
 
-struct XIDTag { static const std::int16_t DEFAULT_VALUE = 0x1000; };
-struct YIDTag { static const std::int16_t DEFAULT_VALUE = 0x1000; };
-struct BlockPinIDTag { static const std::int16_t DEFAULT_VALUE = 0x1000; };
+struct XIDTag { static const std::uint16_t DEFAULT_VALUE = 0x8000; };
+struct YIDTag { static const std::uint16_t DEFAULT_VALUE = 0x8000; };
+struct BlockPinIDTag { static const std::uint16_t DEFAULT_VALUE = 0x8000; };
 using XID = util::ID<std::int16_t, XIDTag>;
 using YID = util::ID<std::int16_t, YIDTag>;
 using BlockPinID = util::ID<std::int16_t, BlockPinIDTag>;
 
 using XYIDPair = std::pair<XID,YID>;
 
-struct BlockIDTag { static const std::uint32_t DEFAULT_VALUE = 0x10001000; };
+struct BlockIDTag { static const std::uint32_t DEFAULT_VALUE = 0x80008000; };
 class BlockID : public util::ID <std::uint32_t, BlockIDTag>, public util::print_printable {
 public:
 	using ID::IDType;
@@ -39,7 +39,7 @@ public:
 	}
 };
 
-struct PinGIDTag { static const std::uint64_t DEFAULT_VALUE = 0x1000100010001000; };
+struct PinGIDTag { static const std::uint64_t DEFAULT_VALUE = 0x8000800080008000; };
 class PinGID : public util::ID<std::uint64_t, PinGIDTag>, public util::print_printable {
 public:
 	using ID::IDType;
@@ -51,8 +51,8 @@ private:
 	static std::pair<BlockID, BlockPinID> blockAndPinFromValue(IDType id) { return {blockFromValue(id), blockPinFromValue(id)}; }
 	static BlockID blockFromValue(IDType id)                              { return util::make_id<BlockID   >(static_cast<BlockID   ::IDType>(id >> 16)); }
 	static BlockPinID blockPinFromValue(IDType id)                        { return util::make_id<BlockPinID>(static_cast<BlockPinID::IDType>(id & 0x0000FFFF)); }
-public:
 
+public:
 	auto getBlock()    const { return blockFromValue(getValue()); }
 	auto getBlockPin() const { return blockPinFromValue(getValue()); }
 
