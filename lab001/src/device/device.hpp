@@ -2,10 +2,13 @@
 #define DEVICE__DEVICE_H
 
 #include <util/id.hpp>
+#include <util/generator.hpp>
 #include <util/print_printable.hpp>
 
 #include <cstdint>
 #include <iosfwd>
+
+#include <boost/operators.hpp>
 
 namespace device {
 
@@ -62,6 +65,91 @@ public:
 	void print(STREAM& os) const {
 		os << "{x" << getBlock().getX().getValue() << ",y" << getBlock().getY().getValue() << ",p" << getBlockPin().getValue() << '}';
 	}
+};
+
+
+
+struct RouteElementIDTag { static const std::uint64_t DEFAULT_VALUE = 0x8000800080008000; };
+class RouteElementID : public util::ID<std::uint64_t, RouteElementIDTag>, public util::print_printable {
+public:
+	using ID::IDType;
+
+	RouteElementID(PinGID p) : ID(makeValueFromPin(p)) { }
+	RouteElementID(XID x, YID y, std::int16_t i) : ID(makeValueFromXYIndex(x,y,i)) { }
+
+	template<typename STREAM>
+	void print(STREAM& os) const {
+		if (isValuePin(getValue())) {
+			pinGIDFromValue_unchecked(getValue()).print(os);
+		} else {
+			os << "{x" << getX().getValue() << ",y" << getY().getValue() << ",i" << getIndex() << '}';
+		}
+	}
+
+	XID getX() const { return xFromValue(getValue()); }
+	YID getY() const { return yFromValue(getValue()); }
+	std::int16_t getIndex() const { return indexFromValue(getValue()); }
+
+	bool isPin() const { return isValuePin(getValue()); }
+
+private:
+	static IDType makeValueFromPin(PinGID p) { return p.getValue() | ID::JUST_HIGH_BIT; }
+	static PinGID pinGIDFromValue_unchecked(IDType v) { return util::make_id<PinGID>(v & ~ID::JUST_HIGH_BIT); }
+	static IDType makeValueFromXYIndex(XID x, YID y, std::int16_t i) {
+		return (static_cast<IDType>(x.getValue()) << 32)
+			| (static_cast<IDType>(y.getValue()) << 16)
+			| (static_cast<IDType>(i))
+		;
+	}
+	static XID xFromValue(IDType v) { return util::make_id<XID>(static_cast<XID::IDType>((v & 0xFFFF00000000) >> 32)); }
+	static YID yFromValue(IDType v) { return util::make_id<YID>(static_cast<YID::IDType>((v & 0x0000FFFF0000) >> 16)); }
+	static std::int16_t indexFromValue(IDType v) { return static_cast<std::int16_t>(v & 0x00000000FFFF); }
+	static bool isValuePin(IDType v) { return (v & ID::JUST_HIGH_BIT) != 0; }
+
+	template<typename>
+	friend class Device;
+};
+
+template<
+	  typename CONNECTOR
+>
+class Device {
+public:
+	Device(
+		int min_x,
+		int max_x,
+		int min_y,
+		int max_y,
+		int track_width,
+		CONNECTOR& connector
+	)
+		: min_x(min_x)
+		, max_x(max_x)
+		, min_y(min_y)
+		, max_y(max_y)
+		, track_width(track_width)
+		, connector(connector)
+	{ }
+
+	auto fanout(RouteElementID src) {
+		return util::make_generator<Index>(
+			connector.fanout_begin(src),
+			[=](auto&& index) { return connector.is_end_index(src, index); },
+			[=](auto&& index) { return connector.next_fanout(src, index); },
+			[=](auto&& index) { return connector.re_from_index(src, index); }
+		);
+	}
+
+private:
+	using Index = typename CONNECTOR::Index;
+
+	int min_x;
+	int max_x;
+	int min_y;
+	int max_y;
+	int track_width;
+
+	CONNECTOR connector;
 };
 
 } // end namespace device

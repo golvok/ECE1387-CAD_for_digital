@@ -1,4 +1,5 @@
 
+#include <device/connectors.hpp>
 #include <graphics/graphics.hpp>
 #include <parsing/cmdargs_parser.hpp>
 #include <parsing/input_parser.hpp>
@@ -63,6 +64,24 @@ int program_main(const std::string& data_file_name) {
 		},
 		[&](const parsing::input::ParseResult& pr) {
 			do_optional_input_data_dump(data_file_name, pr);
+			device::UniversalConnector connector(pr.device_info);
+			device::Device<device::UniversalConnector> dev(
+				0,0,0,0, pr.device_info.track_width, connector
+			);
+
+			auto pin = pr.pin_to_pin_netlist.begin()->first;
+			auto pin_re = device::RouteElementID(pin);
+			auto pin_fanouts = dev.fanout(pin_re);
+			// for (auto& reID : pin_fanouts) {
+			// 	dout(DL::INFO) << reID << '\n';
+			// }
+			for (auto reID_it = begin(pin_fanouts); reID_it != end(pin_fanouts); ++reID_it) {
+				dout(DL::INFO) << *reID_it << '\n';
+				auto pin_fanout_fanouts = dev.fanout(*reID_it);
+				for (auto pff_it = begin(pin_fanout_fanouts); pff_it != end(pin_fanout_fanouts); ++pff_it) {
+					dout(DL::INFO) << '\t' << *pff_it << '\n';
+				}
+			}
 		}
 	);
 	apply_visitor(visitor, parse_result);
