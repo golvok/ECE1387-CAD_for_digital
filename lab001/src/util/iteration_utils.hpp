@@ -8,6 +8,8 @@
 #include <iterator>
 #include <array>
 
+namespace util {
+
 /*************
  * Begin definition of Iterator Pair Adapter. See end for usage
  *************/
@@ -276,5 +278,7 @@ template<typename CONTAINER>
 auto iterate_as_iterators(CONTAINER& c) {
 	return iterator_iterator_adapter<decltype(c.begin())>(c.begin(), c.end());
 }
+
+} // end namespace util
 
 #endif /* UTIL__ITERATION_UTILS_H */
