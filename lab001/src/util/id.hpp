@@ -30,7 +30,8 @@ public:
 	using IDType = id_type;
 	using ThisIDType = ID<id_type,TAG>;
 	const static id_type DEFAULT_VALUE = TAG::DEFAULT_VALUE;
-	const static auto bit_size = sizeof(IDType)*CHAR_BIT;
+	const static auto BIT_SIZE = sizeof(IDType)*CHAR_BIT;
+	const static auto JUST_HIGH_BIT = static_cast<IDType>(1) << (BIT_SIZE-1);
 
 	ID() : value(TAG::DEFAULT_VALUE) { }
 	ID(const ID&) = default;
