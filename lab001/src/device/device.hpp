@@ -39,7 +39,7 @@ public:
 	}
 };
 
-struct PinGIDTag { static const std::uint64_t DEFAULT_VALUE = 0x1000000010001000; };
+struct PinGIDTag { static const std::uint64_t DEFAULT_VALUE = 0x1000100010001000; };
 class PinGID : public util::ID<std::uint64_t, PinGIDTag>, public util::print_printable {
 public:
 	using ID::IDType;
