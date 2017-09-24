@@ -1,3 +1,5 @@
+#ifndef DEVICE__DEVICE_H
+#define DEVICE__DEVICE_H
 
 #include <util/id.hpp>
 #include <util/print_printable.hpp>
@@ -69,3 +71,5 @@ namespace std {
 	template<> struct hash<device::BlockID> : util::MyHash<device::BlockID>::type { };
 	template<> struct hash<device::PinGID> : util::MyHash<device::PinGID>::type { };
 }
+
+#endif // DEVICE__DEVICE_H
