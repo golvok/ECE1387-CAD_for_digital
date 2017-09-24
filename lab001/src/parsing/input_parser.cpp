@@ -1,8 +1,7 @@
 #include "input_parser.hpp"
 
-#include <device/device.hpp>
 #include <util/logging.hpp>
-#include <util/netlist.hpp>
+#include <util/iteration_utils.hpp>
 
 #include <iostream>
 #include <string>
@@ -29,7 +28,7 @@ namespace {
 namespace parsing {
 namespace input {
 
-std::tuple<bool, bool> parse_data(std::istream& is) {
+boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 	std::stringstream is_as_ss;
 	is_as_ss << is.rdbuf();
 	auto is_as_string = is_as_ss.str();
@@ -61,6 +60,10 @@ std::tuple<bool, bool> parse_data(std::istream& is) {
 	using std::begin;
 	using std::end;
 
+	DeviceInfo device_info;
+	device_info.bounds = geom::BoundBox<int>(0,0,get<0>(parse_results),get<0>(parse_results));
+	device_info.track_width = get<1>(parse_results);
+
 	util::Netlist<PinGID> netlist;
 
 	for (const auto& route_request_parse : get<2>(parse_results)) {
@@ -87,16 +90,22 @@ std::tuple<bool, bool> parse_data(std::istream& is) {
 		);
 	}
 
-	for (const auto& src_and_sinks : netlist) {
-		for (const auto& sink : src_and_sinks.second) {
-			dout(DL::INFO) << src_and_sinks.first << " -> " << sink << '\n';
+	const bool matches_full = is_match && it == it_end;
+	if (!matches_full) {
+		auto err_stream = std::stringstream();
+		err_stream << "junk at end of file: ";
+		int count = 0;
+		for (auto& c : util::make_iterable(std::make_pair(it, it_end))) {
+			err_stream << c;
+			if (count > 100) {
+				err_stream << " ...";
+				break;
+			}
 		}
+		return err_stream.str();
 	}
 
-	const bool matches_full = is_match && it == it_end;
-	const bool match_is_good = matches_full;
-
-	return {match_is_good, true};
+	return ParseResult{device_info, netlist};
 }
 
 }
