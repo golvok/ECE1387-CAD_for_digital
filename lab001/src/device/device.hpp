@@ -1,6 +1,7 @@
 #ifndef DEVICE__DEVICE_H
 #define DEVICE__DEVICE_H
 
+#include <util/bit_tools.hpp>
 #include <util/id.hpp>
 #include <util/generator.hpp>
 #include <util/print_printable.hpp>
@@ -26,10 +27,10 @@ class BlockID : public util::ID <std::uint32_t, BlockIDTag>, public util::print_
 public:
 	using ID::IDType;
 private:
-	static IDType makeValueFromXY(XID x, YID y) { return (static_cast<IDType>(x.getValue()) << 16) | static_cast<IDType>(y.getValue()); }
+	static IDType makeValueFromXY(XID x, YID y) { return (util::no_sign_ext_cast<IDType>(x.getValue()) << 16) | util::no_sign_ext_cast<IDType>(y.getValue()); }
 	static XYIDPair xyFromValue(IDType id)      { return {xFromValue(id), yFromValue(id)}; }
-	static XID xFromValue(IDType id)            { return util::make_id<XID>(static_cast<XID::IDType>(id >> 16)); }
-	static YID yFromValue(IDType id)            { return util::make_id<YID>(static_cast<YID::IDType>(id & 0x0000FFFF)); }
+	static XID xFromValue(IDType id)            { return util::make_id<XID>(util::no_sign_ext_cast<XID::IDType>(id >> 16)); }
+	static YID yFromValue(IDType id)            { return util::make_id<YID>(util::no_sign_ext_cast<YID::IDType>(id & 0x0000FFFF)); }
 
 public:
 	BlockID(XID x, YID y) : ID(makeValueFromXY(x,y)) { }
@@ -52,10 +53,10 @@ public:
 	PinGID(BlockID b, BlockPinID bp) : ID(makeValueFromBlockAndPin(b,bp)) { }
 	using ID::ID;
 private:
-	static IDType makeValueFromBlockAndPin(BlockID b, BlockPinID bp)      { return (static_cast<IDType>(b.getValue()) << 16) | static_cast<IDType>(bp.getValue()); }
+	static IDType makeValueFromBlockAndPin(BlockID b, BlockPinID bp)      { return (util::no_sign_ext_cast<IDType>(b.getValue()) << 16) | util::no_sign_ext_cast<IDType>(bp.getValue()); }
 	static std::pair<BlockID, BlockPinID> blockAndPinFromValue(IDType id) { return {blockFromValue(id), blockPinFromValue(id)}; }
-	static BlockID blockFromValue(IDType id)                              { return util::make_id<BlockID   >(static_cast<BlockID   ::IDType>(id >> 16)); }
-	static BlockPinID blockPinFromValue(IDType id)                        { return util::make_id<BlockPinID>(static_cast<BlockPinID::IDType>(id & 0x0000FFFF)); }
+	static BlockID blockFromValue(IDType id)                              { return util::make_id<BlockID   >(util::no_sign_ext_cast<BlockID   ::IDType>(id >> 16)); }
+	static BlockPinID blockPinFromValue(IDType id)                        { return util::make_id<BlockPinID>(util::no_sign_ext_cast<BlockPinID::IDType>(id & 0x0000FFFF)); }
 
 public:
 	auto getBlock()    const { return blockFromValue(getValue()); }
@@ -74,6 +75,7 @@ class RouteElementID : public util::ID<std::uint64_t, RouteElementIDTag>, public
 public:
 	using ID::IDType;
 
+	using ID::ID;
 	RouteElementID(PinGID p) : ID(makeValueFromPin(p)) { }
 	RouteElementID(XID x, YID y, std::int16_t i) : ID(makeValueFromXYIndex(x,y,i)) { }
 
@@ -96,14 +98,14 @@ private:
 	static IDType makeValueFromPin(PinGID p) { return p.getValue() | ID::JUST_HIGH_BIT; }
 	static PinGID pinGIDFromValue_unchecked(IDType v) { return util::make_id<PinGID>(v & ~ID::JUST_HIGH_BIT); }
 	static IDType makeValueFromXYIndex(XID x, YID y, std::int16_t i) {
-		return (static_cast<IDType>(x.getValue()) << 32)
-			| (static_cast<IDType>(y.getValue()) << 16)
-			| (static_cast<IDType>(i))
+		return (util::no_sign_ext_cast<IDType>(x.getValue()) << 32)
+			| (util::no_sign_ext_cast<IDType>(y.getValue()) << 16)
+			| (util::no_sign_ext_cast<IDType>(i))
 		;
 	}
-	static XID xFromValue(IDType v) { return util::make_id<XID>(static_cast<XID::IDType>((v & 0xFFFF00000000) >> 32)); }
-	static YID yFromValue(IDType v) { return util::make_id<YID>(static_cast<YID::IDType>((v & 0x0000FFFF0000) >> 16)); }
-	static std::int16_t indexFromValue(IDType v) { return static_cast<std::int16_t>(v & 0x00000000FFFF); }
+	static XID xFromValue(IDType v) { return util::make_id<XID>(util::no_sign_ext_cast<XID::IDType>((v & 0xFFFF00000000) >> 32)); }
+	static YID yFromValue(IDType v) { return util::make_id<YID>(util::no_sign_ext_cast<YID::IDType>((v & 0x0000FFFF0000) >> 16)); }
+	static std::int16_t indexFromValue(IDType v) { return util::no_sign_ext_cast<std::int16_t>(v & 0x00000000FFFF); }
 	static bool isValuePin(IDType v) { return (v & ID::JUST_HIGH_BIT) != 0; }
 
 	template<typename>
