@@ -67,17 +67,27 @@ int program_main(const std::string& data_file_name) {
 				0,0,0,0, pr.device_info.track_width, connector
 			);
 
-			auto pin = pr.pin_to_pin_netlist.begin()->first;
+
+			auto pin = std::next(pr.pin_to_pin_netlist.begin())->first;
 			auto pin_re = device::RouteElementID(pin);
+			auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
+				str << "fanout of " << pin << " (as REID " << pin_re << ')';
+			});
+
 			auto pin_fanouts = dev.fanout(pin_re);
 			// for (auto& reID : pin_fanouts) {
 			// 	dout(DL::INFO) << reID << '\n';
 			// }
 			for (auto reID_it = begin(pin_fanouts); reID_it != end(pin_fanouts); ++reID_it) {
-				dout(DL::INFO) << *reID_it << '\n';
-				auto pin_fanout_fanouts = dev.fanout(*reID_it);
+				const auto& re = *reID_it;
+				dout(DL::INFO) << re << '\n';
+				auto pin_fanout_fanouts = dev.fanout(re);
 				for (auto pff_it = begin(pin_fanout_fanouts); pff_it != end(pin_fanout_fanouts); ++pff_it) {
 					dout(DL::INFO) << '\t' << *pff_it << '\n';
+					auto pin_fanout_fanout_fanouts = dev.fanout(*pff_it);
+					for (auto pfff_it = begin(pin_fanout_fanout_fanouts); pfff_it != end(pin_fanout_fanout_fanouts); ++pfff_it) {
+						dout(DL::INFO) << '\t' << '\t' << *pfff_it << '\n';
+					}
 				}
 			}
 		}

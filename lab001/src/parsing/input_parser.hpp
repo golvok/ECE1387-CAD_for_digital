@@ -16,7 +16,8 @@ namespace input {
 struct DeviceInfo {
 	geom::BoundBox<int> bounds{};
 	int track_width = -1;
-	int pins_per_block = -1;
+	int pins_per_block_side = -1;
+	int num_blocks_adjacent_to_channel = -1;
 };
 
 struct ParseResult {
