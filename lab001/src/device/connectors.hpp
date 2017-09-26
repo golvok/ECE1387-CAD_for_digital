@@ -22,6 +22,13 @@ namespace {
 			static_cast<std::int16_t>(re.getIndex())
 		);
 	}
+
+	BlockID offset_block(const BlockID& bid, int xdiff, int ydiff, bool swap_xy = false) {
+		return BlockID(
+			util::make_id<XID>(static_cast<XID::IDType>(bid.getX().getValue() + (swap_xy ? ydiff : xdiff))),
+			util::make_id<YID>(static_cast<YID::IDType>(bid.getY().getValue() + (swap_xy ? xdiff : ydiff)))
+		);
+	}
 }
 
 
@@ -41,6 +48,10 @@ namespace {
 struct FullyConnectedConnector {
 	using Index = std::int16_t;
 	const Index END_VALUE = std::numeric_limits<Index>::max();
+
+	using BlockIndex = BlockID;
+
+	using BlockFanoutIndex = PinGID;
 
 	parsing::input::DeviceInfo dev_info;
 	decltype(dev_info.bounds) wire_bb;
@@ -97,18 +108,18 @@ struct FullyConnectedConnector {
 	RouteElementID re_from_index(const RouteElementID& re, const Index out_index) const {
 		if (re.isPin()) {
 			const auto as_pin = re.asPin();
-			const auto pin_side = (as_pin.getBlockPin().getValue() - 1) % 4 + 1;
-			const bool output_to_horiz = pin_side % 2 == 1;
+			const auto pin_side = get_block_pin_side(as_pin);
+			const bool output_to_horiz = pin_fanout_wire_dir(pin_side) == Direction::HORIZONTAL;
 			const auto result_index_value = (output_to_horiz ? dev_info.track_width : 0) + (out_index % dev_info.track_width);
 			const auto base_re = RouteElementID(re.getX(), re.getY(), util::no_sign_ext_cast<RouteElementID::REIndex>(result_index_value));
 			switch (pin_side) {
-				case 1:
+				case BlockSide::BOTTOM:
 					return offset_re_same_index(base_re, 0, 0);
-				case 2:
+				case BlockSide::RIGHT:
 					return offset_re_same_index(base_re, 1, 0);
-				case 3:
+				case BlockSide::TOP:
 					return offset_re_same_index(base_re, 0, 1);
-				case 4:
+				case BlockSide::LEFT:
 					return offset_re_same_index(base_re, 0, 0);
 				default:
 					return RouteElementID();
@@ -122,17 +133,17 @@ struct FullyConnectedConnector {
 				if (is_horiz) {
 					const bool different_xy = out_index % dev_info.num_blocks_adjacent_to_channel;
 					const auto yval = static_cast<YID::IDType>(re.getY().getValue() + (different_xy ? -1 : 0));
-					return PinGID(
+					return RouteElementID(PinGID(
 						BlockID(re.getX(), util::make_id<YID>(yval)),
 						util::make_id<BlockPinID>(block_pin_id)
-					);
+					));
 				} else {
 					const bool same_xy = out_index % dev_info.num_blocks_adjacent_to_channel;
 					const auto xval = static_cast<XID::IDType>(re.getX().getValue() + (same_xy ? 0 : -1));
-					return PinGID(
+					return RouteElementID(PinGID(
 						BlockID(util::make_id<XID>(xval), re.getY()),
 						util::make_id<BlockPinID>(static_cast<BlockPinID::IDType>(block_pin_id + 1))
-					);
+					));
 				}
 			} else {
 				const auto out_index2 = out_index - dev_info.pins_per_block_side*dev_info.num_blocks_adjacent_to_channel;
@@ -160,6 +171,89 @@ struct FullyConnectedConnector {
 			}
 		}
 	}
+
+	BlockFanoutIndex block_fanout_begin(const BlockID& block) {
+		return PinGID(
+			block,
+			util::make_id<BlockPinID>(static_cast<BlockPinID::IDType>(1))
+		);
+	}
+
+	bool block_fanout_index_is_end(const BlockID& block, const BlockFanoutIndex& index) {
+		(void)block;
+		return index.getBlockPin().getValue() > dev_info.pins_per_block_side * 4;
+	}
+
+	BlockFanoutIndex next_block_fanout(const BlockID& block, const BlockFanoutIndex& index) {
+		return PinGID(
+			block,
+			util::make_id<BlockPinID>(static_cast<BlockPinID::IDType>(index.getBlockPin().getValue() + 1))
+		);
+	}
+
+	RouteElementID re_from_block_fanout_index(const BlockID& block, const BlockFanoutIndex& index) {
+		(void)block;
+		return RouteElementID(index);
+	}
+
+
+	BlockIndex blocks_begin() {
+		return BlockID(
+			util::make_id<XID>(static_cast<XID::IDType>(dev_info.bounds.minx())),
+			util::make_id<YID>(static_cast<YID::IDType>(dev_info.bounds.miny()))
+		);
+	}
+
+	bool block_index_is_end(const BlockIndex& curr) {
+		return !dev_info.bounds.intersects(curr.getX().getValue() + 1, curr.getY().getValue() + 1);
+	}
+
+	BlockIndex next_block(const BlockIndex& curr) {
+		auto next = offset_block(curr, 1, 0);
+		if (next.getX().getValue() == dev_info.bounds.maxx()) {
+			auto in_row = offset_block(curr, 0, 1);
+			return BlockID(util::make_id<XID>(static_cast<XID::IDType>(0)), in_row.getY());
+		} else {
+			return next;
+		}
+	}
+
+	BlockID block_from_block_index(const BlockIndex& curr) {
+		return curr;
+	}
+
+	static BlockSide get_block_pin_side(PinGID pin) {
+		switch ((pin.getBlockPin().getValue() - 1) % 4 + 1) {
+			case 1:
+				return BlockSide::BOTTOM;
+			case 2:
+				return BlockSide::RIGHT;
+			case 3:
+				return BlockSide::TOP;
+			case 4:
+				return BlockSide::LEFT;
+			default:
+				return BlockSide::OTHER;
+		}
+	}
+
+	enum class Direction {
+		OTHER, HORIZONTAL, VERTICAL,
+	};
+
+	static Direction pin_fanout_wire_dir(BlockSide side) {
+		switch (side) {
+			case BlockSide::BOTTOM:
+			case BlockSide::TOP:
+				return Direction::HORIZONTAL;
+			case BlockSide::RIGHT:
+			case BlockSide::LEFT:
+				return Direction::VERTICAL;
+			default:
+				return Direction::OTHER;
+		}
+	}
+
 };
 
 }

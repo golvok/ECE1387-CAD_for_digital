@@ -77,7 +77,7 @@ public:
 	using REIndex = std::int16_t;
 
 	using ID::ID;
-	RouteElementID(PinGID p) : ID(makeValueFromPin(p)) { }
+	explicit RouteElementID(PinGID p) : ID(makeValueFromPin(p)) { }
 	RouteElementID(XID x, YID y, REIndex i) : ID(makeValueFromXYIndex(x,y,i)) { }
 
 	template<typename STREAM>
@@ -114,6 +114,10 @@ private:
 	friend class Device;
 };
 
+enum class BlockSide {
+	OTHER, LEFT, RIGHT, TOP, BOTTOM
+};
+
 template<
 	  typename CONNECTOR
 >
@@ -136,7 +140,7 @@ public:
 	{ }
 
 	auto fanout(RouteElementID src) {
-		return util::make_generator<Index>(
+		return util::make_generator<typename CONNECTOR::Index>(
 			connector.fanout_begin(src),
 			[=](auto&& index) { return connector.is_end_index(src, index); },
 			[=](auto&& index) { return connector.next_fanout(src, index); },
@@ -144,8 +148,29 @@ public:
 		);
 	}
 
+	auto fanout(BlockID block) {
+		return util::make_generator<typename CONNECTOR::BlockFanoutIndex>(
+			connector.block_fanout_begin(block),
+			[=](auto&& index) { return connector.block_fanout_index_is_end(block, index); },
+			[=](auto&& index) { return connector.next_block_fanout(block, index); },
+			[=](auto&& index) { return connector.re_from_block_fanout_index(block, index); }
+		);
+	}
+
+	auto blocks() {
+		return util::make_generator<typename CONNECTOR::BlockIndex>(
+			connector.blocks_begin(),
+			[=](auto&& index) { return connector.block_index_is_end(index); },
+			[=](auto&& index) { return connector.next_block(index); },
+			[=](auto&& index) { return connector.block_from_block_index(index); }
+		);
+	}
+
+	BlockSide get_block_pin_side(PinGID pin) {
+		return connector.get_block_pin_side(pin);
+	}
+
 private:
-	using Index = typename CONNECTOR::Index;
 
 	int min_x;
 	int max_x;
