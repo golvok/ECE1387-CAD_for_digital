@@ -1,6 +1,6 @@
 
 #include <device/connectors.hpp>
-#include <graphics/graphics.hpp>
+#include <graphics/graphics_wrapper.hpp>
 #include <parsing/cmdargs_parser.hpp>
 #include <parsing/input_parser.hpp>
 #include <util/lambda_compose.hpp>
@@ -10,6 +10,8 @@
 #include <fstream>
 #include <string>
 #include <thread>
+
+#include <boost/optional.hpp>
 
 int program_main(const std::string& data_file_name);
 void do_optional_input_data_dump(const std::string& data_file_name, const parsing::input::ParseResult& pr);
@@ -25,26 +27,15 @@ int main(int argc, char const** argv) {
 	}
 
 	// enable graphics
-	std::vector<std::thread> g_threads;
 	if (parsed_args.shouldEnableGraphics()) {
-		g_threads.emplace_back([&](){
-			std::string title;
-			for (int i = 0; i < argc; ++i) {
-				title += argv[i];
-				if (i != argc-1) {
-					title += ' ';
-				}
-			}
-			graphics::init_graphics(title, graphics::WHITE);
-			graphics::event_loop([](float, float, graphics::t_event_buttonPressed){}, nullptr, nullptr, [](){});
-		});
+		graphics::get().enable();
+		graphics::get().startThreadsAndOpenWindow();
 	}
 
 	const auto result = program_main(parsed_args.getDataFileName());
 
-	for (auto& t : g_threads) {
-		t.join();
-	}
+	graphics::get().close();
+	graphics::get().join();
 
 	return result;
 }
@@ -90,6 +81,10 @@ int program_main(const std::string& data_file_name) {
 					}
 				}
 			}
+
+			graphics::get().fpga().setFCDev(&dev);
+			graphics::get().waitForPress();
+			graphics::get().fpga().setFCDev(nullptr);
 		}
 	);
 	apply_visitor(visitor, parse_result);

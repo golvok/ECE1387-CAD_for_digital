@@ -332,11 +332,12 @@ typedef enum {
  *      not enabled, and won't respond to clicks.
  */
 typedef struct {
+	using CallbackType = void(std::function<void()>);
     int width;
     int height;
     int xleft;
     int ytop;
-    void(*fcn) (void(*drawscreen) (void));
+    std::function<CallbackType> fcn = nullptr;
 #ifdef X11
     Window win;
     XftDraw* draw;
@@ -408,7 +409,7 @@ static t_gl_state gl_state;
 
 // Stores all the menu buttons created. Initialize the button pointer 
 // and num_buttons for safety.
-static t_button_state button_state = {NULL, 0};
+static t_button_state button_state = {nullptr, 0};
 
 // Contains all coordinates useful for graphics transformation
 static t_transform_coordinates trans_coord;
@@ -520,22 +521,22 @@ static void reset_common_state();
 static void build_default_menu(void);
 
 /* Function declarations for button responses */
-static void translate_up(void (*drawscreen) (void));
-static void translate_left(void (*drawscreen) (void));
-static void translate_right(void (*drawscreen) (void));
-static void translate_down(void (*drawscreen) (void));
-static void panning_execute(int x, int y, void (*drawscreen) (void));
+static void translate_up(std::function<void()> drawscreen);
+static void translate_left(std::function<void()> drawscreen);
+static void translate_right(std::function<void()> drawscreen);
+static void translate_down(std::function<void()> drawscreen);
+static void panning_execute(int x, int y, std::function<void()> drawscreen);
 static void panning_on(int start_x, int start_y);
 static void panning_off(void);
-static void zoom_in(void (*drawscreen) (void));
-static void zoom_out(void (*drawscreen) (void));
-static void handle_zoom_in(float x, float y, void (*drawscreen) (void));
-static void handle_zoom_out(float x, float y, void (*drawscreen) (void));
-static void zoom_fit(void (*drawscreen) (void));
-static void adjustwin(void (*drawscreen) (void));
-static void postscript(void (*drawscreen) (void));
-static void proceed(void (*drawscreen) (void));
-static void quit(void (*drawscreen) (void));
+static void zoom_in(std::function<void()> drawscreen);
+static void zoom_out(std::function<void()> drawscreen);
+static void handle_zoom_in(float x, float y, std::function<void()> drawscreen);
+static void handle_zoom_out(float x, float y, std::function<void()> drawscreen);
+static void zoom_fit(std::function<void()> drawscreen);
+static void adjustwin(std::function<void()> drawscreen);
+static void postscript(std::function<void()> drawscreen);
+static void proceed(std::function<void()> drawscreen);
+static void quit(std::function<void()> drawscreen);
 static void map_button(int bnum);
 static void unmap_button(int bnum);
 
@@ -564,15 +565,15 @@ static unsigned long find_first_set(unsigned long mask);
 /* Helper functions for X11; not visible to client program. */
 static void x11_init_graphics(const char* window_name);
 static void init_cairo();
-static void x11_event_loop(void (*act_on_mousebutton)
-    (float x, float y, t_event_buttonPressed button_info),
-    void (*act_on_mousemove)(float x, float y),
-    void (*act_on_keypress)(char key_pressed, int keysym),
-    void (*drawscreen) (void));
+static void x11_event_loop(
+    std::function<void(float x, float y, t_event_buttonPressed button_info)> act_on_mousebutton,
+    std::function<void(float x, float y)> act_on_mousemove,
+    std::function<void(char key_pressed, int keysym)> act_on_keypress,
+    std::function<void()> drawscreen);
 
 static bool x11_drop_redundant_panning (const XEvent& report, 
                unsigned int& last_skipped_button_press_button);
-static void x11_redraw_all_if_needed (void (*drawscreen) (void));
+static void x11_redraw_all_if_needed (std::function<void()> drawscreen);
 static Bool x11_test_if_exposed(Display *disp, XEvent *event_ptr,
     XPointer dummy);
 static void x11_build_textarea(void);
@@ -583,8 +584,8 @@ static void x11_turn_on_off(int pressed);
 static void x11_drawmenu(void);
 static void menutext(XftDraw* draw, int xc, int yc, const char *text);
 
-static void x11_handle_expose(const XEvent& report, void (*drawscreen) (void));
-static void x11_handle_configure_notify(const XEvent& report, void (*drawscreen) (void));
+static void x11_handle_expose(const XEvent& report, std::function<void()> drawscreen);
+static void x11_handle_configure_notify(const XEvent& report, std::function<void()> drawscreen);
 static void x11_handle_button_info(t_event_buttonPressed *button_info,
     int buttonNumber, int Xbutton_state);
 
@@ -658,7 +659,7 @@ static void *my_malloc(int ibytes) {
     void *mem;
 
     mem = static_cast<void*> (malloc(ibytes));
-    if (mem == NULL) {
+    if (mem == nullptr) {
         printf("memory allocation failed!");
         exit(-1);
     }
@@ -671,7 +672,7 @@ static void *my_realloc(void *memblk, int ibytes) {
     void *mem;
 
     mem = static_cast<void*> (realloc(memblk, ibytes));
-    if (mem == NULL) {
+    if (mem == nullptr) {
         printf("memory allocation failed!");
         exit(-1);
     }
@@ -877,7 +878,7 @@ static void update_brushes() {
         LOGBRUSH lb;
         lb.lbStyle = BS_SOLID;
         lb.lbColor = convert_to_win_color(gl_state.foreground_color);
-        lb.lbHatch = (LONG) NULL;
+        lb.lbHatch = (LONG) nullptr;
         win_linestyle = win32_line_styles[gl_state.currentlinestyle];
         linewidth = max(gl_state.currentlinewidth, 1); // Win32 won't draw 0 width dashed lines.
 
@@ -886,7 +887,7 @@ static void update_brushes() {
             WIN32_DELETE_ERROR();
         /* Create a new pen */
         win32_state.hGraphicsPen = ExtCreatePen(PS_GEOMETRIC | win_linestyle |
-            PS_ENDCAP_FLAT, linewidth, &lb, (LONG) NULL, NULL);
+            PS_ENDCAP_FLAT, linewidth, &lb, (LONG) nullptr, nullptr);
         if (!win32_state.hGraphicsPen)
             WIN32_CREATE_ERROR();
         /* Select created pen into specified device context */
@@ -1008,7 +1009,7 @@ static void force_setlinestyle(int linestyle, int capstyle) {
         LOGBRUSH lb;
         lb.lbStyle = BS_SOLID;
         lb.lbColor = convert_to_win_color(gl_state.foreground_color);
-        lb.lbHatch = (LONG) NULL;
+        lb.lbHatch = (LONG) nullptr;
         int win_linestyle = win32_line_styles[linestyle];
         /* Win32 won't draw 0 width dashed lines. */
         int linewidth = max(gl_state.currentlinewidth, 1);
@@ -1018,7 +1019,7 @@ static void force_setlinestyle(int linestyle, int capstyle) {
             WIN32_DELETE_ERROR();
         /* Create a new pen */
         win32_state.hGraphicsPen = ExtCreatePen(PS_GEOMETRIC | win_linestyle |
-            PS_ENDCAP_FLAT, linewidth, &lb, (LONG) NULL, NULL);
+            PS_ENDCAP_FLAT, linewidth, &lb, (LONG) nullptr, nullptr);
         if (!win32_state.hGraphicsPen)
             WIN32_CREATE_ERROR();
         /* Select created pen into specified device context */
@@ -1065,7 +1066,7 @@ static void force_setlinewidth(int linewidth) {
         LOGBRUSH lb;
         lb.lbStyle = BS_SOLID;
         lb.lbColor = convert_to_win_color(gl_state.foreground_color);
-        lb.lbHatch = (LONG) NULL;
+        lb.lbHatch = (LONG) nullptr;
         int win_linestyle = win32_line_styles[gl_state.currentlinestyle];
 
         if (linewidth == 0)
@@ -1076,7 +1077,7 @@ static void force_setlinewidth(int linewidth) {
             WIN32_DELETE_ERROR();
         /* Create a new pen */
         win32_state.hGraphicsPen = ExtCreatePen(PS_GEOMETRIC | win_linestyle |
-            PS_ENDCAP_FLAT, linewidth, &lb, (LONG) NULL, NULL);
+            PS_ENDCAP_FLAT, linewidth, &lb, (LONG) nullptr, nullptr);
         if (!win32_state.hGraphicsPen)
             WIN32_CREATE_ERROR();
         /* Select created pen into specified device context */
@@ -1110,13 +1111,13 @@ static void force_settextattrs(int pointsize, int degrees) {
 
     if (gl_state.disp_type == SCREEN) {
 #ifdef WIN32
-        if (win32_state.hGraphicsFont != NULL) {
+        if (win32_state.hGraphicsFont != nullptr) {
             /* Delete previously used font */
             if (!DeleteObject(win32_state.hGraphicsFont)) {
                 WIN32_DELETE_ERROR();
             }
         }
-        win32_state.hGraphicsFont = NULL; // expected by drawtext(..)
+        win32_state.hGraphicsFont = nullptr; // expected by drawtext(..)
 #endif
     } else {
         fprintf(gl_state.ps, "%d setfontsize\n", pointsize);
@@ -1212,12 +1213,12 @@ static void map_button(int bnum) {
             win32_state.hButtonsWnd, 
 			(HMENU) (200 + (intptr_t) bnum),
             (HINSTANCE) GetWindowLongPtr(win32_state.hMainWnd, GWLP_HINSTANCE),
-            NULL
+            nullptr
             );
 
         delete[] WIN32_wchar_button_text;
 
-        if (!InvalidateRect(win32_state.hButtonsWnd, NULL, TRUE))
+        if (!InvalidateRect(win32_state.hButtonsWnd, nullptr, TRUE))
             WIN32_DRAW_ERROR();
         if (!UpdateWindow(win32_state.hButtonsWnd))
             WIN32_DRAW_ERROR();
@@ -1226,8 +1227,8 @@ static void map_button(int bnum) {
 #ifdef X11
         button_state.button[bnum].win = -1;
 #else // WIN32
-        button_state.button[bnum].hwnd = NULL;
-        if (!InvalidateRect(win32_state.hButtonsWnd, NULL, TRUE))
+        button_state.button[bnum].hwnd = nullptr;
+        if (!InvalidateRect(win32_state.hButtonsWnd, nullptr, TRUE))
             WIN32_DRAW_ERROR();
         if (!UpdateWindow(win32_state.hButtonsWnd))
             WIN32_DRAW_ERROR();
@@ -1244,7 +1245,7 @@ static void unmap_button(int bnum) {
 #else
         if (!DestroyWindow(button_state.button[bnum].hwnd))
             WIN32_DRAW_ERROR();
-        if (!InvalidateRect(win32_state.hButtonsWnd, NULL, TRUE))
+        if (!InvalidateRect(win32_state.hButtonsWnd, nullptr, TRUE))
             WIN32_DRAW_ERROR();
         if (!UpdateWindow(win32_state.hButtonsWnd))
             WIN32_DRAW_ERROR();
@@ -1256,7 +1257,7 @@ static void unmap_button(int bnum) {
  * The text and button function are set according to button_text and        *
  * button_func, respectively.                                               */
 void create_button(const char *prev_button_text, const char *button_text,
-    void (*button_func) (void (*drawscreen) (void))) {
+    void (*button_func) (std::function<void()> drawscreen)) {
     int i, bnum, space, bheight;
     t_button_type button_type = BUTTON_TEXT;
 
@@ -1537,19 +1538,19 @@ static bool is_droppable_event(
 /* The program's main event loop.  Must be passed a user routine        
  * drawscreen which redraws the screen.  It handles all window resizing 
  * zooming etc. itself.  
- * The three other callbacks are optional -- they can be NULL if you don't 
- * want to use them in your program. If non-NULL, they are called when the user 
+ * The three other callbacks are optional -- they can be nullptr if you don't 
+ * want to use them in your program. If non-nullptr, they are called when the user 
  * clicks a mouse button, moves the mouse or presses the keyboard while the 
  * cursor is in the graphics area. 
  */
-void
-event_loop(void (*act_on_mousebutton)(float x, float y, t_event_buttonPressed button_info),
-    void (*act_on_mousemove)(float x, float y),
-    void (*act_on_keypress)(char key_pressed, int keysym),
-    void (*drawscreen) (void)) {
+void event_loop(
+    std::function<void(float x, float y, t_event_buttonPressed button_info)> act_on_mousebutton,
+    std::function<void(float x, float y)> act_on_mousemove,
+    std::function<void(char key_pressed, int keysym)> act_on_keypress,
+    std::function<void()> drawscreen) {
 
-    if (drawscreen == NULL) {
-        cerr << "Error in event_loop: drawscreen is NULL, but it is a mandatory callback.\n";
+    if (drawscreen == nullptr) {
+        cerr << "Error in event_loop: drawscreen is nullptr, but it is a mandatory callback.\n";
         exit(1);
     }
     
@@ -1581,7 +1582,7 @@ event_loop(void (*act_on_mousebutton)(float x, float y, t_event_buttonPressed bu
     win32_invalidate_screen();
 
     // timeout timer, for event loop. Supposed to be 2 seconds, but isn't?
-    // UINT_PTR timeout_timer = SetTimer(NULL, NULL, 2000, NULL);
+    // UINT_PTR timeout_timer = SetTimer(nullptr, nullptr, 2000, nullptr);
 
     // Windows event dropping explanation:
     // like X11, it will drop events which match is_droppable_event(...), and
@@ -1591,14 +1592,14 @@ event_loop(void (*act_on_mousebutton)(float x, float y, t_event_buttonPressed bu
     // process. So, hopefully this doesn't cause any problems. Also, due to the
     // fact that windows groups multiple fast scrolls into one message, there
     // is logic in win32_handle_mousewheel_zooming to address this.
-    while (!gl_state.ProceedPressed && GetMessage(&msg, NULL, 0, 0)) {
+    while (!gl_state.ProceedPressed && GetMessage(&msg, nullptr, 0, 0)) {
         TranslateMessage(&msg);
         if (msg.message == WM_CHAR) { // only the top window can get keyboard events
             msg.hwnd = win32_state.hMainWnd;
         }
         if (is_droppable_event(&msg)) {
             MSG next_msg;
-            if (PeekMessage(&next_msg, NULL, 0, 0, PM_NOREMOVE)) {
+            if (PeekMessage(&next_msg, nullptr, 0, 0, PM_NOREMOVE)) {
                 // if the current event is droppable, check if
                 // if the next event is droppable.
                 if (is_droppable_event(&next_msg)) {
@@ -1753,7 +1754,7 @@ drawline(float x1, float y1, float x2, float y2) {
 #else /* Win32 */
         if (!BeginPath(win32_state.hGraphicsDC))
             WIN32_DRAW_ERROR();
-        if (!MoveToEx(win32_state.hGraphicsDC, xworld_to_scrn(x1), yworld_to_scrn(y1), NULL))
+        if (!MoveToEx(win32_state.hGraphicsDC, xworld_to_scrn(x1), yworld_to_scrn(y1), nullptr))
             WIN32_DRAW_ERROR();
         if (!LineTo(win32_state.hGraphicsDC, xworld_to_scrn(x2), yworld_to_scrn(y2)))
             WIN32_DRAW_ERROR();
@@ -2293,17 +2294,17 @@ void drawtext(float xc, float yc, const std::string& str_text, float boundx, flo
     int zero_approx_height = textsize.cy;
 
     // reselect normal font
-    if (win32_state.hGraphicsFont != NULL) {
+    if (win32_state.hGraphicsFont != nullptr) {
         if (!SelectObject(win32_state.hGraphicsDC, win32_state.hGraphicsFont)) {
             WIN32_SELECT_ERROR();
         }
     }
 
     // eventhough it might be selected, we wont't be drawing with it, because
-    // the HFONT in wit32_state is NULL, so it will be set before something
+    // the HFONT in wit32_state is nullptr, so it will be set before something
     // tries to draw text. Putting it in a later, more proper, place in this
     // function causes an draw error on font cache cache overflow, for some reason.
-    if (zero_hfont != NULL) {
+    if (zero_hfont != nullptr) {
         if (!DeleteObject(zero_hfont)) {
             WIN32_DELETE_ERROR();
         }
@@ -2330,9 +2331,9 @@ void drawtext(float xc, float yc, const std::string& str_text, float boundx, flo
     width = extents.width;
     height = extents.height;
 #else /* WC : WIN32 */
-    if (win32_state.hGraphicsFont == NULL) {
+    if (win32_state.hGraphicsFont == nullptr) {
         // if the font isn't already created, create it.
-        // note: set to NULL by settextattrs(...) if something changed
+        // note: set to nullptr by settextattrs(...) if something changed
         win32_state.hGraphicsFont = CreateFontIndirect(current_font);
 
         if (!win32_state.hGraphicsFont) {
@@ -2560,7 +2561,7 @@ draw_message(void) {
             gl_state.statusMessage
             );
 #else
-        if (!InvalidateRect(win32_state.hStatusWnd, NULL, TRUE))
+        if (!InvalidateRect(win32_state.hStatusWnd, nullptr, TRUE))
             WIN32_DRAW_ERROR();
         if (!UpdateWindow(win32_state.hStatusWnd))
             WIN32_DRAW_ERROR();
@@ -2597,7 +2598,7 @@ update_message(const string& msg) {
  * of graphics area.
  */
 static void
-zoom_in(void (*drawscreen) (void)) {
+zoom_in(std::function<void()> drawscreen) {
     float xcen, ycen;
 
     xcen = (trans_coord.xright + trans_coord.xleft) / 2;
@@ -2610,7 +2611,7 @@ zoom_in(void (*drawscreen) (void)) {
  * of graphics area.
  */
 static void
-zoom_out(void (*drawscreen) (void)) {
+zoom_out(std::function<void()> drawscreen) {
     float xcen, ycen;
 
     xcen = (trans_coord.xright + trans_coord.xleft) / 2;
@@ -2621,7 +2622,7 @@ zoom_out(void (*drawscreen) (void)) {
 
 /* Zooms in by a factor of ZOOM_FACTOR */
 static void
-handle_zoom_in(float x, float y, void (*drawscreen) (void)) {
+handle_zoom_in(float x, float y, std::function<void()> drawscreen) {
     //make xright - xleft = 0.6 of the original distance 
     trans_coord.xleft = x - (x - trans_coord.xleft) / ZOOM_FACTOR;
     trans_coord.xright = x + (trans_coord.xright - x) / ZOOM_FACTOR;
@@ -2630,14 +2631,14 @@ handle_zoom_in(float x, float y, void (*drawscreen) (void)) {
     trans_coord.ybot = y + (trans_coord.ybot - y) / ZOOM_FACTOR;
 
     update_transform();
-    if (drawscreen != NULL) {
+    if (drawscreen != nullptr) {
         drawscreen();
     }
 }
 
 /* Zooms out by a factor of ZOOM_FACTOR */
 static void
-handle_zoom_out(float x, float y, void (*drawscreen) (void)) {
+handle_zoom_out(float x, float y, std::function<void()> drawscreen) {
     //restore the original distances before previous zoom in
     trans_coord.xleft = x - (x - trans_coord.xleft)* ZOOM_FACTOR;
     trans_coord.xright = x + (trans_coord.xright - x)* ZOOM_FACTOR;
@@ -2645,7 +2646,7 @@ handle_zoom_out(float x, float y, void (*drawscreen) (void)) {
     trans_coord.ybot = y + (trans_coord.ybot - y)* ZOOM_FACTOR;
 
     update_transform();
-    if (drawscreen != NULL) {
+    if (drawscreen != nullptr) {
         drawscreen();
     }
 }
@@ -2653,7 +2654,7 @@ handle_zoom_out(float x, float y, void (*drawscreen) (void)) {
 /* Sets the view back to the initial view set by set_visible_world (i.e. a full     *
  * view) of all the graphics.                                                */
 static void
-zoom_fit(void (*drawscreen) (void)) {
+zoom_fit(std::function<void()> drawscreen) {
     trans_coord.xleft = trans_coord.init_xleft;
     trans_coord.xright = trans_coord.init_xright;
     trans_coord.ytop = trans_coord.init_ytop;
@@ -2665,7 +2666,7 @@ zoom_fit(void (*drawscreen) (void)) {
 
 /* Moves view 1/2 screen up. */
 static void
-translate_up(void (*drawscreen) (void)) {
+translate_up(std::function<void()> drawscreen) {
     float ystep;
 
     ystep = (trans_coord.ybot - trans_coord.ytop) / 2;
@@ -2677,7 +2678,7 @@ translate_up(void (*drawscreen) (void)) {
 
 /* Moves view 1/2 screen down. */
 static void
-translate_down(void (*drawscreen) (void)) {
+translate_down(std::function<void()> drawscreen) {
     float ystep;
 
     ystep = (trans_coord.ybot - trans_coord.ytop) / 2;
@@ -2689,7 +2690,7 @@ translate_down(void (*drawscreen) (void)) {
 
 /* Moves view 1/2 screen left. */
 static void
-translate_left(void (*drawscreen) (void)) {
+translate_left(std::function<void()> drawscreen) {
 
     float xstep;
 
@@ -2702,7 +2703,7 @@ translate_left(void (*drawscreen) (void)) {
 
 /* Moves view 1/2 screen right. */
 static void
-translate_right(void (*drawscreen) (void)) {
+translate_right(std::function<void()> drawscreen) {
     float xstep;
 
     xstep = (trans_coord.xright - trans_coord.xleft) / 2;
@@ -2716,7 +2717,7 @@ translate_right(void (*drawscreen) (void)) {
  * (or middle mouse button) 
  */
 static void
-panning_execute(int x, int y, void (*drawscreen) (void)) {
+panning_execute(int x, int y, std::function<void()> drawscreen) {
     float x_change_world, y_change_world;
 
     x_change_world = xscrn_to_world(x) - xscrn_to_world(pan_state.previous_x);
@@ -2753,7 +2754,7 @@ panning_off(void) {
 // the whole window area.
 
 static void
-update_win(int x[2], int y[2], void (*drawscreen)(void)) {
+update_win(int x[2], int y[2], std::function<void()> drawscreen) {
     float x1, x2, y1, y2;
 
     x[0] = min(x[0], trans_coord.top_width - MWIDTH); /* Can't go under menu */
@@ -2780,7 +2781,7 @@ update_win(int x[2], int y[2], void (*drawscreen)(void)) {
 /* The window button was pressed.  Let the user click on the two *
  * diagonally opposed corners, and zoom in on this area.         */
 static void
-adjustwin(void (*drawscreen) (void)) {
+adjustwin(std::function<void()> drawscreen) {
 #ifdef X11	
 
     XEvent report;
@@ -2865,7 +2866,7 @@ adjustwin(void (*drawscreen) (void)) {
 }
 
 static void
-postscript(void (*drawscreen) (void)) {
+postscript(std::function<void()> drawscreen) {
     /* Takes a snapshot of the screen and stores it in pic?.ps.  The *
      * first picture goes in pic1.ps, the second in pic2.ps, etc.    */
 
@@ -2900,19 +2901,19 @@ postscript(void (*drawscreen) (void)) {
     } else {
         printf("Error initializing for postscript output.\n");
 #ifdef WIN32
-        MessageBoxW(win32_state.hMainWnd, L"Error initializing postscript output.", NULL, MB_OK);
+        MessageBoxW(win32_state.hMainWnd, L"Error initializing postscript output.", nullptr, MB_OK);
 #endif
     }
 }
 
 static void
-proceed(void (*drawscreen) (void)) {
+proceed(std::function<void()> drawscreen) {
     (void) drawscreen; // Suppress unused parameter warnings for Win32
     gl_state.ProceedPressed = true;
 }
 
 static void
-quit(void (*drawscreen) (void)) {
+quit(std::function<void()> drawscreen) {
     (void) drawscreen; // Suppress unused parameter warnings for Win32
     close_graphics();
     exit(0);
@@ -2931,7 +2932,7 @@ close_graphics(void) {
         unmap_button(i);
     }
     free(button_state.button);
-    button_state.button = NULL;
+    button_state.button = nullptr;
     button_state.num_buttons = 0;
 
 #ifdef X11
@@ -2953,8 +2954,8 @@ close_graphics(void) {
 	// Destroy cairo things
 	cairo_destroy(x11_state.ctx);
 	cairo_surface_destroy(x11_state.cairo_surface);
-	x11_state.ctx = NULL;      // Important to NULL these pointers in case init_cairo is called again
-	x11_state.cairo_surface = NULL;
+	x11_state.ctx = nullptr;      // Important to nullptr these pointers in case init_cairo is called again
+	x11_state.cairo_surface = nullptr;
 #elif defined WIN32
     // Destroy the window
     if (!DestroyWindow(win32_state.hMainWnd))
@@ -2964,13 +2965,13 @@ close_graphics(void) {
     // for each of the four window types we created.  Otherwise a 
     // later call to init_graphics to open the graphics window up again
     // will fail.
-    if (!UnregisterClassW(szAppName, GetModuleHandle(NULL)))
+    if (!UnregisterClassW(szAppName, GetModuleHandle(nullptr)))
         WIN32_DRAW_ERROR();
-    if (!UnregisterClassW(szGraphicsName, GetModuleHandle(NULL)))
+    if (!UnregisterClassW(szGraphicsName, GetModuleHandle(nullptr)))
         WIN32_DRAW_ERROR();
-    if (!UnregisterClassW(szStatusName, GetModuleHandle(NULL)))
+    if (!UnregisterClassW(szStatusName, GetModuleHandle(nullptr)))
         WIN32_DRAW_ERROR();
-    if (!UnregisterClassW(szButtonsName, GetModuleHandle(NULL)))
+    if (!UnregisterClassW(szButtonsName, GetModuleHandle(nullptr)))
         WIN32_DRAW_ERROR();
 #endif
 
@@ -2982,7 +2983,7 @@ close_graphics(void) {
  * not be opened, the routine returns 0; otherwise it returns 1. */
 int init_postscript(const char *fname) {
     gl_state.ps = fopen(fname, "w");
-    if (gl_state.ps == NULL) {
+    if (gl_state.ps == nullptr) {
         printf("Error: could not open %s for PostScript output.\n", fname);
         printf("Drawing to screen instead.\n");
         return (0);
@@ -3271,7 +3272,7 @@ build_default_menu(void) {
     button_state.button[5].fcn = zoom_out;
     button_state.button[6].fcn = zoom_fit;
     button_state.button[7].fcn = adjustwin; // see 'adjustButton' below in WIN32 section
-    button_state.button[8].fcn = NULL;
+    button_state.button[8].fcn = nullptr;
     button_state.button[9].fcn = postscript;
     button_state.button[10].fcn = proceed;
     button_state.button[11].fcn = quit;
@@ -3282,7 +3283,7 @@ build_default_menu(void) {
 
 #ifdef WIN32
     win32_state.adjustButton = 7;
-    if (!InvalidateRect(win32_state.hButtonsWnd, NULL, TRUE))
+    if (!InvalidateRect(win32_state.hButtonsWnd, nullptr, TRUE))
         WIN32_DRAW_ERROR();
     if (!UpdateWindow(win32_state.hButtonsWnd))
         WIN32_DRAW_ERROR();
@@ -3470,7 +3471,7 @@ Surface load_png_from_file(const char* file_path) {
 
 void draw_surface(const Surface& surface, float x, float y) {
     cairo_surface_t* cairo_surface = surface.impl_->getSurface();
-    if (cairo_surface != NULL) {
+    if (cairo_surface != nullptr) {
         cairo_set_source_surface(x11_state.ctx, cairo_surface,
                 xworld_to_scrn(x), yworld_to_scrn(y));
         cairo_paint(x11_state.ctx);
@@ -3529,7 +3530,7 @@ void set_redirect_to_postscript (bool new_setting) {
 
 /* Helper function called by init_graphics(). Not visible to client program. */
 static void x11_init_graphics(const char *window_name) {
-    char *display_name = NULL;
+    char *display_name = nullptr;
     int x, y; /* window position */
     unsigned int border_width = 2; /* ignored by OpenWindows */
     XTextProperty windowName;
@@ -3539,7 +3540,7 @@ static void x11_init_graphics(const char *window_name) {
     XEvent event;
 
     /* connect to X server */
-    if ((x11_state.display = XOpenDisplay(display_name)) == NULL) {
+    if ((x11_state.display = XOpenDisplay(display_name)) == nullptr) {
         fprintf(stderr, "Cannot connect to X server %s\n",
             XDisplayName(display_name));
         exit(-1);
@@ -3665,7 +3666,7 @@ static void x11_init_graphics(const char *window_name) {
     strncpy(window_name_copy, window_name, BUFSIZE);
     XStringListToTextProperty(&window_name_copy, 1, &windowName);
     free(window_name_copy);
-    window_name_copy = NULL;
+    window_name_copy = nullptr;
 
     XSetWMName(x11_state.display, x11_state.toplevel, &windowName);
     /* XSetWMIconName (x11_state.display, x11_state.toplevel, &windowName); */
@@ -3685,16 +3686,18 @@ static void x11_init_graphics(const char *window_name) {
      * the top-level window up and running.  Thus the user can start drawing  *
      * into this window immediately, and there's no danger of the window not  *
      * being ready and output being lost.                                     */
-    XPeekIfEvent(x11_state.display, &event, x11_test_if_exposed, NULL);
+    XPeekIfEvent(x11_state.display, &event, x11_test_if_exposed, nullptr);
     force_settextattrs(gl_state.currentfontsize, gl_state.currentfontrotation);
 }
 
 /* Helper function called by event_loop(). Not visible to client program. */
 static void
-x11_event_loop(void (*act_on_mousebutton)(float x, float y, t_event_buttonPressed button_info),
-    void (*act_on_mousemove)(float x, float y),
-    void (*act_on_keypress)(char key_pressed, int keysym),
-    void (*drawscreen) (void)) {
+x11_event_loop(
+    std::function<void(float x, float y, t_event_buttonPressed button_info)> act_on_mousebutton,
+    std::function<void(float x, float y)> act_on_mousemove,
+    std::function<void(char key_pressed, int keysym)> act_on_keypress,
+    std::function<void()> drawscreen
+) {
     XEvent report;
     unsigned int last_skipped_button_press_button = -1;
     int bnum;
@@ -3761,7 +3764,7 @@ x11_event_loop(void (*act_on_mousebutton)(float x, float y, t_event_buttonPresse
                         case Button1: /* Left mouse click; pass back to client program */
                         case Button3: /* Right mouse click; pass back to client program */
                             /* Pass information about the button press to client program */
-                            if (act_on_mousebutton != NULL) // If callback was set
+                            if (act_on_mousebutton != nullptr) // If callback was set
                                 act_on_mousebutton(x, y, button_info);
                             break;
                         case Button2: /* Scroll wheel pressed; start panning */
@@ -3790,7 +3793,7 @@ x11_event_loop(void (*act_on_mousebutton)(float x, float y, t_event_buttonPresse
                         button_state.button[bnum].fcn(drawscreen);
                         button_state.button[bnum].ispressed = 0;
                         x11_drawbut(bnum);
-                        if (button_state.button[bnum].fcn == proceed) {
+                        if (*button_state.button[bnum].fcn.target<t_button::CallbackType*>() == proceed) {
                             x11_turn_on_off(OFF);
                             flushinput();
                             return; /* Rather clumsy way of returning *
@@ -3824,7 +3827,7 @@ x11_event_loop(void (*act_on_mousebutton)(float x, float y, t_event_buttonPresse
                 if (pan_state.panning_enabled)
                     panning_execute(report.xmotion.x, report.xmotion.y, drawscreen);
                 else if (gl_state.get_mouse_move_input &&
-                        act_on_mousemove != NULL && 
+                        act_on_mousemove != nullptr && 
                         report.xmotion.x <= trans_coord.top_width - MWIDTH &&
                         report.xmotion.y <= trans_coord.top_height - T_AREA_HEIGHT)
                     act_on_mousemove(xscrn_to_world(report.xmotion.x), yscrn_to_world(report.xmotion.y));
@@ -3848,8 +3851,8 @@ x11_event_loop(void (*act_on_mousebutton)(float x, float y, t_event_buttonPresse
                                       << " keysym: " << keysym << endl;
 #endif            
 
-                    keyb_buffer[length] = '\0'; /* terminating NULL */
-                    if (act_on_keypress != NULL)
+                    keyb_buffer[length] = '\0'; /* terminating nullptr */
+                    if (act_on_keypress != nullptr)
                         act_on_keypress(keyb_buffer[0], keysym);
                 }
 
@@ -3915,10 +3918,10 @@ static bool x11_drop_redundant_panning (const XEvent& report,
                 float y = yscrn_to_world(report.xbutton.y);
                 switch (report.xbutton.button) {
                     case Button4:
-                        handle_zoom_in(x, y, NULL); // (same function as normal event logic)
+                        handle_zoom_in(x, y, nullptr); // (same function as normal event logic)
                         break;
                     case Button5:
-                        handle_zoom_out(x, y, NULL); // (same function as normal event logic)
+                        handle_zoom_out(x, y, nullptr); // (same function as normal event logic)
                         break;
                     default:
                         // do nothing, also should be impossible
@@ -4164,7 +4167,7 @@ static void x11_drawmenu(void) {
     }
 }
 
-static void x11_handle_expose(const XEvent& report, void (*drawscreen) (void)) {
+static void x11_handle_expose(const XEvent& report, std::function<void()> drawscreen) {
 #ifdef VERBOSE
     printf("Got an expose event.\n");
     printf("Count is: %d.\n", report.xexpose.count);
@@ -4179,7 +4182,7 @@ static void x11_handle_expose(const XEvent& report, void (*drawscreen) (void)) {
 }
 
 
-static void x11_redraw_all_if_needed (void (*drawscreen) (void)) {
+static void x11_redraw_all_if_needed (std::function<void()> drawscreen) {
     // Only redraw if this is (the last Expose or ConfigureNotify 
     // in a series (we sometimes get a lot for a window expose or size
     // change, and some have a count of 0). We redraw everything for all 
@@ -4227,7 +4230,7 @@ static void x11_redraw_all_if_needed (void (*drawscreen) (void)) {
 }
 
 
-static void x11_handle_configure_notify(const XEvent& report, void (*drawscreen) (void)) {
+static void x11_handle_configure_notify(const XEvent& report, std::function<void()> drawscreen) {
     trans_coord.top_width = report.xconfigure.width;
     trans_coord.top_height = report.xconfigure.height;
     update_transform();
@@ -4304,12 +4307,12 @@ static unsigned long find_first_set(unsigned long mask) {
 static void
 win32_init_graphics(const char *window_name) {
     WNDCLASSW wndclass;
-    HINSTANCE hInstance = GetModuleHandle(NULL);
+    HINSTANCE hInstance = GetModuleHandle(nullptr);
     int x, y;
     LOGBRUSH lb;
     lb.lbStyle = BS_SOLID;
     lb.lbColor = convert_to_win_color(gl_state.foreground_color);
-    lb.lbHatch = (LONG) NULL;
+    lb.lbHatch = (LONG) nullptr;
     x = 0;
     y = 0;
 
@@ -4332,8 +4335,8 @@ win32_init_graphics(const char *window_name) {
         PS_GEOMETRIC | win32_line_styles[gl_state.currentlinestyle] | PS_ENDCAP_FLAT,
         1,
         &lb,
-        (LONG) NULL,
-        NULL
+        (LONG) nullptr,
+        nullptr
         );
 
     if (!win32_state.hGraphicsPen)
@@ -4351,24 +4354,24 @@ win32_init_graphics(const char *window_name) {
     wndclass.cbClsExtra = 0;
     wndclass.cbWndExtra = 0;
     wndclass.hInstance = hInstance;
-    wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-    wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wndclass.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+    wndclass.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wndclass.hbrBackground = (HBRUSH) CreateSolidBrush(
         convert_to_win_color(gl_state.background_color)
         );
-    wndclass.lpszMenuName = NULL;
+    wndclass.lpszMenuName = nullptr;
     wndclass.lpszClassName = szAppName;
 
     if (!RegisterClassW(&wndclass)) {
         printf("Error code: %lu\n", GetLastError());
-        MessageBoxW(NULL, L"Initialization of Windows graphics (init_graphics) failed.",
+        MessageBoxW(nullptr, L"Initialization of Windows graphics (init_graphics) failed.",
             szAppName, MB_ICONERROR);
         exit(-1);
     }
 
     /* Register the Graphics Window class */
     wndclass.lpfnWndProc = WIN32_GraphicsWND;
-    wndclass.hIcon = NULL;
+    wndclass.hIcon = nullptr;
     wndclass.lpszClassName = szGraphicsName;
 
     if (!RegisterClassW(&wndclass))
@@ -4376,7 +4379,7 @@ win32_init_graphics(const char *window_name) {
 
     /* Register the Status Window class */
     wndclass.lpfnWndProc = WIN32_StatusWND;
-    wndclass.hIcon = NULL;
+    wndclass.hIcon = nullptr;
     wndclass.lpszClassName = szStatusName;
     wndclass.hbrBackground = win32_state.hGrayBrush;
 
@@ -4385,7 +4388,7 @@ win32_init_graphics(const char *window_name) {
 
     /* Register the Buttons Window class */
     wndclass.lpfnWndProc = WIN32_ButtonsWND;
-    wndclass.hIcon = NULL;
+    wndclass.hIcon = nullptr;
     wndclass.lpszClassName = szButtonsName;
     wndclass.hbrBackground = win32_state.hGrayBrush;
 
@@ -4395,7 +4398,7 @@ win32_init_graphics(const char *window_name) {
     win32_state.hMainWnd = CreateWindowW(
         szAppName, szAppName,
         WS_OVERLAPPEDWINDOW, x, y, trans_coord.top_width,
-        trans_coord.top_height, NULL, NULL, hInstance, NULL);
+        trans_coord.top_height, nullptr, nullptr, hInstance, nullptr);
 
     if (!win32_state.hMainWnd)
         WIN32_DRAW_ERROR();
@@ -4416,12 +4419,12 @@ WIN32_MainWND(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
 
     switch (message) {
         case WM_CREATE:
-            win32_state.hStatusWnd = CreateWindowW(szStatusName, NULL, WS_CHILDWINDOW | WS_VISIBLE,
-                0, 0, 0, 0, hwnd, (HMENU) 102, (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
-            win32_state.hButtonsWnd = CreateWindowW(szButtonsName, NULL, WS_CHILDWINDOW | WS_VISIBLE,
-                0, 0, 0, 0, hwnd, (HMENU) 103, (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
-            win32_state.hGraphicsWnd = CreateWindowW(szGraphicsName, NULL, WS_CHILDWINDOW | WS_VISIBLE,
-                0, 0, 0, 0, hwnd, (HMENU) 101, (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
+            win32_state.hStatusWnd = CreateWindowW(szStatusName, nullptr, WS_CHILDWINDOW | WS_VISIBLE,
+                0, 0, 0, 0, hwnd, (HMENU) 102, (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr);
+            win32_state.hButtonsWnd = CreateWindowW(szButtonsName, nullptr, WS_CHILDWINDOW | WS_VISIBLE,
+                0, 0, 0, 0, hwnd, (HMENU) 103, (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr);
+            win32_state.hGraphicsWnd = CreateWindowW(szGraphicsName, nullptr, WS_CHILDWINDOW | WS_VISIBLE,
+                0, 0, 0, 0, hwnd, (HMENU) 101, (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE), nullptr);
             return 0;
 
         case WM_SIZE:
@@ -4458,7 +4461,7 @@ WIN32_MainWND(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
 
 		case WM_CHAR:
         case WM_KEYDOWN:
-            if (gl_state.get_keypress_input && win32_keypress_ptr != NULL)
+            if (gl_state.get_keypress_input && win32_keypress_ptr != nullptr)
                 win32_keypress_ptr((char) wParam, 0);  // TODO: add extended (keysym) codes
             return 0;
 
@@ -4526,7 +4529,7 @@ WIN32_GraphicsWND(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
                 WIN32_DELETE_ERROR();
             if (!DeleteObject(win32_state.hGraphicsBrush))
                 WIN32_DELETE_ERROR();
-            if (win32_state.hGraphicsFont != NULL && !DeleteObject(win32_state.hGraphicsFont))
+            if (win32_state.hGraphicsFont != nullptr && !DeleteObject(win32_state.hGraphicsFont))
                 WIN32_DELETE_ERROR();
             PostQuitMessage(0);
             return 0;
@@ -4630,7 +4633,7 @@ win32_GraphicsWND_handle_WM_PAINT(HWND hwnd, PAINTSTRUCT &ps, HPEN &hDotPen, REC
     EndPaint(hwnd, &ps);
 
     /* Crash hard if called at wrong time */
-    /* win32_state.hGraphicsDC = NULL;*/
+    /* win32_state.hGraphicsDC = nullptr;*/
 }
 
 static void win32_GraphicsWND_handle_WM_LRBUTTONDOWN(UINT message, WPARAM wParam, LPARAM lParam,
@@ -4643,7 +4646,7 @@ static void win32_GraphicsWND_handle_WM_LRBUTTONDOWN(UINT message, WPARAM wParam
 
     if (win32_state.windowAdjustFlag == WINDOW_DEACTIVATED) {
         // Call function in client program if the callback was set
-        if (win32_mouseclick_ptr != NULL)
+        if (win32_mouseclick_ptr != nullptr)
             win32_mouseclick_ptr(xscrn_to_world(LOWORD(lParam)), yscrn_to_world(HIWORD(lParam)),
                                 button_info);
     } else {
@@ -4743,7 +4746,7 @@ win32_GraphicsWND_handle_WM_MOUSEMOVE(LPARAM lParam, int &X, int &Y, RECT &oldAd
         xPos = GET_X_LPARAM(lParam);
         yPos = GET_Y_LPARAM(lParam);
         panning_execute(xPos, yPos, win32_drawscreen_ptr);
-    } else if (gl_state.get_mouse_move_input && win32_mousemove_ptr != NULL) {
+    } else if (gl_state.get_mouse_move_input && win32_mousemove_ptr != nullptr) {
         win32_mousemove_ptr(xscrn_to_world(LOWORD(lParam)), yscrn_to_world(HIWORD(lParam)));
     }
 }
@@ -4782,7 +4785,7 @@ WIN32_StatusWND(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
                 WIN32_DRAW_ERROR();
             if (!SelectObject(hdc, GetStockObject(BLACK_PEN)))
                 WIN32_SELECT_ERROR();
-            if (!MoveToEx(hdc, rect.left, rect.bottom - 1, NULL))
+            if (!MoveToEx(hdc, rect.left, rect.bottom - 1, nullptr))
                 WIN32_DRAW_ERROR();
             if (!LineTo(hdc, rect.right - 1, rect.bottom - 1))
                 WIN32_DRAW_ERROR();
@@ -4879,7 +4882,7 @@ WIN32_ButtonsWND(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
                 WIN32_DRAW_ERROR();
             if (!SelectObject(hdc, GetStockObject(BLACK_PEN)))
                 WIN32_SELECT_ERROR();
-            if (!MoveToEx(hdc, rect.left, rect.bottom - 1, NULL))
+            if (!MoveToEx(hdc, rect.left, rect.bottom - 1, nullptr))
                 WIN32_DRAW_ERROR();
             if (!LineTo(hdc, rect.right - 1, rect.bottom - 1))
                 WIN32_DRAW_ERROR();
@@ -4894,13 +4897,13 @@ WIN32_ButtonsWND(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
                     y = button_state.button[i].ytop;
                     w = button_state.button[i].width;
 
-                    if (!MoveToEx(hdc, x, y, NULL))
+                    if (!MoveToEx(hdc, x, y, nullptr))
                         WIN32_DRAW_ERROR();
                     if (!LineTo(hdc, x + w, y))
                         WIN32_DRAW_ERROR();
                     if (!SelectObject(hdc, GetStockObject(WHITE_PEN)))
                         WIN32_SELECT_ERROR();
-                    if (!MoveToEx(hdc, x, y + 1, NULL))
+                    if (!MoveToEx(hdc, x, y + 1, nullptr))
                         WIN32_DRAW_ERROR();
                     if (!LineTo(hdc, x + w, y + 1))
                         WIN32_DRAW_ERROR();
@@ -4932,7 +4935,7 @@ static void WIN32_SELECT_ERROR() {
         GetLastError(),	__LINE__);
 
     wprintf(msg);
-    MessageBoxW(NULL, msg, NULL, MB_OK);
+    MessageBoxW(nullptr, msg, nullptr, MB_OK);
     exit(-1);
 }
 
@@ -4942,7 +4945,7 @@ void WIN32_DELETE_ERROR() {
         GetLastError(),	__LINE__);
 
     wprintf(msg);
-    MessageBoxW(NULL, msg, NULL, MB_OK);
+    MessageBoxW(nullptr, msg, nullptr, MB_OK);
     exit(-1);
 }
 
@@ -4952,7 +4955,7 @@ static void WIN32_CREATE_ERROR() {
         GetLastError(),	__LINE__);
 
     wprintf(msg);
-    MessageBoxW(NULL, msg, NULL, MB_OK);
+    MessageBoxW(nullptr, msg, nullptr, MB_OK);
     exit(-1);
 }
 
@@ -4962,21 +4965,21 @@ static void WIN32_DRAW_ERROR() {
         GetLastError(),	__LINE__);
 
     wprintf(msg);
-    MessageBoxW(NULL, msg, NULL, MB_OK);
+    MessageBoxW(nullptr, msg, nullptr, MB_OK);
     exit(-1);
 }
 
 static void win32_invalidate_screen(void) {
     /* Tells the graphics engine to redraw the graphics display since information has changed */
 
-    if (!InvalidateRect(win32_state.hGraphicsWnd, NULL, FALSE))
+    if (!InvalidateRect(win32_state.hGraphicsWnd, nullptr, FALSE))
         WIN32_DRAW_ERROR();
     if (!UpdateWindow(win32_state.hGraphicsWnd))
         WIN32_DRAW_ERROR();
 }
 
 static void win32_reset_state() {
-    // Not sure exactly what needs to be reset to NULL etc. 
+    // Not sure exactly what needs to be reset to nullptr etc. 
     // Resetting everthing to be safe.
     win32_state.hGraphicsPen = 0;
     win32_state.hGraphicsBrush = 0;
@@ -5033,10 +5036,10 @@ static void win32_handle_mousewheel_zooming(WPARAM wParam, LPARAM lParam, bool d
         // Also, only redraw the screen on the last one.
         if (zDelta > 0)
             handle_zoom_in(xscrn_to_world(mousePos.x), yscrn_to_world(mousePos.y),
-            (draw_screen && (i == roll_detent)) ? win32_drawscreen_ptr : NULL);
+            (draw_screen && (i == roll_detent)) ? win32_drawscreen_ptr : nullptr);
         else
             handle_zoom_out(xscrn_to_world(mousePos.x), yscrn_to_world(mousePos.y),
-            (draw_screen && (i == roll_detent)) ? win32_drawscreen_ptr : NULL);
+            (draw_screen && (i == roll_detent)) ? win32_drawscreen_ptr : nullptr);
     }
 }
 
@@ -5206,10 +5209,10 @@ void win32_fillcurve(t_point *points,
 
 namespace graphics {
 
-void event_loop(void (* /*act_on_mousebutton*/) (float x, float y, t_event_buttonPressed button_info),
-    void (* /*act_on_mousemove*/) (float x, float y),
-    void (* /*act_on_keypress*/) (char key_pressed, int keysym),
-    void (* /*drawscreen*/) (void)) { }
+void event_loop(std::function<void(float x, float y, t_event_buttonPressed button_info)>,
+    std::function<void(float x, float y)>,
+    std::function<void(char key_pressed, int keysym)>,
+    std::function<void()>) { }
 
 void init_graphics(const std::string& /*window_name*/, int /*cindex*/) { }
 
@@ -5316,7 +5319,7 @@ t_bound_box get_visible_screen() {
 }
 
 void create_button(const char* /*prev_button_text*/, const char* /*button_text*/,
-    void (* /*button_func*/) (void (*drawscreen) (void))) { }
+    void (* /*button_func*/) (std::function<void()> drawscreen)) { }
 
 void destroy_button(const char* /*button_text*/) { }
 

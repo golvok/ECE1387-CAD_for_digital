@@ -96,7 +96,9 @@ build_info:
 $(EXE_DIR)maize-router: \
 	$(OBJ_DIR)main.o \
 	$(OBJ_DIR)graphics/fontcache.o \
+	$(OBJ_DIR)graphics/fpga_graphics_data.o \
 	$(OBJ_DIR)graphics/graphics.o \
+	$(OBJ_DIR)graphics/graphics_wrapper.o \
 	$(OBJ_DIR)graphics/graphics_state.o \
 	$(OBJ_DIR)graphics/graphics_types.o \
 	$(OBJ_DIR)graphics/Surface.o \
@@ -104,6 +106,7 @@ $(EXE_DIR)maize-router: \
 	$(OBJ_DIR)parsing/cmdargs_parser.o \
 	$(OBJ_DIR)parsing/input_parser.o \
 	$(OBJ_DIR)util/logging.o \
+	$(OBJ_DIR)util/thread_utils.o \
 
 
 # define extra flags for particular object files

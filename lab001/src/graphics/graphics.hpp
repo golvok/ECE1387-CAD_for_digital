@@ -9,6 +9,8 @@
 #include "graphics_types.hpp"
 #include "Surface.hpp"
 
+#include <functional>
+
 // Set X11 by default, if neither NO_GRAPHICS nor WIN32 are defined
 #ifndef NO_GRAPHICS
 #ifndef WIN32
@@ -48,10 +50,10 @@ namespace graphics {
  * structure that stores which buttons was pressed and if Shift or Ctrl was
  * held down, etc.
  */
-void event_loop(void (*act_on_mousebutton) (float x, float y, t_event_buttonPressed button_info),
-        void (*act_on_mousemove) (float x, float y),
-        void (*act_on_keypress) (char key_pressed, int keysym),
-        void (*drawscreen) (void));
+void event_loop(std::function<void(float x, float y, t_event_buttonPressed button_info)> act_on_mousebutton,
+        std::function<void(float x, float y)> act_on_mousemove,
+        std::function<void(char key_pressed, int keysym)> act_on_keypress,
+        std::function<void()> drawscreen);
 
 /* Opens up the graphics; the window will have the UTF-8 string window_name
  * in its title bar and have the specified background colour.
