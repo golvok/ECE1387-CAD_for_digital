@@ -74,10 +74,11 @@ struct RouteElementIDTag { static const std::uint64_t DEFAULT_VALUE = 0x80008000
 class RouteElementID : public util::ID<std::uint64_t, RouteElementIDTag>, public util::print_printable {
 public:
 	using ID::IDType;
+	using REIndex = std::int16_t;
 
 	using ID::ID;
 	RouteElementID(PinGID p) : ID(makeValueFromPin(p)) { }
-	RouteElementID(XID x, YID y, std::int16_t i) : ID(makeValueFromXYIndex(x,y,i)) { }
+	RouteElementID(XID x, YID y, REIndex i) : ID(makeValueFromXYIndex(x,y,i)) { }
 
 	template<typename STREAM>
 	void print(STREAM& os) const {
@@ -90,14 +91,15 @@ public:
 
 	XID getX() const { return xFromValue(getValue()); }
 	YID getY() const { return yFromValue(getValue()); }
-	std::int16_t getIndex() const { return indexFromValue(getValue()); }
+	REIndex getIndex() const { return indexFromValue(getValue()); }
 
 	bool isPin() const { return isValuePin(getValue()); }
+	PinGID asPin() const { return pinGIDFromValue_unchecked(getValue()); }
 
 private:
 	static IDType makeValueFromPin(PinGID p) { return p.getValue() | ID::JUST_HIGH_BIT; }
 	static PinGID pinGIDFromValue_unchecked(IDType v) { return util::make_id<PinGID>(v & ~ID::JUST_HIGH_BIT); }
-	static IDType makeValueFromXYIndex(XID x, YID y, std::int16_t i) {
+	static IDType makeValueFromXYIndex(XID x, YID y, REIndex i) {
 		return (util::no_sign_ext_cast<IDType>(x.getValue()) << 32)
 			| (util::no_sign_ext_cast<IDType>(y.getValue()) << 16)
 			| (util::no_sign_ext_cast<IDType>(i))
@@ -105,7 +107,7 @@ private:
 	}
 	static XID xFromValue(IDType v) { return util::make_id<XID>(util::no_sign_ext_cast<XID::IDType>((v & 0xFFFF00000000) >> 32)); }
 	static YID yFromValue(IDType v) { return util::make_id<YID>(util::no_sign_ext_cast<YID::IDType>((v & 0x0000FFFF0000) >> 16)); }
-	static std::int16_t indexFromValue(IDType v) { return util::no_sign_ext_cast<std::int16_t>(v & 0x00000000FFFF); }
+	static REIndex indexFromValue(IDType v) { return util::no_sign_ext_cast<REIndex>(v & 0x00000000FFFF); }
 	static bool isValuePin(IDType v) { return (v & ID::JUST_HIGH_BIT) != 0; }
 
 	template<typename>
@@ -160,6 +162,7 @@ namespace std {
 	template<typename> struct hash;
 	template<> struct hash<device::BlockID> : util::MyHash<device::BlockID>::type { };
 	template<> struct hash<device::PinGID> : util::MyHash<device::PinGID>::type { };
+	template<> struct hash<device::RouteElementID> : util::MyHash<device::RouteElementID>::type { };
 }
 
 #endif // DEVICE__DEVICE_H
