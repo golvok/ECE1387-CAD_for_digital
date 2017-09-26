@@ -38,21 +38,21 @@ namespace {
  * 0 +-+-+-+-+
  */
 
-struct UniversalConnector {
+struct FullyConnectedConnector {
 	using Index = std::int16_t;
 	const Index END_VALUE = std::numeric_limits<Index>::max();
 
 	parsing::input::DeviceInfo dev_info;
 	decltype(dev_info.bounds) wire_bb;
 
-	UniversalConnector(const parsing::input::DeviceInfo& dev_info)
+	FullyConnectedConnector(const parsing::input::DeviceInfo& dev_info)
 		: dev_info(dev_info)
 		, wire_bb(dev_info.bounds.min_point(), dev_info.bounds.max_point() + geom::make_point(1,1))
 	{ }
-	UniversalConnector(const UniversalConnector&) = default;
-	UniversalConnector& operator=(const UniversalConnector&) = default;
-	UniversalConnector(UniversalConnector&&) = default;
-	UniversalConnector& operator=(UniversalConnector&&) = default;
+	FullyConnectedConnector(const FullyConnectedConnector&) = default;
+	FullyConnectedConnector& operator=(const FullyConnectedConnector&) = default;
+	FullyConnectedConnector(FullyConnectedConnector&&) = default;
+	FullyConnectedConnector& operator=(FullyConnectedConnector&&) = default;
 
 	Index fanout_begin(const RouteElementID& re) const {
 		(void)re;

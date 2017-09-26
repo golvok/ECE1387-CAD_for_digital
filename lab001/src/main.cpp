@@ -62,8 +62,8 @@ int program_main(const std::string& data_file_name) {
 		},
 		[&](const parsing::input::ParseResult& pr) {
 			do_optional_input_data_dump(data_file_name, pr);
-			device::UniversalConnector connector(pr.device_info);
-			device::Device<device::UniversalConnector> dev(
+			device::FullyConnectedConnector connector(pr.device_info);
+			device::Device<device::FullyConnectedConnector> dev(
 				0,0,0,0, pr.device_info.track_width, connector
 			);
 
