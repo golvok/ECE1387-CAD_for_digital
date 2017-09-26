@@ -16,10 +16,13 @@ void do_optional_input_data_dump(const std::string& data_file_name, const parsin
 
 int main(int argc, char const** argv) {
 
-
 	dout.setHighestTitleRank(7);
 
 	const auto parsed_args = parsing::cmdargs::parse(argc,argv);
+	// enable logging levels
+	for (auto& l : parsed_args.getDebugLevelsToEnable()) {
+		dout.enable_level(l);
+	}
 
 	// enable graphics
 	std::vector<std::thread> g_threads;
@@ -35,11 +38,6 @@ int main(int argc, char const** argv) {
 			graphics::init_graphics(title, graphics::WHITE);
 			graphics::event_loop([](float, float, graphics::t_event_buttonPressed){}, nullptr, nullptr, [](){});
 		});
-	}
-
-	// enable logging levels
-	for (auto& l : parsed_args.getDebugLevelsToEnable()) {
-		dout.enable_level(l);
 	}
 
 	const auto result = program_main(parsed_args.getDataFileName());
