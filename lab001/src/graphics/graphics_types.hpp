@@ -3,7 +3,7 @@
 
 #include <string>
 #include <array>
-#include <iostream>
+#include <ostream>
 
 #include "easygl_constants.hpp"
 
@@ -50,6 +50,13 @@ public:
 
 t_point operator*(float lhs, const t_point& rhs);
 
+t_point interpolate(const t_point& p1, float ratio, const t_point& p2);
+
+inline std::ostream& operator<<(std::ostream& os, const t_point& p) {
+    os << '{' << p.x << ',' << p.y << '}';
+    return os;
+}
+
 
 /**
  * Represents a rectangle from x=left to x=right and from y=bottom to y=top.
@@ -73,6 +80,9 @@ public:
     const t_point& top_right() const;
     t_point& bottom_left();
     t_point& top_right();
+
+    t_point top_left() const;
+    t_point bottom_right() const;
 
     /**
      * Calculate and return the center
@@ -135,6 +145,10 @@ private:
     t_point topright;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const t_bound_box& bb) {
+    os << '{' << bb.bottom_left() << '-' << bb.top_right() << '}';
+    return os;
+}
 
 /**
  * A datatype that holds an RGB (red,green,blue) triplet; it is used in this
@@ -167,6 +181,12 @@ public:
     
     static const std::array<t_color,29> predef_colors;
 };
+
+
+inline std::ostream& operator<<(std::ostream& os, const t_color& c) {
+    os << "{r" << c.red << 'g' << c.green << 'b' << c.blue << 'a' << c.alpha << '}';
+    return os;
+}
 
 }
 

@@ -103,6 +103,14 @@ x(src.x), y(src.y) {
 t_point::t_point(float _x, float _y) : x(_x), y(_y) {
 }
 
+t_point operator*(float lhs, const t_point& rhs) {
+    return rhs*lhs;
+}
+
+t_point interpolate(const t_point& p1, float ratio, const t_point& p2) {
+    return p1 + ratio * (p2 - p1);
+}
+
 /******************************************
  * begin t_bound_box function definitions *
  ******************************************/
@@ -129,6 +137,14 @@ const t_point& t_bound_box::bottom_left() const {
 
 const t_point& t_bound_box::top_right() const {
     return topright;
+}
+
+t_point t_bound_box::top_left() const {
+    return {left(), top()};
+}
+
+t_point t_bound_box::bottom_right() const {
+    return {right(), bottom()};
 }
 
 float& t_bound_box::left() {
