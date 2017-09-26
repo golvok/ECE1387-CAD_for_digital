@@ -7,7 +7,7 @@
 #include <util/print_printable.hpp>
 
 #include <cstdint>
-#include <iosfwd>
+#include <ostream>
 
 #include <boost/operators.hpp>
 
@@ -115,8 +115,48 @@ private:
 };
 
 enum class BlockSide {
-	OTHER, LEFT, RIGHT, TOP, BOTTOM
+	OTHER, LEFT, RIGHT, TOP, BOTTOM,
 };
+
+inline std::ostream& operator<<(std::ostream& os, BlockSide bs) {
+	switch (bs) {
+		case BlockSide::OTHER:
+			os << "OTHER";
+		break;
+		case BlockSide::LEFT:
+			os << "LEFT";
+		break;
+		case BlockSide::RIGHT:
+			os << "RIGHT";
+		break;
+		case BlockSide::TOP:
+			os << "TOP";
+		break;
+		case BlockSide::BOTTOM:
+			os << "BOTTOM";
+		break;
+	}
+	return os;
+}
+
+enum class Direction {
+	OTHER, HORIZONTAL, VERTICAL,
+};
+
+inline std::ostream& operator<<(std::ostream& os, Direction dir) {
+	switch (dir) {
+		case Direction::OTHER:
+			os << "OTHER";
+		break;
+		case Direction::HORIZONTAL:
+			os << "HORIZONTAL";
+		break;
+		case Direction::VERTICAL:
+			os << "VERTICAL";
+		break;
+	}
+	return os;
+}
 
 template<
 	  typename CONNECTOR
@@ -168,6 +208,10 @@ public:
 
 	BlockSide get_block_pin_side(PinGID pin) {
 		return connector.get_block_pin_side(pin);
+	}
+
+	Direction channel_direction_on_this_side(PinGID pin) {
+		return connector.channel_direction_on_this_side(pin);
 	}
 
 private:

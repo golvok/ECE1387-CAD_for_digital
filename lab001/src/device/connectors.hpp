@@ -109,7 +109,7 @@ struct FullyConnectedConnector {
 		if (re.isPin()) {
 			const auto as_pin = re.asPin();
 			const auto pin_side = get_block_pin_side(as_pin);
-			const bool output_to_horiz = pin_fanout_wire_dir(pin_side) == Direction::HORIZONTAL;
+			const bool output_to_horiz = channel_direction_on_this_side(pin_side) == Direction::HORIZONTAL;
 			const auto result_index_value = (output_to_horiz ? dev_info.track_width : 0) + (out_index % dev_info.track_width);
 			const auto base_re = RouteElementID(re.getX(), re.getY(), util::no_sign_ext_cast<RouteElementID::REIndex>(result_index_value));
 			switch (pin_side) {
@@ -237,11 +237,7 @@ struct FullyConnectedConnector {
 		}
 	}
 
-	enum class Direction {
-		OTHER, HORIZONTAL, VERTICAL,
-	};
-
-	static Direction pin_fanout_wire_dir(BlockSide side) {
+	static Direction channel_direction_on_this_side(BlockSide side) {
 		switch (side) {
 			case BlockSide::BOTTOM:
 			case BlockSide::TOP:

@@ -253,18 +253,18 @@ t_bound_box::t_bound_box(const t_bound_box& src) :
 bottomleft(src.bottom_left()), topright(src.top_right()) {
 }
 
-t_bound_box::t_bound_box(float _left, float _bottom, float _right, float _top) :
-bottomleft(_left, _bottom), topright(_right, _top) {
-}
+t_bound_box::t_bound_box(float _left, float _bottom, float _right, float _top)
+    : bottomleft(std::min(_left,_right), std::min(_bottom,_top))
+    , topright(std::max(_left,_right), std::max(_bottom,_top))
+{ }
 
-t_bound_box::t_bound_box(const t_point& _bottomleft, const t_point& _topright) :
-bottomleft(_bottomleft), topright(_topright) {
-}
+t_bound_box::t_bound_box(const t_point& p1, const t_point& p2)
+    : t_bound_box(p1.x, p1.y, p2.x, p2.y)
+{ }
 
-t_bound_box::t_bound_box(const t_point& _bottomleft, float width, float height) :
-bottomleft(_bottomleft), topright(_bottomleft) {
-    topright.offset(width, height);
-}
+t_bound_box::t_bound_box(const t_point& p1, float width, float height)
+    : t_bound_box(p1, p1 + t_point(width, height))
+{ }
 
 /******************************************
  * begin t_color function definitions *

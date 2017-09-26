@@ -84,6 +84,26 @@ public:
     t_point top_left() const;
     t_point bottom_right() const;
 
+    std::pair<t_point, t_point> top_side() const { return {top_left(), top_right()}; }
+    std::pair<t_point, t_point> right_side() const { return {top_right(), bottom_right()}; }
+    std::pair<t_point, t_point> bottom_side() const { return {bottom_right(), bottom_left()}; }
+    std::pair<t_point, t_point> left_side() const { return {bottom_left(), top_left()}; }
+
+    template<typename T>
+    auto get_side(const T& side) const {
+        switch (side) {
+            case T::LEFT:
+                return left_side();
+            case T::RIGHT:
+                return right_side();
+            case T::TOP:
+                return top_side();
+            case T::BOTTOM:
+            default:
+                return bottom_side();
+        }
+    }
+
     /**
      * Calculate and return the center
      */
@@ -138,8 +158,8 @@ public:
     t_bound_box();
     t_bound_box(const t_bound_box& src);
     t_bound_box(float left, float bottom, float right, float top);
-    t_bound_box(const t_point& bottomleft, const t_point& topright);
-    t_bound_box(const t_point& bottomleft, float width, float height);
+    t_bound_box(const t_point& p1, const t_point& p2);
+    t_bound_box(const t_point& p1, float width, float height);
 private:
     t_point bottomleft;
     t_point topright;

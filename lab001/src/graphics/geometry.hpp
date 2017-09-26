@@ -28,40 +28,47 @@ namespace geom {
  */
 template<typename PRECISION>
 struct Point {
-	PRECISION x;
-	PRECISION y;
+private:
+	PRECISION m_x;
+	PRECISION m_y;
+public:
 
-	Point() : x(0), y(0) { }
+	Point() : m_x(0), m_y(0) { }
 
 	template<typename THEIR_PRECISION>
 	explicit Point(const Point<THEIR_PRECISION>& src)
-		: Point(static_cast<PRECISION>(src.x), static_cast<PRECISION>(src.y))
+		: Point(static_cast<PRECISION>(src.x()), static_cast<PRECISION>(src.y()))
 	{ }
 
 	template<typename THEIR_PRECISION, typename = std::enable_if_t<is_safe_numeric_conversion<THEIR_PRECISION, PRECISION>>>
 	operator Point<THEIR_PRECISION>() {
-		return {static_cast<PRECISION>(x), static_cast<PRECISION>(y)};
+		return {static_cast<PRECISION>(x()), static_cast<PRECISION>(y())};
 	}
 
-	Point(const Point& src) : Point(src.x,src.y) { }
+	Point(const Point& src) : Point(src.x(),src.y()) { }
 
-	Point(PRECISION x, PRECISION y) : x(x), y(y) { }
+	Point(PRECISION x, PRECISION y) : m_x(x), m_y(y) { }
+
+	PRECISION& x() { return m_x; }
+	const PRECISION& x() const { return m_x; }
+	PRECISION& y() { return m_y; }
+	const PRECISION& y() const { return m_y; }
 
 	void set(PRECISION x, PRECISION y) {
-		this->x = x;
-		this->y = y;
+		m_x = x;
+		m_y = y;
 	}
 	void set(const Point& src) {
-		x = src.x;
-		y = src.y;
+		m_x = src.x();
+		m_y = src.y();
 	}
 
 	/**
 	 * Behaves like a 2 argument plusequals.
 	 */
 	void offset(PRECISION x, PRECISION y) {
-		x += x;
-		y += y;
+		m_x += x;
+		m_y += y;
 	}
 
 	template<typename PRECISION2>
@@ -78,26 +85,26 @@ struct Point {
 	}
 	template<typename PRECISION2>
 	Point& operator+= (const Point<PRECISION2>& rhs) {
-		this->x += rhs.x;
-		this->y += rhs.y;
+		m_x += rhs.x();
+		m_y += rhs.y();
 		return *this;
 	}
 	template<typename PRECISION2>
 	Point& operator-= (const Point<PRECISION2>& rhs) {
-		this->x -= rhs.x;
-		this->y -= rhs.y;
+		m_x -= rhs.x();
+		m_y -= rhs.y();
 		return *this;
 	}
 	template<typename PRECISION2>
 	Point& operator*= (PRECISION2 rhs) {
-		this->x *= rhs;
-		this->y *= rhs;
+		m_x *= rhs;
+		m_y *= rhs;
 		return *this;
 	}
 	template<typename PRECISION2>
 	Point& operator/= (PRECISION2 rhs) {
-		this->x /= rhs;
-		this->y /= rhs;
+		m_x /= rhs;
+		m_y /= rhs;
 		return *this;
 	}
 
@@ -105,8 +112,8 @@ struct Point {
 	 * Assign that point to this one - copy the components
 	 */
 	Point& operator= (const Point& src) {
-		this->x = src.x;
-		this->y = src.y;
+		m_x = src.x();
+		m_y = src.y();
 		return *this;
 	}
 
@@ -132,20 +139,20 @@ const int NEGATIVE_DOT_PRODUCT = 1;
  */
 template<typename PRECISION, typename PRECISION2>
 auto operator+ (const Point<PRECISION>& lhs, const Point<PRECISION2>& rhs) {
-	return make_point(lhs.x + rhs.x, lhs.y + rhs.y);
+	return make_point(lhs.x() + rhs.x(), lhs.y() + rhs.y());
 }
 template<typename PRECISION, typename PRECISION2>
 auto operator- (const Point<PRECISION>& lhs, const Point<PRECISION2>& rhs) {
-	return make_point(lhs.x - rhs.x, lhs.y - rhs.y);
+	return make_point(lhs.x() - rhs.x(), lhs.y() - rhs.y());
 }
 
 template<typename PRECISION, typename PRECISION2>
 auto deltaX(Point<PRECISION> p1, Point<PRECISION2> p2) {
-	return p2.x - p1.x;
+	return p2.x() - p1.x();
 }
 template<typename PRECISION, typename PRECISION2>
 auto deltaY(Point<PRECISION> p1, Point<PRECISION2> p2) {
-	return p2.y - p1.y;
+	return p2.y() - p1.y();
 }
 template<typename PRECISION, typename PRECISION2>
 Point<PRECISION> delta(Point<PRECISION> p1, Point<PRECISION2> p2) {
@@ -153,15 +160,15 @@ Point<PRECISION> delta(Point<PRECISION> p1, Point<PRECISION2> p2) {
 }
 template<typename PRECISION, typename PRECISION2>
 auto multiply(Point<PRECISION> p, PRECISION2 constant) {
-	return make_point(p.x * constant, p.y * constant);
+	return make_point(p.x() * constant, p.y() * constant);
 }
 template<typename PRECISION, typename PRECISION2>
 auto divide(Point<PRECISION> p, PRECISION2 constant) {
-	return make_point(p.x / constant, p.y / constant);
+	return make_point(p.x() / constant, p.y() / constant);
 }
 template<typename PRECISION, typename PRECISION2>
 auto add(Point<PRECISION> p1, Point<PRECISION2> p2) {
-	return make_point(p1.x + p2.x, p1.y + p2.y);
+	return make_point(p1.x() + p2.x(), p1.y() + p2.y());
 }
 template<typename PRECISION, typename PRECISION2>
 auto distance(Point<PRECISION> p1, Point<PRECISION2> p2) {
@@ -169,7 +176,7 @@ auto distance(Point<PRECISION> p1, Point<PRECISION2> p2) {
 }
 template<typename PRECISION>
 auto magnitudeSquared(Point<PRECISION> p) {
-	return pow(p.x, 2) + pow(p.y, 2);
+	return pow(p.x(), 2) + pow(p.y(), 2);
 }
 template<typename PRECISION>
 auto magnitude(Point<PRECISION> p) {
@@ -181,11 +188,11 @@ auto unit(Point<PRECISION> p) {
 }
 template<typename PRECISION, typename PRECISION2>
 auto dotProduct(Point<PRECISION> p1, Point<PRECISION2> p2) {
-	return p1.x * p2.x + p1.y * p2.y;
+	return p1.x() * p2.x() + p1.y() * p2.y();
 }
 template<typename PRECISION>
 Point<PRECISION> getPerpindular(Point<PRECISION> p) {
-	return {p.y,-p.x};
+	return {p.y(),-p.x()};
 }
 template<typename PRECISION, typename PRECISION2>
 auto project(Point<PRECISION> source, Point<PRECISION2> wall) {
@@ -240,13 +247,13 @@ auto operator*(PRECISION lhs, const Point<PRECISION2>& rhs) {
 
 template<typename PRECISION>
 std::ostream& operator<<(std::ostream& os, const Point<PRECISION>& p) {
-	os << '{' << p.x << ',' << p.y << '}';
+	os << '{' << p.x() << ',' << p.y() << '}';
 	return os;
 }
 
 template<typename PRECISION1, typename PRECISION2>
 bool operator==(const Point<PRECISION1>& p1, const Point<PRECISION2>& p2) {
-	return p1.x == p2.x && p1.y == p2.y;
+	return p1.x() == p2.x() && p1.y() == p2.y();
 }
 
 /**
@@ -295,14 +302,14 @@ public:
 	/**
 	 * These return their respective edge/point's location
 	 */
-	const PRECISION& minx() const { return min_point().x; }
-	const PRECISION& maxx() const { return max_point().x; }
-	const PRECISION& miny() const { return min_point().y; }
-	const PRECISION& maxy() const { return max_point().y; }
-	PRECISION& minx() { return min_point().x; }
-	PRECISION& maxx() { return max_point().x; }
-	PRECISION& miny() { return min_point().y; }
-	PRECISION& maxy() { return max_point().y; }
+	const PRECISION& minx() const { return min_point().x(); }
+	const PRECISION& maxx() const { return max_point().x(); }
+	const PRECISION& miny() const { return min_point().y(); }
+	const PRECISION& maxy() const { return max_point().y(); }
+	PRECISION& minx() { return min_point().x(); }
+	PRECISION& maxx() { return max_point().x(); }
+	PRECISION& miny() { return min_point().y(); }
+	PRECISION& maxy() { return max_point().y(); }
 
 	const point_type& min_point() const { return minpoint; }
 	const point_type& max_point() const { return maxpoint; }
