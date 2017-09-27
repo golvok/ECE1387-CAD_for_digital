@@ -1,3 +1,5 @@
+#ifndef UTIL__NETLIST_H
+#define UTIL__NETLIST_H
 
 #include <unordered_map>
 #include <unordered_set>
@@ -22,3 +24,5 @@ private:
 };
 
 } // end namespace util
+
+#endif // UTIL__NETLIST_H
