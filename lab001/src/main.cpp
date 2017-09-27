@@ -74,6 +74,10 @@ int program_main(const std::string& data_file_name) {
 					util::print_container(path, dout(DL::INFO));
 					dout(DL::INFO) << '\n';
 
+					graphics::get().fpga().clearPaths();
+					graphics::get().fpga().addPath(path);
+					graphics::get().waitForPress();
+					graphics::get().fpga().clearPaths();
 				}
 			}
 

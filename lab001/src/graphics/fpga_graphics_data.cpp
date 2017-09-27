@@ -5,6 +5,17 @@
 
 namespace graphics {
 
+namespace {
+	bool is_contained_in_a_path(device::RouteElementID reid, const decltype(std::declval<FPGAGraphicsData>().getPaths())& paths) {
+		for (const auto& path : paths) {
+			if (std::find(begin(path), end(path), reid) != end(path)) {
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
 void FPGAGraphicsData::setFCDev(device::Device<device::FullyConnectedConnector> const* fc_dev) {
 	this->fc_dev = fc_dev;
 	graphics::set_visible_world(-10,-10,20,20);
@@ -112,6 +123,10 @@ void FPGAGraphicsData::drawAll() {
 		const auto grid_square_bounds = bounds_for_xy(xy_loc.x(), xy_loc.y());
 		const auto block_bounds = block_bounds_within(grid_square_bounds);
 
+		if (is_contained_in_a_path(curr, paths)) {
+			graphics::setcolor(0,255,0);
+		}
+
 		if (curr.isPin()) {
 			const auto as_pin = curr.asPin();
 			const auto pin_side = fc_dev->get_block_pin_side(as_pin);
@@ -154,6 +169,8 @@ void FPGAGraphicsData::drawAll() {
 			graphics::settextrotation((int)angle.degreeValue() % 180);
 			graphics::drawtext_in(graphics::t_bound_box(p1,p2), util::stringify_through_stream(curr), 0.02f);
 		}
+
+		graphics::setcolor(0,0,0);
 	}
 
 	dout(DL::INFO) << "done drawing fg device\n";
