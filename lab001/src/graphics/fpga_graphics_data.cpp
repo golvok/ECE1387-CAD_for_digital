@@ -88,10 +88,6 @@ void FPGAGraphicsData::drawAll() {
 		}
 	}
 
-	dout(DL::INFO) << "initial set: ";
-	util::print_container(reIDs_to_draw, dout(DL::INFO));
-	dout(DL::INFO) << '\n';
-
 	std::unordered_set<device::RouteElementID> reIDs_already_seen;
 	while (!reIDs_to_draw.empty()) {
 		const auto curr = reIDs_to_draw.front();
@@ -105,7 +101,6 @@ void FPGAGraphicsData::drawAll() {
 			if (reIDs_already_seen.find(fanout) == end(reIDs_already_seen)) {
 				reIDs_already_seen.insert(curr);
 				reIDs_to_draw.push_back(fanout);
-				dout(DL::INFO) << curr << " adds " << fanout << '\n';
 			}
 		}
 
