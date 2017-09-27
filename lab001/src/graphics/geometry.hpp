@@ -348,8 +348,9 @@ public:
 	 * Does the given point coinside with this bbox?
 	 * Points on the edges or corners are included.
 	 */
-	bool intersects(const point_type& test_pt) const {
-		return intersects(test_pt.x, test_pt.y);
+	template<typename POINT>
+	bool intersects(const POINT& test_pt) const {
+		return intersects(test_pt.x(), test_pt.y());
 	}
 
 	bool intersects(PRECISION x, PRECISION y) const {
