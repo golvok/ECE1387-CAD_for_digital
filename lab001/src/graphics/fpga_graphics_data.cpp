@@ -6,7 +6,8 @@
 namespace graphics {
 
 namespace {
-	bool is_contained_in_a_path(device::RouteElementID reid, const decltype(std::declval<FPGAGraphicsData>().getPaths())& paths) {
+	template<typename T>
+	bool is_contained_in_a_path(device::RouteElementID reid, const T& paths) {
 		for (const auto& path : paths) {
 			if (std::find(begin(path), end(path), reid) != end(path)) {
 				return true;
@@ -16,15 +17,23 @@ namespace {
 	}
 }
 
-void FPGAGraphicsData::setFCDev(device::Device<device::FullyConnectedConnector> const* fc_dev) {
-	this->fc_dev = fc_dev;
-	graphics::set_visible_world(-10,-10,20,20);
+FPGAGraphicsDataStateScope FPGAGraphicsData::pushState(
+	device::Device<device::FullyConnectedConnector> const* fc_dev,
+	const std::vector<std::vector<device::RouteElementID>>& paths
+) {
+	state_stack.push_back(std::make_unique<FPGAGraphicsDataState>(fc_dev, paths));
+	const geom::BoundBox<float>& fpga_bb = fc_dev->info().bounds;
+	const float margin = 3.0f;
+	graphics::set_visible_world(fpga_bb.minx()-margin, fpga_bb.miny()-margin, fpga_bb.maxx()+margin, fpga_bb.maxy()+margin);
+	return FPGAGraphicsDataStateScope(state_stack.back().get());
 }
 
 void FPGAGraphicsData::drawAll() {
 	graphics::clearscreen();
+	const auto& data_and_lock_copy = dataAndLock();
+	const auto& data = data_and_lock_copy.first;
 
-	if (!fc_dev) return;
+	if (!data.getFCDev()) return;
 
 	dout(DL::INFO) << "drawing fc device\n";
 	graphics::setcolor(0,0,0);
@@ -81,7 +90,7 @@ void FPGAGraphicsData::drawAll() {
 	};
 
 	std::list<device::RouteElementID> reIDs_to_draw;
-	for (const auto& block : fc_dev->blocks()) {
+	for (const auto& block : data.getFCDev()->blocks()) {
 		const auto xy_loc = geom::make_point(
 			block.getX().getValue(),
 			block.getY().getValue()
@@ -94,7 +103,7 @@ void FPGAGraphicsData::drawAll() {
 		graphics::settextrotation(0);
 		graphics::drawtext_in(block_bounds, util::stringify_through_stream(geom::make_point(block.getX().getValue(), block.getY().getValue())));
 
-		for (const auto& pin_re : fc_dev->fanout(block)) {
+		for (const auto& pin_re : data.getFCDev()->fanout(block)) {
 			reIDs_to_draw.push_back(pin_re);
 		}
 	}
@@ -108,7 +117,7 @@ void FPGAGraphicsData::drawAll() {
 			continue;
 		}
 
-		for (const auto& fanout : fc_dev->fanout(curr)) {
+		for (const auto& fanout : data.getFCDev()->fanout(curr)) {
 			if (reIDs_already_seen.find(fanout) == end(reIDs_already_seen)) {
 				reIDs_already_seen.insert(curr);
 				reIDs_to_draw.push_back(fanout);
@@ -123,13 +132,13 @@ void FPGAGraphicsData::drawAll() {
 		const auto grid_square_bounds = bounds_for_xy(xy_loc.x(), xy_loc.y());
 		const auto block_bounds = block_bounds_within(grid_square_bounds);
 
-		if (is_contained_in_a_path(curr, paths)) {
+		if (is_contained_in_a_path(curr, data.getPaths())) {
 			graphics::setcolor(0,255,0);
 		}
 
 		if (curr.isPin()) {
 			const auto as_pin = curr.asPin();
-			const auto pin_side = fc_dev->get_block_pin_side(as_pin);
+			const auto pin_side = data.getFCDev()->get_block_pin_side(as_pin);
 			const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), pin_side);
 
 			const auto block_side = block_bounds.get_side(pin_side);
@@ -145,8 +154,8 @@ void FPGAGraphicsData::drawAll() {
 			graphics::drawline(p1, p2);
 			graphics::settextrotation((int)angle.degreeValue() % 180);
 			graphics::drawtext_in(graphics::t_bound_box(p1,p2), util::stringify_through_stream(curr), 0.02f);
-		} else { // if (fc_dev->is_channel(curr)) {
-			const auto wire_dir = fc_dev->wire_direction(curr);
+		} else { // if (data.getFCDev()->is_channel(curr)) {
+			const auto wire_dir = data.getFCDev()->wire_direction(curr);
 			const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), channel_location(wire_dir));
 
 			const auto sides = [&]() -> std::pair<std::pair<t_point, t_point>, std::pair<t_point, t_point>> {
@@ -160,7 +169,7 @@ void FPGAGraphicsData::drawAll() {
 				}
 			}();
 
-			const auto channel_pos = ((float)fc_dev->index_in_channel(curr) + 0.5f) / (float)fc_dev->info().track_width;
+			const auto channel_pos = ((float)data.getFCDev()->index_in_channel(curr) + 0.5f) / (float)data.getFCDev()->info().track_width;
 			const auto p1 = interpolate(sides.first.first, channel_pos, sides.first.second);
 			const auto p2 = interpolate(sides.second.second, channel_pos, sides.second.first);
 			const auto angle = inclination(geom::make_point(p1.x, p1.y), geom::make_point(p2.x, p2.y));

@@ -25,10 +25,8 @@ int route_all(const Netlist& pin_to_pin_netlist, FanoutGenerator&& fanout_gen) {
 			util::print_container(path, dout(DL::INFO));
 			dout(DL::INFO) << '\n';
 
-			graphics::get().fpga().clearPaths();
-			graphics::get().fpga().addPath(path);
+			const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, {path});
 			graphics::get().waitForPress();
-			graphics::get().fpga().clearPaths();
 		}
 	}
 	return 0;

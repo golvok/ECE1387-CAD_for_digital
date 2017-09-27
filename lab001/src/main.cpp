@@ -59,7 +59,7 @@ int program_main(const std::string& data_file_name) {
 				pr.device_info, connector
 			);
 
-			graphics::get().fpga().setFCDev(&dev);
+			const auto gfx_state_keeper = graphics::get().fpga().pushState(&dev);
 			graphics::get().waitForPress();
 
 			device::RouteElementID test_re(
@@ -74,10 +74,8 @@ int program_main(const std::string& data_file_name) {
 
 			// const auto result = 
 			algo::route_all(pr.pin_to_pin_netlist, dev);
-			// algo::test_func(1);
 
 			graphics::get().waitForPress();
-			graphics::get().fpga().setFCDev(nullptr);
 		}
 	);
 	apply_visitor(visitor, parse_result);
