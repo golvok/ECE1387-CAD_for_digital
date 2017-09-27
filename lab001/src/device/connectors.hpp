@@ -67,7 +67,7 @@ struct FullyConnectedConnector {
 
 	Index fanout_begin(const RouteElementID& re) const {
 		(void)re;
-		return 0;
+		return next_fanout(re, -1);
 	}
 
 	bool is_end_index(const RouteElementID& re, const Index& index) const {
