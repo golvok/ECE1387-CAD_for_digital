@@ -125,7 +125,7 @@ struct FullyConnectedConnector {
 					return RouteElementID();
 			}
 		} else {
-			const bool is_horiz = re.getIndex()/dev_info.track_width;
+			const bool is_horiz = wire_direction(re) == Direction::HORIZONTAL;
 			if (out_index < dev_info.pins_per_block_side*dev_info.num_blocks_adjacent_to_channel) {
 				const auto block_pin_id = static_cast<BlockPinID::IDType>(
 					dev_info.num_blocks_adjacent_to_channel*(out_index % dev_info.num_blocks_adjacent_to_channel) + 1
@@ -248,6 +248,21 @@ struct FullyConnectedConnector {
 			default:
 				return Direction::OTHER;
 		}
+	}
+
+	Direction wire_direction(RouteElementID reid) const {
+		switch (reid.getIndex()/dev_info.track_width) {
+			case 0:
+				return Direction::VERTICAL;
+			case 1:
+				return Direction::HORIZONTAL;
+			default:
+				return Direction::OTHER;
+		}
+	}
+
+	auto index_in_channel(RouteElementID reid) const {
+		return reid.getIndex() % dev_info.track_width;
 	}
 
 };

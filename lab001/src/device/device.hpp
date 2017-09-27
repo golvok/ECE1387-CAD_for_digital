@@ -218,6 +218,14 @@ public:
 		return connector.channel_direction_on_this_side(pin);
 	}
 
+	Direction wire_direction(RouteElementID reid) {
+		return connector.wire_direction(reid);
+	}
+
+	auto index_in_channel(RouteElementID reid) {
+		return connector.index_in_channel(reid);
+	}
+
 private:
 
 	DeviceInfo dev_info;
