@@ -46,6 +46,8 @@ std::vector<ID> maze_route(ID1&& source, ID2&& sink, FanoutGenerator&& fanout_ge
 				data[fanout].distance = data[explore_curr].distance + 1;
 				data[fanout].put_in_queue = true;
 				to_visit.push_back(fanout);
+			} else {
+				dout(DL::INFO) << "skipping " << fanout << "... ";
 			}
 		}
 
