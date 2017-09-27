@@ -5,7 +5,7 @@
 
 namespace graphics {
 
-void FPGAGraphicsData::setFCDev(device::Device<device::FullyConnectedConnector>* fc_dev) {
+void FPGAGraphicsData::setFCDev(device::Device<device::FullyConnectedConnector> const* fc_dev) {
 	this->fc_dev = fc_dev;
 	graphics::set_visible_world(-10,-10,20,20);
 }

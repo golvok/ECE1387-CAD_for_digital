@@ -183,7 +183,7 @@ public:
 		return dev_info;
 	}
 
-	auto fanout(RouteElementID src) {
+	auto fanout(RouteElementID src) const {
 		return util::make_generator<typename CONNECTOR::Index>(
 			connector.fanout_begin(src),
 			[=](auto&& index) { return connector.is_end_index(src, index); },
@@ -192,7 +192,7 @@ public:
 		);
 	}
 
-	auto fanout(BlockID block) {
+	auto fanout(BlockID block) const {
 		return util::make_generator<typename CONNECTOR::BlockFanoutIndex>(
 			connector.block_fanout_begin(block),
 			[=](auto&& index) { return connector.block_fanout_index_is_end(block, index); },
@@ -201,7 +201,7 @@ public:
 		);
 	}
 
-	auto blocks() {
+	auto blocks() const {
 		return util::make_generator<typename CONNECTOR::BlockIndex>(
 			connector.blocks_begin(),
 			[=](auto&& index) { return connector.block_index_is_end(index); },
@@ -210,19 +210,19 @@ public:
 		);
 	}
 
-	BlockSide get_block_pin_side(PinGID pin) {
+	BlockSide get_block_pin_side(PinGID pin) const {
 		return connector.get_block_pin_side(pin);
 	}
 
-	Direction channel_direction_on_this_side(PinGID pin) {
+	Direction channel_direction_on_this_side(PinGID pin) const {
 		return connector.channel_direction_on_this_side(pin);
 	}
 
-	Direction wire_direction(RouteElementID reid) {
+	Direction wire_direction(RouteElementID reid) const {
 		return connector.wire_direction(reid);
 	}
 
-	auto index_in_channel(RouteElementID reid) {
+	auto index_in_channel(RouteElementID reid) const {
 		return connector.index_in_channel(reid);
 	}
 

@@ -181,43 +181,43 @@ struct FullyConnectedConnector {
 		}
 	}
 
-	BlockFanoutIndex block_fanout_begin(const BlockID& block) {
+	static BlockFanoutIndex block_fanout_begin(const BlockID& block) {
 		return PinGID(
 			block,
 			util::make_id<BlockPinID>(static_cast<BlockPinID::IDType>(1))
 		);
 	}
 
-	bool block_fanout_index_is_end(const BlockID& block, const BlockFanoutIndex& index) {
+	bool block_fanout_index_is_end(const BlockID& block, const BlockFanoutIndex& index) const {
 		(void)block;
 		return index.getBlockPin().getValue() > dev_info.pins_per_block_side * 4;
 	}
 
-	BlockFanoutIndex next_block_fanout(const BlockID& block, const BlockFanoutIndex& index) {
+	static BlockFanoutIndex next_block_fanout(const BlockID& block, const BlockFanoutIndex& index) {
 		return PinGID(
 			block,
 			util::make_id<BlockPinID>(static_cast<BlockPinID::IDType>(index.getBlockPin().getValue() + 1))
 		);
 	}
 
-	RouteElementID re_from_block_fanout_index(const BlockID& block, const BlockFanoutIndex& index) {
+	static RouteElementID re_from_block_fanout_index(const BlockID& block, const BlockFanoutIndex& index) {
 		(void)block;
 		return RouteElementID(index);
 	}
 
 
-	BlockIndex blocks_begin() {
+	BlockIndex blocks_begin() const {
 		return BlockID(
 			util::make_id<XID>(static_cast<XID::IDType>(dev_info.bounds.minx())),
 			util::make_id<YID>(static_cast<YID::IDType>(dev_info.bounds.miny()))
 		);
 	}
 
-	bool block_index_is_end(const BlockIndex& curr) {
+	bool block_index_is_end(const BlockIndex& curr) const {
 		return !dev_info.bounds.intersects(curr.getX().getValue(), curr.getY().getValue());
 	}
 
-	BlockIndex next_block(const BlockIndex& curr) {
+	BlockIndex next_block(const BlockIndex& curr) const {
 		auto next = offset_block(curr, 1, 0);
 		if (next.getX().getValue() > dev_info.bounds.maxx()) {
 			auto in_row = offset_block(curr, 0, 1);
@@ -227,7 +227,7 @@ struct FullyConnectedConnector {
 		}
 	}
 
-	BlockID block_from_block_index(const BlockIndex& curr) {
+	static BlockID block_from_block_index(const BlockIndex& curr) {
 		return curr;
 	}
 

@@ -12,12 +12,12 @@ public:
 		: fc_dev(nullptr)
 	{ }
 
-	void setFCDev(device::Device<device::FullyConnectedConnector>* fc_dev);
+	void setFCDev(device::Device<device::FullyConnectedConnector> const* fc_dev);
 
 	void drawAll();
 
 private:
-	device::Device<device::FullyConnectedConnector>* fc_dev;
+	device::Device<device::FullyConnectedConnector> const* fc_dev;
 };
 
 } // end namespace graphics
