@@ -71,7 +71,7 @@ LDFLAGS  += $(EXTRA_FLAGS) $(WARNING_FLAGS) $(LIBRARY_LINK_FLAGS)
 .PRECIOUS: $(OBJ_DIR)%.o
 
 # define source directories
-SOURCE_DIRS = graphics/ parsing/ util/ ./
+SOURCE_DIRS = algo/ graphics/ parsing/ util/ ./
 
 ALL_OBJ_DIRS  = $(addprefix $(OBJ_DIR),  $(SOURCE_DIRS))
 ALL_DEPS_DIRS = $(addprefix $(DEPS_DIR), $(SOURCE_DIRS))
@@ -95,6 +95,7 @@ build_info:
 # add more dependencies here:
 $(EXE_DIR)maize-router: \
 	$(OBJ_DIR)main.o \
+	$(OBJ_DIR)algo/maze_router.o \
 	$(OBJ_DIR)graphics/fontcache.o \
 	$(OBJ_DIR)graphics/fpga_graphics_data.o \
 	$(OBJ_DIR)graphics/graphics.o \

@@ -1,4 +1,5 @@
 
+#include <algo/maze_router.hpp>
 #include <device/connectors.hpp>
 #include <graphics/graphics_wrapper.hpp>
 #include <parsing/cmdargs_parser.hpp>
@@ -58,31 +59,24 @@ int program_main(const std::string& data_file_name) {
 				pr.device_info, connector
 			);
 
+			graphics::get().fpga().setFCDev(&dev);
+			graphics::get().waitForPress();
 
-			auto pin = std::next(pr.pin_to_pin_netlist.begin())->first;
-			auto pin_re = device::RouteElementID(pin);
-			auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
-				str << "fanout of " << pin << " (as REID " << pin_re << ')';
-			});
+			for (const auto& src_sinks : pr.pin_to_pin_netlist) {
+				const auto src_pin_re = device::RouteElementID(src_sinks.first);
+				for (const auto& sink_pin : src_sinks.second) {
+					const auto sink_pin_re = device::RouteElementID(sink_pin);
 
-			auto pin_fanouts = dev.fanout(pin_re);
-			// for (auto& reID : pin_fanouts) {
-			// 	dout(DL::INFO) << reID << '\n';
-			// }
-			for (auto reID_it = begin(pin_fanouts); reID_it != end(pin_fanouts); ++reID_it) {
-				const auto& re = *reID_it;
-				dout(DL::INFO) << re << '\n';
-				auto pin_fanout_fanouts = dev.fanout(re);
-				for (auto pff_it = begin(pin_fanout_fanouts); pff_it != end(pin_fanout_fanouts); ++pff_it) {
-					dout(DL::INFO) << '\t' << *pff_it << '\n';
-					auto pin_fanout_fanout_fanouts = dev.fanout(*pff_it);
-					for (auto pfff_it = begin(pin_fanout_fanout_fanouts); pfff_it != end(pin_fanout_fanout_fanouts); ++pfff_it) {
-						dout(DL::INFO) << '\t' << '\t' << *pfff_it << '\n';
-					}
+					auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
+						str << "Routing " << src_pin_re << " -> " << sink_pin_re;
+					});
+					const auto path = algo::maze_route<device::RouteElementID>(src_pin_re, sink_pin_re, dev);
+					util::print_container(path, dout(DL::INFO));
+					dout(DL::INFO) << '\n';
+
 				}
 			}
 
-			graphics::get().fpga().setFCDev(&dev);
 			graphics::get().waitForPress();
 			graphics::get().fpga().setFCDev(nullptr);
 		}
