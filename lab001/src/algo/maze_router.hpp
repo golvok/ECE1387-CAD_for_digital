@@ -32,40 +32,41 @@ std::vector<ID> maze_route(ID1&& source, ID2&& sink, FanoutGenerator&& fanout_ge
 		const auto explore_curr = to_visit.front();
 		to_visit.pop_front();
 
-		dout(DL::INFO) << "examining " << explore_curr << "... ";
+		dout(DL::ROUTE_D1) << "examining " << explore_curr << "... ";
 
 		if (data[explore_curr].expanded) {
-			dout(DL::INFO) << "already seen it\n";
+			dout(DL::ROUTE_D1) << "already seen it\n";
 			continue;
 		}
 
 		for (const auto& fanout : fanout_gen.fanout(explore_curr)) {
 			data[fanout].fanin.push_back(explore_curr);
 			if (!data[fanout].put_in_queue && !data[fanout].expanded) {
-				dout(DL::INFO) << "adding " << fanout << "... ";
+				dout(DL::ROUTE_D2) << "adding " << fanout << "... ";
 				data[fanout].distance = data[explore_curr].distance + 1;
 				data[fanout].put_in_queue = true;
 				to_visit.push_back(fanout);
 			} else {
-				dout(DL::INFO) << "skipping " << fanout << "... ";
+				dout(DL::ROUTE_D3) << "skipping " << fanout << "... ";
 			}
 		}
 
 		if (explore_curr == sink) {
-			dout(DL::INFO) << "is the target!\n";
+			dout(DL::ROUTE_D1) << "is the target!\n";
 			break;
 		}
 
 		data[explore_curr].expanded = true;
 
-		dout(DL::INFO) << "done\n";
+		dout(DL::ROUTE_D1) << "done\n";
 	}
 
-	dout(DL::INFO) << "tracing back...\n";
+	dout(DL::ROUTE_D1) << "tracing back... ";
 
 	std::vector<ID> result;
 	auto traceback_curr = sink;
 	while (true) {
+		dout(DL::ROUTE_D1) << traceback_curr << " -> ";
 		result.push_back(traceback_curr);
 		if (traceback_curr == source || data[traceback_curr].fanin.empty()) {
 			break;
@@ -75,6 +76,8 @@ std::vector<ID> maze_route(ID1&& source, ID2&& sink, FanoutGenerator&& fanout_ge
 			return data[lhs].distance < data[rhs].distance;
 		});
 	}
+
+	dout(DL::ROUTE_D1) << " (SRC) \n";
 
 	return result;
 }

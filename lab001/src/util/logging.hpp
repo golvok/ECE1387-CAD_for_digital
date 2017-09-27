@@ -25,20 +25,10 @@ namespace DebugLevel {
 		WARN,  // same as ^ ?
 		ERROR, // always on
 
-		WC_D1, // Wanted capacity debug
-		WC_D2, // Wanted capacity debug level 2
-		WC_D3, // Wanted capacity lowest level debug
-		TR_D1, // Train Routing debug
-		TR_D2, // Train Routing debug level 2
-		TR_D3, // Train Routing lowest level debug
-		PR_D1, // Passenger Routing debug
-		PR_D2, // Passenger Routing debug level 2
-		PR_D3, // Passenger Routing debug level 3
-		PR_D4, // Passenger Routing lowest level debug
-
-		SIM_D1, // Simulator debug
-		SIM_D2, // Simulator debug level 2
-		SIM_D3, // Simulator lowest level debug
+		ROUTE_D1, // Passenger Routing debug
+		ROUTE_D2, // Passenger Routing debug level 2
+		ROUTE_D3, // Passenger Routing debug level 3
+		ROUTE_D4, // Passenger Routing lowest level debug
 
 		DATA_READ1, // reading of data
 

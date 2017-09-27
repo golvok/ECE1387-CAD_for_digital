@@ -14,10 +14,7 @@ namespace DebugLevel {
 
 	std::vector<Level> getStandardDebug() {
 		return {
-			WC_D1, WC_D2, WC_D3,
-			TR_D1, TR_D2, TR_D3,
-			PR_D1, PR_D2, PR_D3,
-			SIM_D1, SIM_D2, SIM_D3,
+			ROUTE_D1, ROUTE_D2,
 			DATA_READ1,
 		};
 	}
@@ -29,10 +26,7 @@ namespace DebugLevel {
 	 * a given Level may appear in multiple chains.
 	 */
 	std::vector<std::vector<Level>> enable_chains {
-		{ WC_D3, WC_D2, WC_D1, },
-		{ TR_D3, TR_D2, TR_D1, },
-		{ PR_D4, PR_D3, PR_D2, PR_D1, },
-		{ SIM_D3, SIM_D2, SIM_D1, },
+		{ ROUTE_D4, ROUTE_D3, ROUTE_D2, ROUTE_D1, },
 		{ DATA_READ1, },
 	};
 
@@ -52,20 +46,11 @@ namespace DebugLevel {
 		{ INFO,  "INFO"  },
 		{ WARN,  "WARN"  },
 		{ ERROR, "ERROR" },
-		{ WC_D1, "WC_D1" },
-		{ WC_D2, "WC_D2" },
-		{ WC_D3, "WC_D3" },
-		{ TR_D1, "TR_D1" },
-		{ TR_D2, "TR_D2" },
-		{ TR_D3, "TR_D3" },
-		{ PR_D1, "PR_D1" },
-		{ PR_D2, "PR_D2" },
-		{ PR_D3, "PR_D3" },
-		{ PR_D4, "PR_D4" },
+		{ ROUTE_D1, "ROUTE_D1" },
+		{ ROUTE_D2, "ROUTE_D2" },
+		{ ROUTE_D3, "ROUTE_D3" },
+		{ ROUTE_D4, "ROUTE_D4" },
 
-		{ SIM_D1, "SIM_D1" },
-		{ SIM_D2, "SIM_D2" },
-		{ SIM_D3, "SIM_D3" },
 		{ DATA_READ1, "DATA_READ1" },
 	};
 
