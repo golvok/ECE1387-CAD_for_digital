@@ -1,6 +1,7 @@
 #ifndef DEVICE__DEVICE_H
 #define DEVICE__DEVICE_H
 
+#include <graphics/geometry.hpp>
 #include <util/bit_tools.hpp>
 #include <util/id.hpp>
 #include <util/generator.hpp>
@@ -158,26 +159,29 @@ inline std::ostream& operator<<(std::ostream& os, Direction dir) {
 	return os;
 }
 
+struct DeviceInfo {
+	geom::BoundBox<int> bounds{};
+	int track_width = -1;
+	int pins_per_block_side = -1;
+	int num_blocks_adjacent_to_channel = -1;
+};
+
 template<
 	  typename CONNECTOR
 >
 class Device {
 public:
 	Device(
-		int min_x,
-		int max_x,
-		int min_y,
-		int max_y,
-		int track_width,
+		const DeviceInfo& dev_info,
 		CONNECTOR& connector
 	)
-		: min_x(min_x)
-		, max_x(max_x)
-		, min_y(min_y)
-		, max_y(max_y)
-		, track_width(track_width)
+		: dev_info(dev_info)
 		, connector(connector)
 	{ }
+
+	const auto& info() const {
+		return dev_info;
+	}
 
 	auto fanout(RouteElementID src) {
 		return util::make_generator<typename CONNECTOR::Index>(
@@ -216,11 +220,7 @@ public:
 
 private:
 
-	int min_x;
-	int max_x;
-	int min_y;
-	int max_y;
-	int track_width;
+	DeviceInfo dev_info;
 
 	CONNECTOR connector;
 };

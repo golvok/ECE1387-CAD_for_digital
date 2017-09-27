@@ -60,7 +60,7 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 	using std::begin;
 	using std::end;
 
-	DeviceInfo device_info;
+	device::DeviceInfo device_info;
 	device_info.bounds = geom::BoundBox<int>(0,0,get<0>(parse_results),get<0>(parse_results));
 	device_info.track_width = get<1>(parse_results);
 	device_info.pins_per_block_side = 1;

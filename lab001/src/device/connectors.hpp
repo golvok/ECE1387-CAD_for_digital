@@ -53,10 +53,10 @@ struct FullyConnectedConnector {
 
 	using BlockFanoutIndex = PinGID;
 
-	parsing::input::DeviceInfo dev_info;
+	DeviceInfo dev_info;
 	decltype(dev_info.bounds) wire_bb;
 
-	FullyConnectedConnector(const parsing::input::DeviceInfo& dev_info)
+	FullyConnectedConnector(const DeviceInfo& dev_info)
 		: dev_info(dev_info)
 		, wire_bb(dev_info.bounds.min_point(), dev_info.bounds.max_point() + geom::make_point(1,1))
 	{ }
