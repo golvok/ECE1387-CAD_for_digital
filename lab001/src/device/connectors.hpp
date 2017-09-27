@@ -77,28 +77,37 @@ struct FullyConnectedConnector {
 
 	Index next_fanout(const RouteElementID& re, Index index) const {
 		(void)re;
-		if (re.isPin()) {
-			auto next = static_cast<Index>(index + 1);
-			if (next > dev_info.track_width - 1) {
-				return END_VALUE;
+		auto next = index;
+		while (true) {
+			next = static_cast<Index>(next + 1);
+			if (re.isPin()) {
+				if (next > dev_info.track_width - 1) {
+					return END_VALUE;
+				}
 			} else {
-				return next;
-			}
-		} else {
-			auto next = index;
-			while (true) {
-				next = static_cast<Index>(next + 1);
 				if (next > dev_info.pins_per_block_side*dev_info.num_blocks_adjacent_to_channel + dev_info.track_width*6 - 1) {
 					return END_VALUE;
-				} else {
-					auto result = re_from_index(re, next);
-					if (dev_info.bounds.intersects(result.getX().getValue(), result.getY().getValue())) {
+				}
+			}
+
+			const auto result = re_from_index(re, next);
+			const auto xy = geom::make_point(
+				result.getX().getValue(),
+				result.getY().getValue()
+			);
+			if (result.isPin()) {
+				if (dev_info.bounds.intersects(xy)) {
+					return next;
+				}
+			} else {
+				// allow top row & right col
+				if (wire_bb.intersects(xy)) {
+					const auto dir = wire_direction(result);
+					if (dir == decltype(dir)::HORIZONTAL && xy.x() != wire_bb.maxx()) {
 						return next;
-					} else {
-						// allow top row & right col
-						if (!result.isPin() && wire_bb.intersects(result.getX().getValue(), result.getY().getValue())) {
-							return next;
-						}
+					}
+					if (dir == decltype(dir)::VERTICAL && xy.y() != wire_bb.maxy()) {
+						return next;
 					}
 				}
 			}
