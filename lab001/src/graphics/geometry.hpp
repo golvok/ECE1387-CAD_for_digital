@@ -119,6 +119,32 @@ public:
 
 };
 
+enum class AngleType {
+	DEGREE, RADIAN,
+};
+
+template<AngleType ANGLETYPE, typename PRECISION> class Angle;
+
+template<typename PRECISION>
+class Angle<AngleType::RADIAN, PRECISION> {
+	PRECISION value;
+public:
+	Angle(PRECISION value) : value(value) { }
+
+	PRECISION radianValue() const { return value; }
+	PRECISION degreeValue() const { return value/M_PI * (PRECISION)180; }
+};
+
+template<typename PRECISION>
+class Angle<AngleType::DEGREE, PRECISION> {
+	PRECISION value;
+public:
+	Angle(PRECISION value) : value(value) { }
+
+	PRECISION radianValue() const { return value*M_PI / (PRECISION)180; }
+	PRECISION degreeValue() const { return value; }
+};
+
 /**
  * constructor helper - will chose a type parameter for Point
  * that will be at least as precise as x and y
@@ -127,6 +153,9 @@ template<typename PRECISION1, typename PRECISION2>
 auto make_point(PRECISION1 x, PRECISION2 y) -> Point<decltype(x+y)> {
 	return {x,y};
 }
+
+template<typename PRECISION> Angle<AngleType::RADIAN, PRECISION> make_radian_angle(PRECISION value) { return {value}; }
+template<typename PRECISION> Angle<AngleType::DEGREE, PRECISION> make_degree_angle(PRECISION value) { return {value}; }
 
 const int POSITIVE_DOT_PRODUCT = 0;
 const int NEGATIVE_DOT_PRODUCT = 1;
@@ -189,6 +218,11 @@ auto unit(Point<PRECISION> p) {
 template<typename PRECISION, typename PRECISION2>
 auto dotProduct(Point<PRECISION> p1, Point<PRECISION2> p2) {
 	return p1.x() * p2.x() + p1.y() * p2.y();
+}
+template<typename PRECISION, typename PRECISION2>
+auto inclination(Point<PRECISION> p1, Point<PRECISION2> p2) {
+	auto delta_vec = p2 - p1;
+	return make_radian_angle(atan2(delta_vec.y(), delta_vec.x()));
 }
 template<typename PRECISION>
 Point<PRECISION> getPerpindular(Point<PRECISION> p) {
