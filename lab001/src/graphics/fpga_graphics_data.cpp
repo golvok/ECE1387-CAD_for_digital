@@ -49,7 +49,7 @@ void FPGAGraphicsData::drawAll() {
 				return {block_bounds.top_right(), block_bounds_of_the_above.bottom_left()};
 			} break;
 			case decltype(dir)::BOTTOM: {
-				return {bound_of_me.bottom_right(), block_bounds_of_the_above.bottom_left()};
+				return {bound_of_me.bottom_right(), block_bounds.bottom_left()};
 			} break;
 			default:
 				dout(DL::WARN) << "not sure how calculate bounds of " << dir << " channel\n";
@@ -58,6 +58,18 @@ void FPGAGraphicsData::drawAll() {
 		}
 	};
 
+	const auto channel_location = [](auto dir) {
+		switch (dir) {
+			case decltype(dir)::HORIZONTAL:
+				return device::BlockSide::BOTTOM;
+			case decltype(dir)::VERTICAL:
+				return device::BlockSide::LEFT;
+			default:
+				return device::BlockSide::OTHER;
+		}
+	};
+
+	std::list<device::RouteElementID> reIDs_to_draw;
 	for (const auto& block : fc_dev->blocks()) {
 		const auto xy_loc = geom::make_point(
 			block.getX().getValue(),
@@ -65,28 +77,92 @@ void FPGAGraphicsData::drawAll() {
 		);
 
 		const auto grid_square_bounds = bounds_for_xy(xy_loc.x(), xy_loc.y());
-
 		const auto block_bounds = block_bounds_within(grid_square_bounds);
 
 		graphics::drawrect(block_bounds);
+		graphics::settextrotation(0);
 		graphics::drawtext_in(block_bounds, util::stringify_through_stream(geom::make_point(block.getX().getValue(), block.getY().getValue())));
 
 		for (const auto& pin_re : fc_dev->fanout(block)) {
-			if (pin_re.isPin()) {
-				const auto as_pin = pin_re.asPin();
-				const auto pin_side = fc_dev->get_block_pin_side(as_pin);
-				const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), pin_side);
-
-				const auto block_side = block_bounds.get_side(pin_side);
-				const auto channel_side = channel_bounds.get_side(pin_side);
-
-				const auto block_point = interpolate(block_side.first, 2.0f/3.0f, block_side.second);
-				const auto channel_point = interpolate(channel_side.first, 2.0f/3.0f, channel_side.second);
-
-				graphics::drawline(block_point, interpolate(block_point, 0.9f, channel_point));
-			}
+			reIDs_to_draw.push_back(pin_re);
 		}
 	}
+
+	dout(DL::INFO) << "initial set: ";
+	util::print_container(reIDs_to_draw, dout(DL::INFO));
+	dout(DL::INFO) << '\n';
+
+	std::unordered_set<device::RouteElementID> reIDs_already_seen;
+	while (!reIDs_to_draw.empty()) {
+		const auto curr = reIDs_to_draw.front();
+		reIDs_to_draw.pop_front();
+
+		if (reIDs_already_seen.insert(curr).second == false) {
+			continue;
+		}
+
+		for (const auto& fanout : fc_dev->fanout(curr)) {
+			if (reIDs_already_seen.find(fanout) == end(reIDs_already_seen)) {
+				reIDs_already_seen.insert(curr);
+				reIDs_to_draw.push_back(fanout);
+				dout(DL::INFO) << curr << " adds " << fanout << '\n';
+			}
+		}
+
+		const auto xy_loc = geom::make_point(
+			curr.getX().getValue(),
+			curr.getY().getValue()
+		);
+
+		const auto grid_square_bounds = bounds_for_xy(xy_loc.x(), xy_loc.y());
+		const auto block_bounds = block_bounds_within(grid_square_bounds);
+
+		if (curr.isPin()) {
+			const auto as_pin = curr.asPin();
+			const auto pin_side = fc_dev->get_block_pin_side(as_pin);
+			const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), pin_side);
+
+			const auto block_side = block_bounds.get_side(pin_side);
+			const auto channel_side = channel_bounds.get_side(pin_side);
+
+			const auto block_point = interpolate(block_side.first, 2.0f/3.0f, block_side.second);
+			const auto channel_point = interpolate(channel_side.first, 2.0f/3.0f, channel_side.second);
+
+			const auto p1 = block_point;
+			const auto p2 = interpolate(block_point, 0.9f, channel_point);
+			const auto angle = inclination(geom::make_point(p1.x, p1.y), geom::make_point(p2.x, p2.y));
+
+			graphics::drawline(p1, p2);
+			graphics::settextrotation((int)angle.degreeValue() % 180);
+			graphics::drawtext_in(graphics::t_bound_box(p1,p2), util::stringify_through_stream(curr), 0.02f);
+		} else { // if (fc_dev->is_channel(curr)) {
+			const auto wire_dir = fc_dev->wire_direction(curr);
+			const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), channel_location(wire_dir));
+
+			const auto sides = [&]() -> std::pair<std::pair<t_point, t_point>, std::pair<t_point, t_point>> {
+				using device::BlockSide;
+				switch (wire_dir) {
+					case decltype(wire_dir)::HORIZONTAL:
+						return {channel_bounds.get_side(BlockSide::LEFT), channel_bounds.get_side(BlockSide::RIGHT)};
+					case decltype(wire_dir)::VERTICAL:
+					default:
+						return {channel_bounds.get_side(BlockSide::BOTTOM), channel_bounds.get_side(BlockSide::TOP)};
+				}
+			}();
+
+			const auto channel_pos = ((float)fc_dev->index_in_channel(curr) + 0.5f) / (float)fc_dev->info().track_width;
+			const auto p1 = interpolate(sides.first.first, channel_pos, sides.first.second);
+			const auto p2 = interpolate(sides.second.second, channel_pos, sides.second.first);
+			const auto angle = inclination(geom::make_point(p1.x, p1.y), geom::make_point(p2.x, p2.y));
+
+			graphics::drawline(p1, p2);
+			graphics::settextrotation((int)angle.degreeValue() % 180);
+			graphics::drawtext_in(graphics::t_bound_box(p1,p2), util::stringify_through_stream(curr), 0.02f);
+		}
+	}
+
+	dout(DL::INFO) << "done drawing fg device\n";
+
 }
 
 } // end namespace graphics
