@@ -1,5 +1,5 @@
 
-#include <algo/maze_router.hpp>
+#include <algo/routing.hpp>
 #include <device/connectors.hpp>
 #include <graphics/graphics_wrapper.hpp>
 #include <parsing/cmdargs_parser.hpp>
@@ -62,24 +62,19 @@ int program_main(const std::string& data_file_name) {
 			graphics::get().fpga().setFCDev(&dev);
 			graphics::get().waitForPress();
 
-			for (const auto& src_sinks : pr.pin_to_pin_netlist) {
-				const auto src_pin_re = device::RouteElementID(src_sinks.first);
-				for (const auto& sink_pin : src_sinks.second) {
-					const auto sink_pin_re = device::RouteElementID(sink_pin);
-
-					auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
-						str << "Routing " << src_pin_re << " -> " << sink_pin_re;
-					});
-					const auto path = algo::maze_route<device::RouteElementID>(src_pin_re, sink_pin_re, dev);
-					util::print_container(path, dout(DL::INFO));
-					dout(DL::INFO) << '\n';
-
-					graphics::get().fpga().clearPaths();
-					graphics::get().fpga().addPath(path);
-					graphics::get().waitForPress();
-					graphics::get().fpga().clearPaths();
-				}
+			device::RouteElementID test_re(
+				util::make_id<device::XID>((int16_t)2),
+				util::make_id<device::YID>((int16_t)4),
+				(int16_t)0
+			);
+			dout(DL::INFO) << test_re << '\n';
+			for (const auto& fanout : dev.fanout(test_re)) {
+				dout(DL::INFO) << '\t' << fanout << '\n';
 			}
+
+			// const auto result = 
+			algo::route_all(pr.pin_to_pin_netlist, dev);
+			// algo::test_func(1);
 
 			graphics::get().waitForPress();
 			graphics::get().fpga().setFCDev(nullptr);

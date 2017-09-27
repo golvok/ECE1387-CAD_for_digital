@@ -96,6 +96,7 @@ build_info:
 $(EXE_DIR)maize-router: \
 	$(OBJ_DIR)main.o \
 	$(OBJ_DIR)algo/maze_router.o \
+	$(OBJ_DIR)algo/routing.o \
 	$(OBJ_DIR)graphics/fontcache.o \
 	$(OBJ_DIR)graphics/fpga_graphics_data.o \
 	$(OBJ_DIR)graphics/graphics.o \

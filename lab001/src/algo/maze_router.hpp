@@ -11,11 +11,8 @@
 
 namespace algo {
 
-// template<typename ID, typename ID1, typename ID2, typename FanoutGenerator>
-// std::vector<ID> maze_route(ID1&& source, ID2&& sink, FanoutGenerator&& fanout_gen);
-
-template<typename ID, typename ID1, typename ID2, typename FanoutGenerator>
-std::vector<ID> maze_route(ID1&& source, ID2&& sink, FanoutGenerator&& fanout_gen) {
+template<typename ID, typename ID1, typename ID2, typename FanoutGenerator, typename ShouldIgnore>
+std::vector<ID> maze_route(ID1&& source, ID2&& sink, FanoutGenerator&& fanout_gen, ShouldIgnore&& should_ignore) {
 	std::list<ID> to_visit;
 	to_visit.push_back(source);
 
@@ -37,11 +34,14 @@ std::vector<ID> maze_route(ID1&& source, ID2&& sink, FanoutGenerator&& fanout_ge
 		if (data[explore_curr].expanded) {
 			dout(DL::ROUTE_D1) << "already seen it\n";
 			continue;
+		} else if (should_ignore(explore_curr)) {
+			dout(DL::ROUTE_D1) << "should be ignored\n";
+			continue;
 		}
 
 		for (const auto& fanout : fanout_gen.fanout(explore_curr)) {
 			data[fanout].fanin.push_back(explore_curr);
-			if (!data[fanout].put_in_queue && !data[fanout].expanded) {
+			if (!data[fanout].put_in_queue && !data[fanout].expanded && !should_ignore(fanout)) {
 				dout(DL::ROUTE_D2) << "adding " << fanout << "... ";
 				data[fanout].distance = data[explore_curr].distance + 1;
 				data[fanout].put_in_queue = true;
@@ -81,11 +81,6 @@ std::vector<ID> maze_route(ID1&& source, ID2&& sink, FanoutGenerator&& fanout_ge
 
 	return result;
 }
-
-// extern template
-// std::vector<device::RouteElementID> maze_route<device::RouteElementID, const device::RouteElementID&, const device::RouteElementID&, const device::Device<device::FullyConnectedConnector>&>(
-// 	const device::RouteElementID& source, const device::RouteElementID& dest, const device::Device<device::FullyConnectedConnector>& fanout_gen
-// );
 
 } // end namespace algo
 
