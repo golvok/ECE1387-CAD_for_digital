@@ -205,12 +205,12 @@ struct FullyConnectedConnector {
 	}
 
 	bool block_index_is_end(const BlockIndex& curr) {
-		return !dev_info.bounds.intersects(curr.getX().getValue() + 1, curr.getY().getValue() + 1);
+		return !dev_info.bounds.intersects(curr.getX().getValue(), curr.getY().getValue());
 	}
 
 	BlockIndex next_block(const BlockIndex& curr) {
 		auto next = offset_block(curr, 1, 0);
-		if (next.getX().getValue() == dev_info.bounds.maxx()) {
+		if (next.getX().getValue() > dev_info.bounds.maxx()) {
 			auto in_row = offset_block(curr, 0, 1);
 			return BlockID(util::make_id<XID>(static_cast<XID::IDType>(0)), in_row.getY());
 		} else {
