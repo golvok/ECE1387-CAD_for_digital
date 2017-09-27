@@ -72,8 +72,8 @@ int program_main(const std::string& data_file_name) {
 				dout(DL::INFO) << '\t' << fanout << '\n';
 			}
 
-			// const auto result = 
-			algo::route_all(pr.pin_to_pin_netlist, dev);
+			const auto result = algo::route_all(pr.pin_to_pin_netlist, dev);
+			const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushState(&dev, result);
 
 			graphics::get().waitForPress();
 		}
