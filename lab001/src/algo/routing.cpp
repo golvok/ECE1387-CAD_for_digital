@@ -13,9 +13,9 @@ std::vector<std::vector<device::RouteElementID>> route_all(const Netlist& pin_to
 	std::vector<std::vector<device::RouteElementID>> result;
 	std::unordered_set<device::RouteElementID> used;
 
-	for (const auto& src_sinks : pin_to_pin_netlist) {
-		const auto src_pin_re = device::RouteElementID(src_sinks.first);
-		for (const auto& sink_pin : src_sinks.second) {
+	for (const auto& src_pin : pin_to_pin_netlist.roots()) {
+		const auto& src_pin_re = device::RouteElementID(src_pin);
+		for (const auto& sink_pin : pin_to_pin_netlist.fanout(src_pin)) {
 			const auto sink_pin_re = device::RouteElementID(sink_pin);
 
 			auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {

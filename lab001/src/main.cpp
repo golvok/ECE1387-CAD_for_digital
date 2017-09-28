@@ -90,9 +90,9 @@ void do_optional_input_data_dump(const std::string& data_file_name, const parsin
 
 	const auto indent = dout(DL::DATA_READ1).indentWithTitle("Input Data Dump");
 	dout(DL::DATA_READ1) << "using input file: " << data_file_name << '\n';
-	for (const auto& src_and_sinks : pr.pin_to_pin_netlist) {
-		for (const auto& sink : src_and_sinks.second) {
-			dout(DL::DATA_READ1) << src_and_sinks.first << " -> " << sink << '\n';
+	for (const auto& source : pr.pin_to_pin_netlist.roots()) {
+		for (const auto& sink : pr.pin_to_pin_netlist.fanout(source)) {
+			dout(DL::DATA_READ1) << source << " -> " << sink << '\n';
 		}
 	}
 }

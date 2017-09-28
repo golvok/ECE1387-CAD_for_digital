@@ -71,7 +71,7 @@ LDFLAGS  += $(EXTRA_FLAGS) $(WARNING_FLAGS) $(LIBRARY_LINK_FLAGS)
 .PRECIOUS: $(OBJ_DIR)%.o
 
 # define source directories
-SOURCE_DIRS = algo/ graphics/ parsing/ util/ ./
+SOURCE_DIRS = algo/ graphics/ parsing/ util/ util/tests/ ./
 
 ALL_OBJ_DIRS  = $(addprefix $(OBJ_DIR),  $(SOURCE_DIRS))
 ALL_DEPS_DIRS = $(addprefix $(DEPS_DIR), $(SOURCE_DIRS))
@@ -84,7 +84,7 @@ DIRS= \
 	$(BUILD_DIR)
 
 # define executables
-EXES=$(EXE_DIR)maize-router
+EXES=$(EXE_DIR)maize-router $(EXE_DIR)test-netlist
 
 all: $(EXES) | build_info
 
@@ -109,6 +109,10 @@ $(EXE_DIR)maize-router: \
 	$(OBJ_DIR)parsing/input_parser.o \
 	$(OBJ_DIR)util/logging.o \
 	$(OBJ_DIR)util/thread_utils.o \
+
+
+$(EXE_DIR)test-netlist: \
+	$(OBJ_DIR)util/tests/netlist_test.o \
 
 
 # define extra flags for particular object files

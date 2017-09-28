@@ -74,7 +74,7 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 			break;
 		}
 
-		netlist.add_connection(
+		netlist.addConnection(
 			util::make_id<PinGID>(
 				util::make_id<BlockID>(
 					util::make_id<XID>(get<0>(route_request_parse)),

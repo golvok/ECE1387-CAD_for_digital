@@ -7,6 +7,7 @@ build/DEPS/**/*.d
 
 # Executables
 build/EXE/maize-router
+build/EXE/test-netlist
 
 # YCM compiled config
 .ycm_extra_conf.pyc
