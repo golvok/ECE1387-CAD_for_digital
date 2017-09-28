@@ -19,13 +19,22 @@ namespace {
 
 FPGAGraphicsDataStateScope FPGAGraphicsData::pushState(
 	device::Device<device::FullyConnectedConnector> const* fc_dev,
-	const std::vector<std::vector<device::RouteElementID>>& paths
+	const std::vector<std::vector<device::RouteElementID>>& paths,
+	std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw
 ) {
-	state_stack.push_back(std::make_unique<FPGAGraphicsDataState>(fc_dev, paths));
+	state_stack.push_back(std::make_unique<FPGAGraphicsDataState>(fc_dev, paths, std::move(extra_colours_to_draw)));
 	const geom::BoundBox<float>& fpga_bb = fc_dev->info().bounds;
 	const float margin = 3.0f;
 	graphics::set_visible_world(fpga_bb.minx()-margin, fpga_bb.miny()-margin, fpga_bb.maxx()+margin, fpga_bb.maxy()+margin);
+	graphics::refresh_graphics();
 	return FPGAGraphicsDataStateScope(state_stack.back().get());
+}
+
+FPGAGraphicsDataStateScope FPGAGraphicsData::pushState(
+	device::Device<device::FullyConnectedConnector> const* fc_dev,
+	std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw
+) {
+	return pushState(fc_dev, {}, std::move(extra_colours_to_draw));
 }
 
 void FPGAGraphicsData::drawAll() {
@@ -134,6 +143,11 @@ void FPGAGraphicsData::drawAll() {
 
 		if (is_contained_in_a_path(curr, data.getPaths())) {
 			graphics::setcolor(0,255,0);
+		} else {
+			const auto find_result = data.getExtraColours().find(curr);
+			if (find_result != end(data.getExtraColours())) {
+				graphics::setcolor(find_result->second);
+			}
 		}
 
 		if (curr.isPin()) {

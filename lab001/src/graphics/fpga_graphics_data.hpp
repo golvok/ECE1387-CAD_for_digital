@@ -3,6 +3,7 @@
 
 #include <device/connectors.hpp>
 #include <device/device.hpp>
+#include <graphics/graphics_types.hpp>
 
 #include <mutex>
 #include <vector>
@@ -17,15 +18,18 @@ public:
 		: enabled(true)
 		, fc_dev(nullptr)
 		, paths()
+		, extra_colours_to_draw()
 	{ }
 
 	FPGAGraphicsDataState(
 		device::Device<device::FullyConnectedConnector> const* fc_dev,
-		const std::vector<std::vector<device::RouteElementID>>& paths = {}
+		const std::vector<std::vector<device::RouteElementID>>& paths = {},
+		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw = {}
 	)
 		: enabled(true)
 		, fc_dev(fc_dev)
 		, paths(paths)
+		, extra_colours_to_draw(std::move(extra_colours_to_draw))
 	{ }
 
 	FPGAGraphicsDataState(const FPGAGraphicsDataState&) = default;
@@ -40,6 +44,9 @@ public:
 	      auto& getFCDev()       { return fc_dev; }
 	const auto& getFCDev() const { return fc_dev; }
 
+	      auto& getExtraColours()       { return extra_colours_to_draw; }
+	const auto& getExtraColours() const { return extra_colours_to_draw; }
+
 	bool isEnabled() { return enabled; }
 
 private:
@@ -48,6 +55,7 @@ private:
 	bool enabled;
 	device::Device<device::FullyConnectedConnector> const* fc_dev;
 	std::vector<std::vector<device::RouteElementID>> paths;
+	std::unordered_map<device::RouteElementID, graphics::t_color> extra_colours_to_draw;
 };
 
 class FPGAGraphicsDataStateScope {
@@ -98,7 +106,13 @@ public:
 
 	FPGAGraphicsDataStateScope pushState(
 		device::Device<device::FullyConnectedConnector> const* fc_dev = nullptr,
-		const std::vector<std::vector<device::RouteElementID>>& paths = {}
+		const std::vector<std::vector<device::RouteElementID>>& paths = {},
+		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw = {}
+	);
+
+	FPGAGraphicsDataStateScope pushState(
+		device::Device<device::FullyConnectedConnector> const* fc_dev,
+		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw
 	);
 
 private:

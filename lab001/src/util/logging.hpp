@@ -30,6 +30,8 @@ namespace DebugLevel {
 		ROUTE_D3, // Passenger Routing debug level 3
 		ROUTE_D4, // Passenger Routing lowest level debug
 
+		MAZE_ROUTE_STEP, // Stepping though the algorithm
+
 		DATA_READ1, // reading of data
 
 		LEVEL_COUNT, // please make sure this is at the end

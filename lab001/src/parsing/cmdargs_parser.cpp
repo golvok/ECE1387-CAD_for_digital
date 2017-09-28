@@ -33,10 +33,15 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 			continue;
 		}
 
-		auto result = DebugLevel::getFromString(arg.substr(prefix.size(),std::string::npos));
+		const auto level_string = arg.substr(prefix.size(),std::string::npos);
+		auto result = DebugLevel::getFromString(level_string);
 		if (result.second) {
 			auto levels_in_chain = DebugLevel::getAllShouldBeEnabled(result.first);
 			levels_to_enable.insert(end(levels_to_enable),begin(levels_in_chain),end(levels_in_chain));
+		} else {
+			util::print_and_throw<std::invalid_argument>([&](auto&& str) {
+				str << "don't understand debug level " << level_string;
+			});
 		}
 	}
 

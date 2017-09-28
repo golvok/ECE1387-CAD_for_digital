@@ -26,7 +26,7 @@ namespace DebugLevel {
 	 * a given Level may appear in multiple chains.
 	 */
 	std::vector<std::vector<Level>> enable_chains {
-		{ ROUTE_D4, ROUTE_D3, ROUTE_D2, ROUTE_D1, },
+		{ MAZE_ROUTE_STEP, ROUTE_D4, ROUTE_D3, ROUTE_D2, ROUTE_D1, },
 		{ DATA_READ1, },
 	};
 
@@ -50,6 +50,8 @@ namespace DebugLevel {
 		{ ROUTE_D2, "ROUTE_D2" },
 		{ ROUTE_D3, "ROUTE_D3" },
 		{ ROUTE_D4, "ROUTE_D4" },
+
+		{ MAZE_ROUTE_STEP, "MAZE_ROUTE_STEP" },
 
 		{ DATA_READ1, "DATA_READ1" },
 	};
