@@ -98,6 +98,8 @@ t_bound_box get_visible_screen();
 /* Closes the graphics windows, frees all its memory and so on. */
 void close_graphics(void);
 
+void refresh_graphics();
+
 
 /************************* USER INTERACTION FUNCTIONS ******************/
 

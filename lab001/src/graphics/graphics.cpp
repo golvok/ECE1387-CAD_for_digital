@@ -2978,6 +2978,22 @@ close_graphics(void) {
     gl_state.initialized = false;
 }
 
+void refresh_graphics() {
+	if (!gl_state.initialized) {
+		return;
+	}
+
+	// );
+#ifdef VERBOSE
+	cout << "screen refresh requested... triggering Expose" << endl;
+#endif
+
+	// generate an expose event
+	XClearArea(x11_state.display, x11_state.toplevel, 0, 0, 1, 1, true);
+	// flush for immediacy
+	XFlush(x11_state.display);
+}
+
 /* Opens a file for PostScript output.  The header information,  *
  * clipping path, etc. are all dumped out.  If the file could    *
  * not be opened, the routine returns 0; otherwise it returns 1. */
@@ -3538,6 +3554,8 @@ static void x11_init_graphics(const char *window_name) {
     unsigned long valuemask = 0; /* ignore XGCvalues and use defaults */
     XGCValues values;
     XEvent event;
+
+    XInitThreads();
 
     /* connect to X server */
     if ((x11_state.display = XOpenDisplay(display_name)) == nullptr) {
