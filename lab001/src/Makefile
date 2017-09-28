@@ -84,9 +84,12 @@ DIRS= \
 	$(BUILD_DIR)
 
 # define executables
-EXES=$(EXE_DIR)maize-router $(EXE_DIR)test-netlist
+TEST_EXES=$(EXE_DIR)test-netlist
+EXES=$(EXE_DIR)maize-router $(TEST_EXES)
 
-all: $(EXES) | build_info
+all: $(EXES) test | build_info
+
+test: $(patsubst %, run_%, $(TEST_EXES))
 
 build_info:
 	@echo "Building with makeflags ${MAKEFLAGS}"
@@ -144,7 +147,10 @@ $(OBJ_DIR)%.o: %.cpp | build_info $(OBJ_DIR)$$(dir %) $(DEPS_DIR)$$(dir %)
 
 # compile *.o's into an executable
 $(EXE_DIR)%: | build_info $(EXE_DIR)
-	$(CXX) $^ -o $@ $(LDFLAGS)
+	'$(CXX)' $^ -o '$@' $(LDFLAGS)
+
+$(patsubst %, run_%, $(EXES)): $$(patsubst run_%, %, $$(@))
+	@( $^ && echo "SUCCESS: $^" ) || echo "FAIL: $^"
 
 $(DIRS):
 	mkdir -p $@
