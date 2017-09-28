@@ -15,6 +15,9 @@ std::vector<std::vector<device::RouteElementID>> route_all(const Netlist& pin_to
 
 	for (const auto& src_pin : pin_to_pin_netlist.roots()) {
 		const auto& src_pin_re = device::RouteElementID(src_pin);
+		std::unordered_set<device::RouteElementID> used_by_this_net;
+		used_by_this_net.insert(src_pin_re);
+
 		for (const auto& sink_pin : pin_to_pin_netlist.fanout(src_pin)) {
 			const auto sink_pin_re = device::RouteElementID(sink_pin);
 
@@ -22,16 +25,15 @@ std::vector<std::vector<device::RouteElementID>> route_all(const Netlist& pin_to
 				str << "Routing " << src_pin_re << " -> " << sink_pin_re;
 			});
 
-			result.emplace_back(algo::maze_route<device::RouteElementID>(src_pin_re, sink_pin_re, fanout_gen, [&](auto&& reid) {
-				return used.find(reid) != end(used);
+			result.emplace_back(algo::maze_route<device::RouteElementID>(used_by_this_net, sink_pin_re, fanout_gen, [&](auto&& reid) {
+				return used.find(reid) != end(used) && used_by_this_net.find(reid) == end(used_by_this_net);
 			}));
 
 			const auto& path = result.back();
 
 			for (const auto& id : path) {
-				if (id != src_pin_re) {
-					used.insert(id);
-				}
+				used.insert(id);
+				used_by_this_net.insert(id);
 			}
 
 			const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, {path});

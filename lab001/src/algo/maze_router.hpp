@@ -11,10 +11,16 @@
 
 namespace algo {
 
-template<typename ID, typename ID1, typename ID2, typename FanoutGenerator, typename ShouldIgnore>
-std::vector<ID> maze_route(ID1&& source, ID2&& sink, FanoutGenerator&& fanout_gen, ShouldIgnore&& should_ignore) {
+template<typename ID, typename IDSet, typename ID2, typename FanoutGenerator, typename ShouldIgnore>
+std::vector<ID> maze_route(IDSet&& sources, ID2&& sink, FanoutGenerator&& fanout_gen, ShouldIgnore&& should_ignore) {
 	std::list<ID> to_visit;
-	to_visit.push_back(source);
+
+	dout(DL::ROUTE_D1) << "starting with: ";
+	for (const auto& source : sources) {
+		dout(DL::ROUTE_D1) << source << ' ';
+		to_visit.push_back(source);
+	}
+	dout(DL::ROUTE_D1) << '\n';
 
 	struct VertexData {
 		std::vector<ID> fanin{};
@@ -68,7 +74,7 @@ std::vector<ID> maze_route(ID1&& source, ID2&& sink, FanoutGenerator&& fanout_ge
 	while (true) {
 		dout(DL::ROUTE_D1) << traceback_curr << " -> ";
 		result.push_back(traceback_curr);
-		if (traceback_curr == source || data[traceback_curr].fanin.empty()) {
+		if (sources.find(traceback_curr) != end(sources) || data[traceback_curr].fanin.empty()) {
 			break;
 		}
 		const auto& fanin = data[traceback_curr].fanin;
