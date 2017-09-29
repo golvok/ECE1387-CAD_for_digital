@@ -119,6 +119,21 @@ enum class BlockSide {
 	OTHER, LEFT, RIGHT, TOP, BOTTOM,
 };
 
+inline BlockSide oppositeSide(BlockSide bs) {
+	switch (bs) {
+		default:
+			return BlockSide::OTHER;
+		case BlockSide::LEFT:
+			return BlockSide::RIGHT;
+		case BlockSide::RIGHT:
+			return BlockSide::LEFT;
+		case BlockSide::TOP:
+			return BlockSide::BOTTOM;
+		case BlockSide::BOTTOM:
+			return BlockSide::TOP;
+	}
+}
+
 inline std::ostream& operator<<(std::ostream& os, BlockSide bs) {
 	switch (bs) {
 		case BlockSide::OTHER:
