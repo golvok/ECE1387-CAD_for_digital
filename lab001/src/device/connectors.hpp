@@ -280,13 +280,123 @@ struct FullyConnectedConnector {
 
 };
 
+class WiltonConnector : public FullyConnectedConnector {
+public:
+	using FullyConnectedConnector::FullyConnectedConnector;
+
+	Index next_fanout(const RouteElementID& re, Index index) const {
+		auto next = index;
+		while (true) {
+			next = FullyConnectedConnector::next_fanout(re, next);
+			if (next == END_VALUE) {
+				return END_VALUE;
+			}
+			const auto& result = re_from_index(re, next);
+			if (re.isPin()) {
+				return next;
+			} else {
+				const auto sides = sides_of_common_switchbox({re, result});
+				if (
+					fanout_allowed_wilton({index_in_channel(    re.getIndex()), sides.first},  {index_in_channel(result.getIndex()), sides.second}) ||
+					fanout_allowed_wilton({index_in_channel(result.getIndex()), sides.second}, {index_in_channel(    re.getIndex()), sides.first})
+				) {
+					return next;
+				}
+			}
+		}
+	}
+
+	std::pair<BlockSide,BlockSide> sides_of_common_switchbox(std::pair<const RouteElementID&, const RouteElementID&> reids) const {
+		const auto dirs = std::make_pair(wire_direction(reids.first), wire_direction(reids.second));
+		const auto locs = std::make_pair(
+			geom::make_point(reids.first.getX().getValue(),  reids.first.getY().getValue()),
+			geom::make_point(reids.second.getX().getValue(), reids.second.getY().getValue())
+		);
+
+		return sides_of_common_switchbox(dirs, locs);
+	}
+
+	template<typename Dirs, typename Locs>
+	static std::pair<BlockSide,BlockSide> sides_of_common_switchbox(Dirs dirs, Locs locs) {
+
+		if (dirs.first == Direction::OTHER || dirs.second == Direction::OTHER) {
+			return {BlockSide::OTHER, BlockSide::OTHER};
+		} else if (dirs.first == dirs.second) {
+			// if vert, smaller y has bottom, other has top
+			// if horiz, smaller x has left, other has right
+			if (dirs.first == Direction::VERTICAL) {
+				if (locs.first.y() < locs.second.y()) {
+					return {BlockSide::BOTTOM, BlockSide::TOP};
+				} else {
+					return {BlockSide::TOP, BlockSide::BOTTOM};
+				}
+			} else if (dirs.first == Direction::HORIZONTAL) {
+				if (locs.first.x() < locs.second.x()) {
+					return {BlockSide::LEFT, BlockSide::RIGHT};
+				} else {
+					return {BlockSide::RIGHT, BlockSide::LEFT};
+				}
+			} else {
+				return {BlockSide::OTHER, BlockSide::OTHER};
+			}
+		} else {
+			// if xy same, vert gets top & horiz gets right
+			// else if (abs of x and y diffs \leq 1 && have same sign) vert gets bottom & horiz gets left
+			// else error
+
+			// -- or --
+
+			// if vert above or at horiz, vert -> top
+			// 	else vert -> bottom
+			// if vert to the left or at horiz, horiz -> right
+			// 	else horiz -> left
+			if (dirs.first == Direction::VERTICAL) {
+				const auto delta_to_vert = locs.first - locs.second;
+				return std::make_pair(
+					delta_to_vert.y() >= 0 ? BlockSide::TOP   : BlockSide::BOTTOM,
+					delta_to_vert.x() <= 0 ? BlockSide::RIGHT : BlockSide::LEFT
+				);
+			} else {
+				const auto delta_to_vert = locs.second - locs.first;
+				return std::make_pair(
+					delta_to_vert.x() <= 0 ? BlockSide::RIGHT : BlockSide::LEFT,
+					delta_to_vert.y() >= 0 ? BlockSide::TOP   : BlockSide::BOTTOM
+				);
+			}
+		}
+	}
+
+	bool fanout_allowed_wilton(std::pair<int, BlockSide> source, std::pair<int, BlockSide> sink) const {
+		if (oppositeSide(source.second) == sink.second && source.first == sink.first) {
+			return true; // opposite side, same channel => connect
+		}
+
+		const auto w = dev_info.track_width;
+		switch (source.second) {
+			case BlockSide::LEFT:
+				return sink.second == BlockSide::TOP    && (w - source.first) % w == sink.first;
+			case BlockSide::TOP:
+				return sink.second == BlockSide::RIGHT  && (source.first + 1) % w == sink.first;
+			case BlockSide::RIGHT:
+				return sink.second == BlockSide::BOTTOM && (2*w - 2 - source.first) % w == sink.first;
+			case BlockSide::BOTTOM:
+				return sink.second == BlockSide::LEFT   && (source.first + 1) % w == sink.first;
+			default:
+				return true;
+		}
+	}
+};
+
 #define ALL_DEVICES_COMMA_SEP \
+	device::Device<device::WiltonConnector>, \
 	device::Device<device::FullyConnectedConnector>
 
 #define ALL_DEVICES_COMMA_SEP_REF \
+	device::Device<device::WiltonConnector>&, \
 	device::Device<device::FullyConnectedConnector>&
 
 #define ALL_DEVICES_COMMA_SEP_CONST_REF \
+	const device::Device<device::WiltonConnector>&, \
 	const device::Device<device::FullyConnectedConnector>&
 
 static const util::type_vector<
