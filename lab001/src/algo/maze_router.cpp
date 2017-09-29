@@ -3,6 +3,7 @@
 #include <device/connectors.hpp>
 #include <device/device.hpp>
 #include <graphics/graphics_wrapper.hpp>
+#include <util/template_utils.hpp>
 
 namespace algo {
 
@@ -14,7 +15,17 @@ namespace detail {
 		graphics::get().waitForPress();
 	}
 
-	template void displayAndWait(std::unordered_map<device::RouteElementID, graphics::t_color>&& colours_to_draw, const device::Device<device::FullyConnectedConnector>& device);
+	template<typename Device>
+	struct displayAndWait_instantiator {
+		static auto func(){
+			return &displayAndWait<device::RouteElementID, Device>;
+		}
+	};
+
+	void maze_router_template_instantiator() {
+		util::forceInstantiation<displayAndWait_instantiator>(device::ALL_DEVICES);
+	}
+
 }
 
 } // end namespace algo

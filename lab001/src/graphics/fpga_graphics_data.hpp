@@ -16,18 +16,19 @@ class FPGAGraphicsDataState {
 public:
 	FPGAGraphicsDataState()
 		: enabled(true)
-		, fc_dev(nullptr)
+		, device(nullptr)
 		, paths()
 		, extra_colours_to_draw()
 	{ }
 
+	template<typename Device>
 	FPGAGraphicsDataState(
-		device::Device<device::FullyConnectedConnector> const* fc_dev,
+		Device const* device,
 		const std::vector<std::vector<device::RouteElementID>>& paths = {},
 		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw = {}
 	)
 		: enabled(true)
-		, fc_dev(fc_dev)
+		, device(device)
 		, paths(paths)
 		, extra_colours_to_draw(std::move(extra_colours_to_draw))
 	{ }
@@ -41,8 +42,8 @@ public:
 	      auto& getPaths()       { return paths; }
 	const auto& getPaths() const { return paths; }
 
-	      auto& getFCDev()       { return fc_dev; }
-	const auto& getFCDev() const { return fc_dev; }
+	      auto& getDevice()       { return device; }
+	const auto& getDevice() const { return device; }
 
 	      auto& getExtraColours()       { return extra_colours_to_draw; }
 	const auto& getExtraColours() const { return extra_colours_to_draw; }
@@ -53,7 +54,8 @@ private:
 	friend class FPGAGraphicsDataStateScope;
 
 	bool enabled;
-	device::Device<device::FullyConnectedConnector> const* fc_dev;
+	template <typename... Ts> using variant_with_nullptr = boost::variant<nullptr_t, Ts...>;
+	util::substitute_into<variant_with_nullptr, util::add_pointer_to_const_t, ALL_DEVICES_COMMA_SEP> device;
 	std::vector<std::vector<device::RouteElementID>> paths;
 	std::unordered_map<device::RouteElementID, graphics::t_color> extra_colours_to_draw;
 };
@@ -88,6 +90,10 @@ private:
 };
 
 class Graphics;
+namespace detail{
+	template<typename>
+	struct pushState_instantiator;
+}
 
 class FPGAGraphicsData {
 public:
@@ -104,19 +110,34 @@ public:
 	FPGAGraphicsData& operator=(const FPGAGraphicsData&) = delete;
 	FPGAGraphicsData& operator=(FPGAGraphicsData&&) = default;
 
+	template<typename Device>
 	FPGAGraphicsDataStateScope pushState(
-		device::Device<device::FullyConnectedConnector> const* fc_dev = nullptr,
+		Device const* device = nullptr,
+		const std::vector<std::vector<device::RouteElementID>>& paths = {},
+		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw = {}
+	) {
+		return pushState_base(device, paths, std::move(extra_colours_to_draw));
+	}
+
+	template<typename Device>
+	FPGAGraphicsDataStateScope pushState(
+		Device const* device,
+		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw
+	) {
+		return pushState_base(device, {}, std::move(extra_colours_to_draw));
+	}
+
+private:
+	friend class Graphics;
+	template<typename> friend class detail::pushState_instantiator;
+
+	template<typename Device>
+	FPGAGraphicsDataStateScope pushState_base(
+		Device const* device = nullptr,
 		const std::vector<std::vector<device::RouteElementID>>& paths = {},
 		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw = {}
 	);
 
-	FPGAGraphicsDataStateScope pushState(
-		device::Device<device::FullyConnectedConnector> const* fc_dev,
-		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw
-	);
-
-private:
-	friend class Graphics;
 	void drawAll();
 
 	struct StateLock {

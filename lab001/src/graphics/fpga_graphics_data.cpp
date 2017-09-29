@@ -17,32 +17,23 @@ namespace {
 	}
 }
 
-FPGAGraphicsDataStateScope FPGAGraphicsData::pushState(
-	device::Device<device::FullyConnectedConnector> const* fc_dev,
+template<typename Device>
+FPGAGraphicsDataStateScope FPGAGraphicsData::pushState_base(
+	Device const* device,
 	const std::vector<std::vector<device::RouteElementID>>& paths,
 	std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw
 ) {
-	state_stack.push_back(std::make_unique<FPGAGraphicsDataState>(fc_dev, paths, std::move(extra_colours_to_draw)));
-	const geom::BoundBox<float>& fpga_bb = fc_dev->info().bounds;
+	state_stack.push_back(std::make_unique<FPGAGraphicsDataState>(device, paths, std::move(extra_colours_to_draw)));
+	const geom::BoundBox<float>& fpga_bb = device->info().bounds;
 	const float margin = 3.0f;
 	graphics::set_visible_world(fpga_bb.minx()-margin, fpga_bb.miny()-margin, fpga_bb.maxx()+margin, fpga_bb.maxy()+margin);
 	graphics::refresh_graphics();
 	return FPGAGraphicsDataStateScope(state_stack.back().get());
 }
 
-FPGAGraphicsDataStateScope FPGAGraphicsData::pushState(
-	device::Device<device::FullyConnectedConnector> const* fc_dev,
-	std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw
-) {
-	return pushState(fc_dev, {}, std::move(extra_colours_to_draw));
-}
-
-void FPGAGraphicsData::drawAll() {
-	graphics::clearscreen();
-	const auto& data_and_lock_copy = dataAndLock();
-	const auto& data = data_and_lock_copy.first;
-
-	if (!data.getFCDev()) return;
+template<typename Device>
+static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
+	if (!device) return;
 
 	dout(DL::INFO) << "drawing fc device\n";
 	graphics::setcolor(0,0,0);
@@ -99,7 +90,7 @@ void FPGAGraphicsData::drawAll() {
 	};
 
 	std::list<device::RouteElementID> reIDs_to_draw;
-	for (const auto& block : data.getFCDev()->blocks()) {
+	for (const auto& block : device->blocks()) {
 		const auto xy_loc = geom::make_point(
 			block.getX().getValue(),
 			block.getY().getValue()
@@ -112,7 +103,7 @@ void FPGAGraphicsData::drawAll() {
 		graphics::settextrotation(0);
 		graphics::drawtext_in(block_bounds, util::stringify_through_stream(geom::make_point(block.getX().getValue(), block.getY().getValue())));
 
-		for (const auto& pin_re : data.getFCDev()->fanout(block)) {
+		for (const auto& pin_re : device->fanout(block)) {
 			reIDs_to_draw.push_back(pin_re);
 		}
 	}
@@ -126,7 +117,7 @@ void FPGAGraphicsData::drawAll() {
 			continue;
 		}
 
-		for (const auto& fanout : data.getFCDev()->fanout(curr)) {
+		for (const auto& fanout : device->fanout(curr)) {
 			if (reIDs_already_seen.find(fanout) == end(reIDs_already_seen)) {
 				reIDs_already_seen.insert(curr);
 				reIDs_to_draw.push_back(fanout);
@@ -152,7 +143,7 @@ void FPGAGraphicsData::drawAll() {
 
 		if (curr.isPin()) {
 			const auto as_pin = curr.asPin();
-			const auto pin_side = data.getFCDev()->get_block_pin_side(as_pin);
+			const auto pin_side = device->get_block_pin_side(as_pin);
 			const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), pin_side);
 
 			const auto block_side = block_bounds.get_side(pin_side);
@@ -168,8 +159,8 @@ void FPGAGraphicsData::drawAll() {
 			graphics::drawline(p1, p2);
 			graphics::settextrotation((int)angle.degreeValue() % 180);
 			graphics::drawtext_in(graphics::t_bound_box(p1,p2), util::stringify_through_stream(curr), 0.02f);
-		} else { // if (data.getFCDev()->is_channel(curr)) {
-			const auto wire_dir = data.getFCDev()->wire_direction(curr);
+		} else { // if (device->is_channel(curr)) {
+			const auto wire_dir = device->wire_direction(curr);
 			const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), channel_location(wire_dir));
 
 			const auto sides = [&]() -> std::pair<std::pair<t_point, t_point>, std::pair<t_point, t_point>> {
@@ -179,11 +170,11 @@ void FPGAGraphicsData::drawAll() {
 						return {channel_bounds.get_side(BlockSide::LEFT), channel_bounds.get_side(BlockSide::RIGHT)};
 					case decltype(wire_dir)::VERTICAL:
 					default:
-						return {channel_bounds.get_side(BlockSide::BOTTOM), channel_bounds.get_side(BlockSide::TOP)};
+						return {channel_bounds.get_side(BlockSide::TOP), channel_bounds.get_side(BlockSide::BOTTOM)};
 				}
 			}();
 
-			const auto channel_pos = ((float)data.getFCDev()->index_in_channel(curr) + 0.5f) / (float)data.getFCDev()->info().track_width;
+			const auto channel_pos = ((float)device->index_in_channel(curr) + 0.5f) / (float)device->info().track_width;
 			const auto p1 = interpolate(sides.first.first, channel_pos, sides.first.second);
 			const auto p2 = interpolate(sides.second.second, channel_pos, sides.second.first);
 			const auto angle = inclination(geom::make_point(p1.x, p1.y), geom::make_point(p2.x, p2.y));
@@ -196,8 +187,34 @@ void FPGAGraphicsData::drawAll() {
 		graphics::setcolor(0,0,0);
 	}
 
-	dout(DL::INFO) << "done drawing fg device\n";
+	dout(DL::INFO) << "done drawing fc device\n";
 
+}
+
+template<> void drawDevice(const nullptr_t&, const FPGAGraphicsDataState&) { }
+template<> void drawDevice(nullptr_t&, const FPGAGraphicsDataState&) { }
+
+void FPGAGraphicsData::drawAll() {
+	graphics::clearscreen();
+	const auto& data_and_lock_copy = dataAndLock();
+	const auto& data = data_and_lock_copy.first;
+
+	boost::apply_visitor([&](auto&& device) {
+		drawDevice(device, data);
+	}, data.getDevice());
+}
+
+namespace detail {
+	template<typename Device>
+	struct pushState_instantiator {
+		static auto func(){
+			return &FPGAGraphicsData::pushState_base<Device>;
+		}
+	};
+
+	void fpga_graphics_data_template_instantiator() {
+		util::forceInstantiation<pushState_instantiator>(device::ALL_DEVICES);
+	}
 }
 
 } // end namespace graphics

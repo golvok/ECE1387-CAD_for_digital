@@ -3,6 +3,8 @@
 
 #include <device/device.hpp>
 #include <parsing/input_parser.hpp>
+#include <util/logging.hpp>
+#include <util/template_utils.hpp>
 
 namespace device {
 
@@ -277,6 +279,27 @@ struct FullyConnectedConnector {
 	}
 
 };
+
+#define ALL_DEVICES_COMMA_SEP \
+	device::Device<device::FullyConnectedConnector>
+
+#define ALL_DEVICES_COMMA_SEP_REF \
+	device::Device<device::FullyConnectedConnector>&
+
+#define ALL_DEVICES_COMMA_SEP_CONST_REF \
+	const device::Device<device::FullyConnectedConnector>&
+
+static const util::type_vector<
+	ALL_DEVICES_COMMA_SEP
+> ALL_DEVICES;
+
+static const util::type_vector<
+	ALL_DEVICES_COMMA_SEP_REF
+> ALL_DEVICES_REF;
+
+static const util::type_vector<
+	ALL_DEVICES_COMMA_SEP_CONST_REF
+> ALL_DEVICES_CONST_REF;
 
 }
 

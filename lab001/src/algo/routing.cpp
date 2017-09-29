@@ -43,8 +43,22 @@ std::vector<std::vector<device::RouteElementID>> route_all(const Netlist& pin_to
 	return result;
 }
 
-template std::vector<std::vector<device::RouteElementID>> route_all(const util::Netlist<device::PinGID>& pin_to_pin_netlist,       device::Device<device::FullyConnectedConnector>&  fanout_gen);
-template std::vector<std::vector<device::RouteElementID>> route_all(const util::Netlist<device::PinGID>& pin_to_pin_netlist, const device::Device<device::FullyConnectedConnector>&  fanout_gen);
-template std::vector<std::vector<device::RouteElementID>> route_all(const util::Netlist<device::PinGID>& pin_to_pin_netlist,       device::Device<device::FullyConnectedConnector>&& fanout_gen);
+namespace detail {
+	template<typename Netlist>
+	struct route_all_instantiator {
+		template<typename Device>
+		struct with_netlist {
+			static auto func(){
+				return &route_all<Netlist, Device>;
+			}
+		};
+	};
+
+	void fpga_graphics_data_template_instantiator() {
+		util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES );
+		util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES_REF );
+		util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES_CONST_REF );
+	}
+}
 
 } // end namespace algo
