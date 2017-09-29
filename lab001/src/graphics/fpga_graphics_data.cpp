@@ -102,6 +102,16 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 		}
 	}
 
+	std::unordered_map<device::RouteElementID, graphics::t_color> colour_overrides;
+	for (const auto& id : data.getNetlist().all_ids()) {
+		colour_overrides[id] = t_color(0x00, 0xFF, 0x00);
+	}
+	for (const auto& path : data.getPaths()) {
+		for (const auto& id : path) {
+			colour_overrides[id] = t_color(0x00, 0x00, 0xFF);
+		}
+	}
+
 	std::unordered_set<device::RouteElementID> reIDs_already_seen;
 	while (!reIDs_to_draw.empty()) {
 		const auto curr = reIDs_to_draw.front();
@@ -126,12 +136,13 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 		const auto grid_square_bounds = bounds_for_xy(xy_loc.x(), xy_loc.y());
 		const auto block_bounds = block_bounds_within(grid_square_bounds);
 
-		if (is_contained_in_a_path(curr, data.getPaths())) {
-			graphics::setcolor(0,255,0);
+		const auto colour_overrides_find_result = colour_overrides.find(curr);
+		if (colour_overrides_find_result != end(colour_overrides)) {
+			graphics::setcolor(colour_overrides_find_result->second);
 		} else {
-			const auto find_result = data.getExtraColours().find(curr);
-			if (find_result != end(data.getExtraColours())) {
-				graphics::setcolor(find_result->second);
+			const auto extracolours_find_result = data.getExtraColours().find(curr);
+			if (extracolours_find_result != end(data.getExtraColours())) {
+				graphics::setcolor(extracolours_find_result->second);
 			}
 		}
 

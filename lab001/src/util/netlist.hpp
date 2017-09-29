@@ -1,6 +1,8 @@
 #ifndef UTIL__NETLIST_H
 #define UTIL__NETLIST_H
 
+#include <util/generator.hpp>
+
 #include <unordered_map>
 #include <unordered_set>
 #include <stdexcept>
@@ -44,6 +46,16 @@ public:
 		} else {
 			return { begin(lookup_result->second), end(lookup_result->second) };
 		}
+	}
+
+	auto all_ids() const {
+		return util::xrange_forward_pe<typename decltype(connections)::const_iterator>(
+			begin(connections),
+			end(connections),
+			[](auto& elem) {
+				return elem->first;
+			}
+		);
 	}
 private:
 	ConnectionStorage connections;
