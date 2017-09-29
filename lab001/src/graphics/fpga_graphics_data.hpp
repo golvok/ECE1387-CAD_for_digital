@@ -135,8 +135,15 @@ private:
 	FPGAGraphicsDataStateScope pushState_base(
 		Device const* device = nullptr,
 		const std::vector<std::vector<device::RouteElementID>>& paths = {},
-		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw = {}
-	);
+		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw = {},
+		bool reset_view = false
+	) {
+		state_stack.push_back(std::make_unique<FPGAGraphicsDataState>(device, paths, std::move(extra_colours_to_draw)));
+		do_graphics_refresh(reset_view, device->info().bounds);
+		return FPGAGraphicsDataStateScope(state_stack.back().get());
+	}
+
+	void do_graphics_refresh(bool reset_view, const geom::BoundBox<float>& fpga_bb);
 
 	void drawAll();
 

@@ -17,18 +17,12 @@ namespace {
 	}
 }
 
-template<typename Device>
-FPGAGraphicsDataStateScope FPGAGraphicsData::pushState_base(
-	Device const* device,
-	const std::vector<std::vector<device::RouteElementID>>& paths,
-	std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw
-) {
-	state_stack.push_back(std::make_unique<FPGAGraphicsDataState>(device, paths, std::move(extra_colours_to_draw)));
-	const geom::BoundBox<float>& fpga_bb = device->info().bounds;
-	const float margin = 3.0f;
-	graphics::set_visible_world(fpga_bb.minx()-margin, fpga_bb.miny()-margin, fpga_bb.maxx()+margin, fpga_bb.maxy()+margin);
+void FPGAGraphicsData::do_graphics_refresh(bool reset_view, const geom::BoundBox<float>& fpga_bb) {
+	if (reset_view) {
+		const float margin = 3.0f;
+		graphics::set_visible_world(fpga_bb.minx()-margin, fpga_bb.miny()-margin, fpga_bb.maxx()+margin, fpga_bb.maxy()+margin);
+	}
 	graphics::refresh_graphics();
-	return FPGAGraphicsDataStateScope(state_stack.back().get());
 }
 
 template<typename Device>
@@ -204,17 +198,5 @@ void FPGAGraphicsData::drawAll() {
 	}, data.getDevice());
 }
 
-namespace detail {
-	template<typename Device>
-	struct pushState_instantiator {
-		static auto func(){
-			return &FPGAGraphicsData::pushState_base<Device>;
-		}
-	};
-
-	void fpga_graphics_data_template_instantiator() {
-		util::forceInstantiation<pushState_instantiator>(device::ALL_DEVICES);
-	}
-}
 
 } // end namespace graphics

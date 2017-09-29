@@ -54,10 +54,12 @@ namespace detail {
 		};
 	};
 
-	void fpga_graphics_data_template_instantiator() {
-		util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES );
-		util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES_REF );
-		util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES_CONST_REF );
+	auto fpga_graphics_data_template_instantiator() {
+		return std::make_tuple(
+			util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES ),
+			util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES_REF ),
+			util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES_CONST_REF )
+		);
 	}
 }
 

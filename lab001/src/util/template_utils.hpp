@@ -7,8 +7,8 @@ template<typename... Ts>
 struct type_vector { };
 
 template<template <typename> class Subst, typename... Devices>
-void forceInstantiation(type_vector<Devices...>) {
-	(void)std::make_tuple(Subst<Devices>::func()..., 0);
+auto forceInstantiation(type_vector<Devices...>) {
+	return std::make_tuple(Subst<Devices>::func()..., 0);
 }
 
 template<typename T>
