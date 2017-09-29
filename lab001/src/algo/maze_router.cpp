@@ -22,8 +22,10 @@ namespace detail {
 		}
 	};
 
-	void maze_router_template_instantiator() {
-		util::forceInstantiation<displayAndWait_instantiator>(device::ALL_DEVICES);
+	auto maze_router_template_instantiator() {
+		return std::make_tuple(
+			util::forceInstantiation<displayAndWait_instantiator>(device::ALL_DEVICES)
+		);
 	}
 
 }
