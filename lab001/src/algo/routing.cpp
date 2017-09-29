@@ -11,8 +11,8 @@
 namespace algo {
 
 template<typename Netlist, typename FanoutGenerator>
-util::Netlist<device::RouteElementID, true> route_all(const Netlist& pin_to_pin_netlist, FanoutGenerator&& fanout_gen) {
-	util::Netlist<device::RouteElementID, true> result;
+RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, FanoutGenerator&& fanout_gen) {
+	RouteAllResult<Netlist> result;
 	std::unordered_set<device::RouteElementID> used;
 
 	const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, true);
@@ -33,18 +33,22 @@ util::Netlist<device::RouteElementID, true> route_all(const Netlist& pin_to_pin_
 				return used.find(reid) != end(used) && used_by_this_net.find(reid) == end(used_by_this_net);
 			});
 
-			boost::optional<device::RouteElementID> prev;
-			for (const auto& id : new_routing) {
-				used.insert(id);
-				used_by_this_net.insert(id);
-				if (prev) {
-					result.addConnection(*prev, id);
+			if (new_routing) {
+				boost::optional<device::RouteElementID> prev;
+				for (const auto& id : *new_routing) {
+					used.insert(id);
+					used_by_this_net.insert(id);
+					if (prev) {
+						result.netlist().addConnection(*prev, id);
+					}
+					prev = id;
 				}
-				prev = id;
-			}
 
-			const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, {new_routing}, true);
-			graphics::get().waitForPress();
+				const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, {*new_routing}, true);
+				graphics::get().waitForPress();
+			} else {
+				result.unroutedPins().addConnection(src_pin, sink_pin);
+			}
 		}
 	}
 	return result;

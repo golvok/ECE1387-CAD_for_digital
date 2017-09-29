@@ -8,6 +8,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 namespace algo {
 
 namespace detail {
@@ -56,7 +58,7 @@ namespace detail {
 }
 
 template<typename ID, typename IDSet, typename ID2, typename FanoutGenerator, typename ShouldIgnore>
-std::vector<ID> maze_route(IDSet&& sources, ID2&& sink, FanoutGenerator&& fanout_gen, ShouldIgnore&& should_ignore) {
+boost::optional<std::vector<ID>> maze_route(IDSet&& sources, ID2&& sink, FanoutGenerator&& fanout_gen, ShouldIgnore&& should_ignore) {
 	std::list<ID> to_visit;
 
 	dout(DL::ROUTE_D1) << "starting with: ";
@@ -130,23 +132,35 @@ std::vector<ID> maze_route(IDSet&& sources, ID2&& sink, FanoutGenerator&& fanout
 
 	dout(DL::ROUTE_D1) << "tracing back... ";
 
-	std::vector<ID> result;
+	boost::optional<std::vector<ID>> reversed_result = std::vector<ID>();
 	auto traceback_curr = sink;
 	while (true) {
-		dout(DL::ROUTE_D1) << traceback_curr << " -> ";
-		result.push_back(traceback_curr);
-		if (sources.find(traceback_curr) != end(sources) || data[traceback_curr].fanin.empty()) {
+		if (sources.find(traceback_curr) != end(sources)) {
+			dout(DL::ROUTE_D1) << traceback_curr << '\n';
 			break;
+		} else if (data[traceback_curr].fanin.empty()) {
+			dout(DL::ROUTE_D1) << "couldn't trace back past " << traceback_curr << '\n';
+			reversed_result = boost::none;
+			break;
+		} else {
+			dout(DL::ROUTE_D1) << traceback_curr << " -> ";
+			reversed_result->push_back(traceback_curr);
+			const auto& fanin = data[traceback_curr].fanin;
+			traceback_curr = *std::min_element(begin(fanin), end(fanin), [&](const auto& lhs, const auto& rhs) {
+				return data[lhs].distance < data[rhs].distance;
+			});
 		}
-		const auto& fanin = data[traceback_curr].fanin;
-		traceback_curr = *std::min_element(begin(fanin), end(fanin), [&](const auto& lhs, const auto& rhs) {
-			return data[lhs].distance < data[rhs].distance;
-		});
 	}
 
-	dout(DL::ROUTE_D1) << " (SRC) \n";
-
-	return result;
+	if (reversed_result) {
+		std::vector<ID> result;
+		for (auto it = reversed_result->rbegin(); it != reversed_result->rend(); ++it) {
+			result.push_back(*it);
+		}
+		return result;
+	} else {
+		return boost::none;
+	}
 }
 
 } // end namespace algo
