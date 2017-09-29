@@ -54,7 +54,7 @@ private:
 	friend class FPGAGraphicsDataStateScope;
 
 	bool enabled;
-	template <typename... Ts> using variant_with_nullptr = boost::variant<nullptr_t, Ts...>;
+	template <typename... Ts> using variant_with_nullptr = boost::variant<std::nullptr_t, Ts...>;
 	util::substitute_into<variant_with_nullptr, util::add_pointer_to_const_t, ALL_DEVICES_COMMA_SEP> device;
 	std::vector<std::vector<device::RouteElementID>> paths;
 	std::unordered_map<device::RouteElementID, graphics::t_color> extra_colours_to_draw;

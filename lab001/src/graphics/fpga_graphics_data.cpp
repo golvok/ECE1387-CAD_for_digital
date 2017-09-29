@@ -185,8 +185,8 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 
 }
 
-template<> void drawDevice(const nullptr_t&, const FPGAGraphicsDataState&) { }
-template<> void drawDevice(nullptr_t&, const FPGAGraphicsDataState&) { }
+template<> void drawDevice(const std::nullptr_t&, const FPGAGraphicsDataState&) { }
+template<> void drawDevice(std::nullptr_t&, const FPGAGraphicsDataState&) { }
 
 void FPGAGraphicsData::drawAll() {
 	graphics::clearscreen();
