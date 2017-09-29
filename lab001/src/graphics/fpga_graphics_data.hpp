@@ -112,19 +112,38 @@ public:
 
 	template<typename Device>
 	FPGAGraphicsDataStateScope pushState(
-		Device const* device = nullptr,
-		const std::vector<std::vector<device::RouteElementID>>& paths = {},
-		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw = {}
+		Device const* device,
+		const std::vector<std::vector<device::RouteElementID>>& paths,
+		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw,
+		bool reset_view = false
 	) {
-		return pushState_base(device, paths, std::move(extra_colours_to_draw));
+		return pushState_base(device, paths, std::move(extra_colours_to_draw), reset_view);
 	}
 
 	template<typename Device>
 	FPGAGraphicsDataStateScope pushState(
 		Device const* device,
-		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw
+		bool reset_view = false
 	) {
-		return pushState_base(device, {}, std::move(extra_colours_to_draw));
+		return pushState_base(device, {}, {} , reset_view);
+	}
+
+	template<typename Device>
+	FPGAGraphicsDataStateScope pushState(
+		Device const* device,
+		const std::vector<std::vector<device::RouteElementID>>& paths,
+		bool reset_view = false
+	) {
+		return pushState_base(device, paths, {}, reset_view);
+	}
+
+	template<typename Device>
+	FPGAGraphicsDataStateScope pushState(
+		Device const* device,
+		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw,
+		bool reset_view = false
+	) {
+		return pushState_base(device, {}, std::move(extra_colours_to_draw), reset_view);
 	}
 
 private:

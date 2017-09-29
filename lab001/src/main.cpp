@@ -62,6 +62,7 @@ int program_main(const std::string& data_file_name) {
 			const auto gfx_state_keeper = graphics::get().fpga().pushState(&dev);
 			graphics::get().waitForPress();
 
+			bool do_view_reset = true;
 			for (int i = 0; i < dev.info().track_width*2; ++i) {
 				device::RouteElementID test_re(
 					util::make_id<device::XID>((int16_t)2),
@@ -78,7 +79,8 @@ int program_main(const std::string& data_file_name) {
 					dout(DL::INFO) << '\t' << fanout << '\n';
 				}
 
-				const auto gfx_state_keeper = graphics::get().fpga().pushState(&dev, std::move(colours));
+				const auto gfx_state_keeper = graphics::get().fpga().pushState(&dev, std::move(colours), do_view_reset);
+				do_view_reset = false;
 				graphics::get().waitForPress();
 			}
 

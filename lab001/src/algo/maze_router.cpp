@@ -11,7 +11,7 @@ namespace detail {
 
 	template<typename ID, typename Device>
 	void displayAndWait(std::unordered_map<ID, graphics::t_color>&& colours_to_draw, const Device& device) {
-		const auto gfx_state_keeper = graphics::get().fpga().pushState(&device, std::move(colours_to_draw));
+		const auto gfx_state_keeper = graphics::get().fpga().pushState(&device, std::move(colours_to_draw), false);
 		graphics::get().waitForPress();
 	}
 

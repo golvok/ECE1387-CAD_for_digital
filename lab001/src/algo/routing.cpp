@@ -13,6 +13,8 @@ std::vector<std::vector<device::RouteElementID>> route_all(const Netlist& pin_to
 	std::vector<std::vector<device::RouteElementID>> result;
 	std::unordered_set<device::RouteElementID> used;
 
+	const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, true);
+
 	for (const auto& src_pin : pin_to_pin_netlist.roots()) {
 		const auto& src_pin_re = device::RouteElementID(src_pin);
 		std::unordered_set<device::RouteElementID> used_by_this_net;
@@ -36,7 +38,7 @@ std::vector<std::vector<device::RouteElementID>> route_all(const Netlist& pin_to
 				used_by_this_net.insert(id);
 			}
 
-			const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, {path});
+			const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, {path}, true);
 			graphics::get().waitForPress();
 		}
 	}
