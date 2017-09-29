@@ -29,7 +29,6 @@ template<typename Device>
 static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 	if (!device) return;
 
-	dout(DL::INFO) << "drawing fc device\n";
 	graphics::setcolor(0,0,0);
 
 	const auto bounds_for_xy = [&](auto x, auto y) {
@@ -191,8 +190,6 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 
 		graphics::setcolor(0,0,0);
 	}
-
-	dout(DL::INFO) << "done drawing fc device\n";
 
 }
 
