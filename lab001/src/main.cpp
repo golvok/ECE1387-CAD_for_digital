@@ -84,7 +84,7 @@ int program_main(const std::string& data_file_name) {
 				graphics::get().waitForPress();
 			}
 
-			const auto result = algo::route_all(pr.pin_to_pin_netlist, dev);
+			const auto result = algo::route_all(pr.pin_to_pin_netlist, pr.pin_to_pin_netlist.roots(), dev);
 			for (const auto& source : result.unroutedPins().all_ids()) {
 				for (const auto& sink : result.unroutedPins().fanout(source)) {
 					dout(DL::WARN) << "failed to route " << source << " -> " << sink << '\n';

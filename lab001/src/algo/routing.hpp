@@ -25,14 +25,14 @@ private:
 	UnroutedNetlist m_unroutedPins = {};
 };
 
-template<typename Netlist, typename FanoutGenerator>
-RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, FanoutGenerator&& fanout_gen) {
+template<typename Netlist, typename NetOrder, typename FanoutGenerator>
+RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, NetOrder&& net_order, FanoutGenerator&& fanout_gen) {
 	RouteAllResult<Netlist> result;
 	std::unordered_set<device::RouteElementID> used;
 
 	const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, true);
 
-	for (const auto& src_pin : pin_to_pin_netlist.roots()) {
+	for (const auto& src_pin : net_order) {
 		const auto& src_pin_re = device::RouteElementID(src_pin);
 		std::unordered_set<device::RouteElementID> used_by_this_net;
 		used_by_this_net.insert(src_pin_re);
