@@ -51,16 +51,18 @@ namespace detail {
 		template<typename Device>
 		struct with_netlist {
 			static auto func(){
-				return &route_all<Netlist, Device>;
+				return std::make_tuple(
+					&route_all<Netlist, Device>,
+					&route_all<Netlist, Device&>,
+					&route_all<Netlist, const Device&>
+				);
 			}
 		};
 	};
 
 	auto fpga_graphics_data_template_instantiator() {
 		return std::make_tuple(
-			util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES ),
-			util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES_REF ),
-			util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES_CONST_REF )
+			util::forceInstantiation<route_all_instantiator< util::Netlist<device::PinGID> >::with_netlist>( device::ALL_DEVICES )
 		);
 	}
 }
