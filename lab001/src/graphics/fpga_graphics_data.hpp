@@ -173,7 +173,7 @@ private:
 	};
 
 	std::pair<FPGAGraphicsDataState&, std::unique_lock<StateLock>> dataAndLock() {
-		if (!state_owner_count.owner_count == 0) {
+		if (state_owner_count.owner_count == 0) {
 			while (state_stack.size() > 1 && !state_stack.back()->isEnabled()) {
 				state_stack.pop_back();
 			}
