@@ -66,7 +66,6 @@ struct FullyConnectedConnector {
 	FullyConnectedConnector& operator=(FullyConnectedConnector&&) = default;
 
 	Index fanout_begin(const RouteElementID& re) const {
-		(void)re;
 		return next_fanout(re, -1);
 	}
 
@@ -76,7 +75,6 @@ struct FullyConnectedConnector {
 	}
 
 	Index next_fanout(const RouteElementID& re, Index index) const {
-		(void)re;
 		auto next = index;
 		while (true) {
 			next = static_cast<Index>(next + 1);
@@ -160,7 +158,7 @@ struct FullyConnectedConnector {
 
 				// note modulo in the line in the switch block.
 				// This has the effecte of swapping the vert/horiz-ness of each fanout
-				const auto track_number = out_index2 % dev_info.track_width + (is_horiz ? dev_info.track_width : 0);
+				const auto track_number = index_in_channel(out_index2) + (is_horiz ? dev_info.track_width : 0);
 				switch (dest_channel) {
 					case 0:
 						return offset_re_new_index(re,  0,  0, (track_number + dev_info.track_width) % (dev_info.track_width*2), is_horiz);
@@ -270,8 +268,12 @@ struct FullyConnectedConnector {
 		}
 	}
 
+	int index_in_channel(int index) const {
+		return index % dev_info.track_width;
+	}
+
 	auto index_in_channel(RouteElementID reid) const {
-		return reid.getIndex() % dev_info.track_width;
+		return index_in_channel(reid.getIndex());
 	}
 
 };
