@@ -294,6 +294,8 @@ public:
 			const auto& result = re_from_index(re, next);
 			if (re.isPin()) {
 				return next;
+			} else if (result.isPin()) {
+				return next;
 			} else {
 				const auto sides = sides_of_common_switchbox({re, result});
 				if (
