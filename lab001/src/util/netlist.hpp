@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <stdexcept>
+#include <sstream>
 
 #include <boost/range/iterator_range.hpp>
 
@@ -31,7 +32,16 @@ public:
 		if (!sink_location_and_wasnt_there.second) {
 			const auto num_erased = m_roots.erase(sink);
 			if (IS_FOREST && num_erased == 0) {
-				throw std::invalid_argument("attempt to add a connection that will short two trees together");
+				std::stringstream err_str;
+				err_str << "attempt to add connection " << source << " -> " << sink << " that will short two trees together: \n";
+				for (const auto& id : connections) {
+					err_str << id.first << " -> ";
+					for (const auto& fanout : id.second) {
+						err_str << fanout << ", ";
+					}
+					err_str << '\n';
+				}
+				throw std::invalid_argument(err_str.str());
 			}
 		}
 	}
