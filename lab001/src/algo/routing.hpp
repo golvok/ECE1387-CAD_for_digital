@@ -25,12 +25,13 @@ private:
 	UnroutedNetlist m_unroutedPins = {};
 };
 
-template<typename Netlist, typename NetOrder, typename FanoutGenerator>
+template<bool exitAtFirstNoRoute, typename Netlist, typename NetOrder, typename FanoutGenerator>
 RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, NetOrder&& net_order, FanoutGenerator&& fanout_gen) {
 	RouteAllResult<Netlist> result;
 	std::unordered_set<device::RouteElementID> used;
 
 	const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, true);
+	bool encountered_failing_pin = false;
 
 	for (const auto& src_pin : net_order) {
 		const auto& src_pin_re = device::RouteElementID(src_pin);
@@ -39,6 +40,11 @@ RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, NetOrder&& 
 
 		for (const auto& sink_pin : pin_to_pin_netlist.fanout(src_pin)) {
 			const auto sink_pin_re = device::RouteElementID(sink_pin);
+
+			if (exitAtFirstNoRoute && encountered_failing_pin) {
+				result.unroutedPins().addConnection(src_pin, sink_pin);
+				continue;
+			}
 
 			auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
 				str << "Routing " << src_pin_re << " -> " << sink_pin_re;
@@ -63,6 +69,7 @@ RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, NetOrder&& 
 				graphics::get().waitForPress();
 			} else {
 				result.unroutedPins().addConnection(src_pin, sink_pin);
+				encountered_failing_pin = true;
 			}
 		}
 	}

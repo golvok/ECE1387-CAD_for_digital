@@ -52,7 +52,7 @@ class RouteAsIsFlow : public FlowBase<Device> {
 	using FlowBase<Device>::dev;
 public:
 	void flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist) const {
-		const auto result = algo::route_all(pin_to_pin_netlist, pin_to_pin_netlist.roots(), dev);
+		const auto result = algo::route_all<false>(pin_to_pin_netlist, pin_to_pin_netlist.roots(), dev);
 		for (const auto& source : result.unroutedPins().all_ids()) {
 			for (const auto& sink : result.unroutedPins().fanout(source)) {
 				dout(DL::WARN) << "failed to route " << source << " -> " << sink << '\n';
