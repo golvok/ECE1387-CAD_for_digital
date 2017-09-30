@@ -186,17 +186,20 @@ template<
 >
 class Device {
 public:
+	template<typename L_CONNECTOR>
 	Device(
 		const DeviceInfo& dev_info,
-		CONNECTOR& connector
+		L_CONNECTOR&& connector
 	)
 		: dev_info(dev_info)
-		, connector(connector)
+		, connector(std::forward<L_CONNECTOR>(connector))
 	{ }
 
 	const auto& info() const {
 		return dev_info;
 	}
+
+	const auto& getConnector() const { return connector; }
 
 	auto fanout(RouteElementID src) const {
 		return util::make_generator<typename CONNECTOR::Index>(
