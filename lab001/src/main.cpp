@@ -65,7 +65,7 @@ int program_main(const ProgramConfig& config) {
 			if (config.fanout_test) {
 				flows::fanout_test(pr.device_info);
 			}
-			flows::route_as_is(pr.device_info, pr.pin_to_pin_netlist);
+			flows::track_width_exploration(pr.device_info, pr.pin_to_pin_netlist);
 		}
 	);
 	apply_visitor(visitor, parse_result);

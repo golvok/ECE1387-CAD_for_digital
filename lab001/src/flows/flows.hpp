@@ -8,7 +8,7 @@
 namespace flows {
 
 void fanout_test(const device::DeviceInfo& dev_desc);
-void track_width_exploration(const device::DeviceInfo& dev_desc);
+void track_width_exploration(const device::DeviceInfo& dev_desc, const util::Netlist<device::PinGID>& pin_to_pin_netlist);
 void route_as_is(const device::DeviceInfo& dev_desc, const util::Netlist<device::PinGID>& pin_to_pin_netlist);
 
 } // end namespace flow
