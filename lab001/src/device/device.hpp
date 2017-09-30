@@ -186,6 +186,8 @@ template<
 >
 class Device {
 public:
+	using Connector = CONNECTOR;
+
 	template<typename L_CONNECTOR>
 	Device(
 		const DeviceInfo& dev_info,

@@ -89,7 +89,7 @@ public:
 				str << "Trying track width of " << dev_info_copy.track_width;
 			});
 
-			const Device modified_dev(dev_info_copy, dev.getConnector());
+			const Device modified_dev(dev_info_copy, typename Device::Connector(dev_info_copy));
 			const auto route_success = RouteAsIsFlow<Device>(modified_dev).flow_main(pin_to_pin_netlist);
 
 			if (route_success) {
@@ -112,7 +112,7 @@ namespace {
 
 	DeviceVariant make_device(const device::DeviceInfo& dev_desc) {
 		device::WiltonConnector connector(dev_desc);
-		return device::Device<device::WiltonConnector>(dev_desc, connector);
+		return device::Device<std::remove_reference_t<decltype(connector)>>(dev_desc, connector);
 	}
 }
 
