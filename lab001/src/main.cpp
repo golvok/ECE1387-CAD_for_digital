@@ -16,6 +16,7 @@
 struct ProgramConfig {
 	std::string data_file_name;
 	bool fanout_test;
+	boost::optional<int> channel_width_override;
 };
 
 int program_main(const ProgramConfig& config);
@@ -41,6 +42,7 @@ int main(int argc, char const** argv) {
 	const auto result = program_main(ProgramConfig{
 		parsed_args.getDataFileName(),
 		parsed_args.shouldDoFanoutTest(),
+		parsed_args.channelWidthOverride()
 	});
 
 	graphics::get().close();
@@ -62,10 +64,16 @@ int program_main(const ProgramConfig& config) {
 		},
 		[&](const parsing::input::ParseResult& pr) {
 			do_optional_input_data_dump(config.data_file_name, pr);
-			if (config.fanout_test) {
-				flows::fanout_test(pr.device_info);
+
+			auto device_info_to_use = pr.device_info; // make copy
+			if (config.channel_width_override) {
+				device_info_to_use.track_width = *config.channel_width_override;
 			}
-			flows::track_width_exploration(pr.device_info, pr.pin_to_pin_netlist);
+
+			if (config.fanout_test) {
+				flows::fanout_test(device_info_to_use);
+			}
+			flows::track_width_exploration(device_info_to_use, pr.pin_to_pin_netlist);
 		}
 	);
 	apply_visitor(visitor, parse_result);

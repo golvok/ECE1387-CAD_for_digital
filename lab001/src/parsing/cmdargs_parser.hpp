@@ -6,6 +6,8 @@
 
 #include <string>
 
+#include <boost/optional.hpp>
+
 namespace parsing {
 
 namespace cmdargs {
@@ -25,6 +27,7 @@ public:
 	 */
 	bool shouldEnableGraphics() const  { return graphics_enabled; }
 	bool shouldDoFanoutTest() const { return fanout_test; }
+	const boost::optional<int>& channelWidthOverride() const { return channel_width_override; }
 	const std::string& getDataFileName() const { return data_file_name; }
 
 private:
@@ -32,6 +35,7 @@ private:
 
 	bool graphics_enabled;
 	bool fanout_test;
+	boost::optional<int> channel_width_override;
 
 	/// The printing levels that should be enabled. Duplicate entries are possible & allowed
 	std::vector<DebugLevel::Level> levels_to_enable;
