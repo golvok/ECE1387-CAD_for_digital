@@ -72,7 +72,7 @@ public:
 
 
 struct RouteElementIDTag { static const std::uint64_t DEFAULT_VALUE = 0x8000800080008000; };
-class RouteElementID : public util::ID<std::uint64_t, RouteElementIDTag>, public util::print_printable {
+class RouteElementID : public util::ID<std::uint64_t, RouteElementIDTag>, public util::print_printable, public boost::equality_comparable<RouteElementID, PinGID> {
 public:
 	using ID::IDType;
 	using REIndex = std::int16_t;
@@ -96,6 +96,10 @@ public:
 
 	bool isPin() const { return isValuePin(getValue()); }
 	PinGID asPin() const { return pinGIDFromValue_unchecked(getValue()); }
+
+	bool operator==(const PinGID& rhs) const {
+		return *this == RouteElementID(rhs);
+	}
 
 private:
 	static IDType makeValueFromPin(PinGID p) { return p.getValue() | ID::JUST_HIGH_BIT; }
