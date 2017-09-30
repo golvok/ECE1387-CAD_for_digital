@@ -24,12 +24,14 @@ public:
 	 * Should the current invocation of the program display graphics?
 	 */
 	bool shouldEnableGraphics() const  { return graphics_enabled; }
+	bool shouldDoFanoutTest() const { return fanout_test; }
 	const std::string& getDataFileName() const { return data_file_name; }
 
 private:
 	friend ParsedArguments parse(int arc_int, char const** argv);
 
 	bool graphics_enabled;
+	bool fanout_test;
 
 	/// The printing levels that should be enabled. Duplicate entries are possible & allowed
 	std::vector<DebugLevel::Level> levels_to_enable;

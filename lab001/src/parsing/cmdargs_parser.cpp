@@ -7,6 +7,7 @@ namespace cmdargs {
 
 ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 	: graphics_enabled(false)
+	, fanout_test(false)
 	, levels_to_enable(DebugLevel::getDefaultSet())
 	, data_file_name()
  {
@@ -25,6 +26,10 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 	if (std::find(begin(args),end(args),"--debug") != end(args)) {
 		auto debug_levels = DebugLevel::getStandardDebug();
 		levels_to_enable.insert(end(levels_to_enable),begin(debug_levels),end(debug_levels));
+	}
+
+	if (std::find(begin(args),end(args),"--fanout-test") != end(args)) {
+		fanout_test = true;
 	}
 
 	std::string prefix("--DL::");

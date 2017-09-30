@@ -13,7 +13,12 @@
 
 #include <boost/optional.hpp>
 
-int program_main(const std::string& data_file_name);
+struct ProgramConfig {
+	std::string data_file_name;
+	bool fanout_test;
+};
+
+int program_main(const ProgramConfig& config);
 
 void do_optional_input_data_dump(const std::string& data_file_name, const parsing::input::ParseResult& pr);
 
@@ -33,7 +38,10 @@ int main(int argc, char const** argv) {
 		graphics::get().startThreadsAndOpenWindow();
 	}
 
-	const auto result = program_main(parsed_args.getDataFileName());
+	const auto result = program_main(ProgramConfig{
+		parsed_args.getDataFileName(),
+		parsed_args.shouldDoFanoutTest(),
+	});
 
 	graphics::get().close();
 	graphics::get().join();
@@ -41,9 +49,9 @@ int main(int argc, char const** argv) {
 	return result;
 }
 
-int program_main(const std::string& data_file_name) {
+int program_main(const ProgramConfig& config) {
 
-	std::ifstream data_file(data_file_name);
+	std::ifstream data_file(config.data_file_name);
 
 	auto parse_result = parsing::input::parse_data(data_file);
 	auto visitor = util::compose<boost::static_visitor<void>>(
@@ -53,8 +61,10 @@ int program_main(const std::string& data_file_name) {
 			});
 		},
 		[&](const parsing::input::ParseResult& pr) {
-			do_optional_input_data_dump(data_file_name, pr);
-			flows::fanout_test(pr.device_info);
+			do_optional_input_data_dump(config.data_file_name, pr);
+			if (config.fanout_test) {
+				flows::fanout_test(pr.device_info);
+			}
 			flows::route_as_is(pr.device_info, pr.pin_to_pin_netlist);
 		}
 	);
