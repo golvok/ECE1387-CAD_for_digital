@@ -79,24 +79,43 @@ class TrackWidthExplorationFlow : public FlowBase<Device> {
 	using FlowBase<Device>::dev;
 public:
 	void flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist) const {
+		std::unordered_map<int, bool> attempt_statuses;
 		auto track_width_range = boost::irange(1, dev.info().track_width+1); // +1 as last argument is a past-end
 		const auto SENTINEL = -1; // something note in the above range, specifically less than everything
 		using std::begin; using std::end;
 		std::binary_search(begin(track_width_range), end(track_width_range), SENTINEL, [&](const auto& rhs, const auto& lhs) {
 			auto dev_info_copy = this->dev.info();
 			dev_info_copy.track_width = std::max(rhs,lhs); // get the non-sentinel
-			const auto indent_scope = dout(DL::INFO).indentWithTitle([&](auto&& str) {
-				str << "Trying track width of " << dev_info_copy.track_width;
-			});
 
-			const Device modified_dev(dev_info_copy, typename Device::Connector(dev_info_copy));
-			const auto route_success = RouteAsIsFlow<Device>(modified_dev).flow_main(pin_to_pin_netlist);
+			const auto route_success = [&](){
+				const auto attempt_find_result = attempt_statuses.find(dev_info_copy.track_width);
+				if (attempt_find_result == end(attempt_statuses)) {
+					const auto indent_scope = dout(DL::INFO).indentWithTitle([&](auto&& str) {
+						str << "Trying track width of " << dev_info_copy.track_width;
+					});
 
-			if (route_success) {
-				dout(DL::INFO) << "Circuit successfully routed with track width of " << modified_dev.info().track_width << '\n';
-			} else {
-				dout(DL::INFO) << "Circuit FAILED to route with track width of " << modified_dev.info().track_width << '\n';
-			}
+					const Device modified_dev(dev_info_copy, typename Device::Connector(dev_info_copy));
+					const auto route_success = RouteAsIsFlow<Device>(modified_dev).flow_main(pin_to_pin_netlist);
+
+					if (route_success) {
+						dout(DL::INFO) << "Circuit successfully routed with track width of " << modified_dev.info().track_width << '\n';
+					} else {
+						dout(DL::INFO) << "Circuit FAILED to route with track width of " << modified_dev.info().track_width << '\n';
+					}
+					return route_success;
+				} else {
+					const auto route_success = attempt_find_result->second;
+
+					if (route_success) {
+						dout(DL::INFO) << "Circuit already successfully routed with track width of " << attempt_find_result->first << '\n';
+					} else {
+						dout(DL::INFO) << "Circuit ALREADY FAILED to route with track width of " << attempt_find_result->first << '\n';
+					}
+					return route_success;
+				}
+			}();
+
+			attempt_statuses[dev_info_copy.track_width] = route_success;
 
 			if (rhs == SENTINEL) {
 				return route_success;
