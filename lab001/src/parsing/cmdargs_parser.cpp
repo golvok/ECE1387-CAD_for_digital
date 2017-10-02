@@ -1,6 +1,8 @@
 
 #include "cmdargs_parser.hpp"
 
+#include <unordered_set>
+
 namespace parsing {
 
 namespace cmdargs {
@@ -14,23 +16,36 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
  {
 	uint arg_count = argc_int;
 	std::vector<std::string> args;
+	std::unordered_set<std::ptrdiff_t> used;
 
 	// add all but first
 	for (uint i = 1; i < arg_count; ++i) {
 		args.emplace_back(argv[i]);
 	}
 
-	if (std::find(begin(args),end(args),"--graphics") != end(args)) {
-		graphics_enabled = true;
+	{
+		auto arg_it = std::find(begin(args),end(args),"--graphics");
+		if (arg_it != end(args)) {
+			graphics_enabled = true;
+			used.insert(std::distance(begin(args), arg_it));
+		}
 	}
 
-	if (std::find(begin(args),end(args),"--debug") != end(args)) {
-		auto debug_levels = DebugLevel::getStandardDebug();
-		levels_to_enable.insert(end(levels_to_enable),begin(debug_levels),end(debug_levels));
+	{
+		const auto arg_it = std::find(begin(args),end(args),"--debug");
+		if (arg_it != end(args)) {
+			auto debug_levels = DebugLevel::getStandardDebug();
+			levels_to_enable.insert(end(levels_to_enable),begin(debug_levels),end(debug_levels));
+			used.insert(std::distance(begin(args), arg_it));
+		}
 	}
 
-	if (std::find(begin(args),end(args),"--fanout-test") != end(args)) {
-		fanout_test = true;
+	{
+		const auto arg_it = std::find(begin(args),end(args),"--fanout-test");
+		if (arg_it != end(args)) {
+			fanout_test = true;
+			used.insert(std::distance(begin(args), arg_it));
+		}
 	}
 
 	{
@@ -50,12 +65,15 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 					});
 				}
 				channel_width_override = result;
+				used.insert(std::distance(begin(args), cwo_flag_it));
+				used.insert(std::distance(begin(args), cwo_number_it));
 			}
 		}
 	}
 
 	std::string prefix("--DL::");
-	for (auto& arg : args) {
+	for (auto arg_it = begin(args); arg_it != end(args); ++arg_it) {
+		const auto arg = *arg_it;
 		if (std::mismatch(begin(prefix),end(prefix),begin(arg),end(arg)).first != end(prefix)) {
 			continue;
 		}
@@ -65,6 +83,7 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 		if (result.second) {
 			auto levels_in_chain = DebugLevel::getAllShouldBeEnabled(result.first);
 			levels_to_enable.insert(end(levels_to_enable),begin(levels_in_chain),end(levels_in_chain));
+			used.insert(std::distance(begin(args), arg_it));
 		} else {
 			util::print_and_throw<std::invalid_argument>([&](auto&& str) {
 				str << "don't understand debug level " << level_string;
@@ -86,8 +105,26 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 				});
 			} else {
 				data_file_name = *data_file_it;
+				used.insert(std::distance(begin(args), data_flag_it));
+				used.insert(std::distance(begin(args), data_file_it));
 			}
 		}
+	}
+
+	std::vector<size_t> unused;
+	for (size_t i = 0; i < args.size(); ++i) {
+		if (used.find(i) == end(used)) {
+			unused.push_back(i);
+		}
+	}
+
+	if (!unused.empty()) {
+		util::print_and_throw<std::invalid_argument>([&](auto&& str) {
+			str << "didn't understand the following arguments:\n";
+			for (const auto& index : unused) {
+				str << '\t' << args[index] << '\n';
+			}
+		});
 	}
 
 }
