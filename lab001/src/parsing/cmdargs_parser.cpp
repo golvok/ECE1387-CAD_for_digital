@@ -10,6 +10,7 @@ namespace cmdargs {
 ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 	: graphics_enabled(false)
 	, fanout_test(false)
+	, route_as_is(false)
 	, channel_width_override(boost::none)
 	, levels_to_enable(DebugLevel::getDefaultSet())
 	, data_file_name()
@@ -44,6 +45,14 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 		const auto arg_it = std::find(begin(args),end(args),"--fanout-test");
 		if (arg_it != end(args)) {
 			fanout_test = true;
+			used.insert(std::distance(begin(args), arg_it));
+		}
+	}
+
+		{
+		const auto arg_it = std::find(begin(args),end(args),"--route-as-is");
+		if (arg_it != end(args)) {
+			route_as_is = true;
 			used.insert(std::distance(begin(args), arg_it));
 		}
 	}

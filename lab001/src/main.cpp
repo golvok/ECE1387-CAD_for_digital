@@ -16,6 +16,7 @@
 struct ProgramConfig {
 	std::string data_file_name;
 	bool fanout_test;
+	bool route_as_is;
 	boost::optional<int> channel_width_override;
 };
 
@@ -42,6 +43,7 @@ int main(int argc, char const** argv) {
 	const auto result = program_main(ProgramConfig{
 		parsed_args.getDataFileName(),
 		parsed_args.shouldDoFanoutTest(),
+		parsed_args.shouldJustRouteAsIs(),
 		parsed_args.channelWidthOverride()
 	});
 
@@ -73,7 +75,12 @@ int program_main(const ProgramConfig& config) {
 			if (config.fanout_test) {
 				flows::fanout_test(device_info_to_use);
 			}
-			flows::track_width_exploration(device_info_to_use, pr.pin_to_pin_netlist);
+
+			if (config.route_as_is) {
+				flows::route_as_is(device_info_to_use, pr.pin_to_pin_netlist);
+			} else {
+				flows::track_width_exploration(device_info_to_use, pr.pin_to_pin_netlist);
+			}
 		}
 	);
 	apply_visitor(visitor, parse_result);
