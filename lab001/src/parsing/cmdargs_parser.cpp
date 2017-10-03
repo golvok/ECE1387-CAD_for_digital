@@ -1,6 +1,8 @@
 
 #include "cmdargs_parser.hpp"
 
+#include <device/connectors.hpp>
+
 #include <unordered_set>
 
 namespace parsing {
@@ -12,6 +14,7 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 	, fanout_test(false)
 	, route_as_is(false)
 	, channel_width_override(boost::none)
+	, device_type_override(boost::none)
 	, levels_to_enable(DebugLevel::getDefaultSet())
 	, data_file_name()
  {
@@ -76,6 +79,33 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 				channel_width_override = result;
 				used.insert(std::distance(begin(args), cwo_flag_it));
 				used.insert(std::distance(begin(args), cwo_number_it));
+			}
+		}
+	}
+
+	{
+		auto dto_flag_it = std::find(begin(args),end(args),"--device-type-override");
+		if (dto_flag_it == end(args)) {
+			util::print_and_throw<std::invalid_argument>([&](auto&& str) {
+				str << "--device-type-override required";
+			});
+		} else {
+			auto dto_arg_it = std::next(dto_flag_it);
+			if (dto_arg_it == end(args)) {
+				util::print_and_throw<std::invalid_argument>([&](auto&& str) {
+					str << "--device-type-override requires an argument";
+				});
+			} else {
+				auto result = device::DeviceType::parseFromString(*dto_arg_it);
+				if (!result) {
+					util::print_and_throw<std::invalid_argument>([&](auto&& str) {
+						str << "don't understand --device-type-override argument : " << *dto_arg_it;
+					});
+				} else {
+					device_type_override = result;
+					used.insert(std::distance(begin(args), dto_flag_it));
+					used.insert(std::distance(begin(args), dto_arg_it));
+				}
 			}
 		}
 	}

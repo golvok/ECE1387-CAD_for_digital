@@ -84,6 +84,13 @@ namespace util {
 			}
 		}
 	}
+
+	template<typename CONTAINER>
+	bool empty(CONTAINER&& c) {
+		using std::begin;
+		using std::end;
+		return begin(c) == end(c);
+	}
 }
 
 /*******

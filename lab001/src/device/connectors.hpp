@@ -6,6 +6,8 @@
 #include <util/logging.hpp>
 #include <util/template_utils.hpp>
 
+#include <boost/optional.hpp>
+
 namespace device {
 
 namespace {
@@ -55,7 +57,7 @@ struct FullyConnectedConnector {
 
 	using BlockFanoutIndex = PinGID;
 
-	DeviceInfo dev_info;
+	const DeviceInfo& dev_info;
 	decltype(dev_info.bounds) wire_bb;
 
 	FullyConnectedConnector(const DeviceInfo& dev_info)
@@ -413,6 +415,21 @@ static const util::type_vector<
 	ALL_DEVICES_COMMA_SEP_CONST_REF
 > ALL_DEVICES_CONST_REF;
 
+namespace DeviceType {
+	static const DeviceTypeID Wilton = util::make_id<DeviceTypeID>(1);
+	static const DeviceTypeID FullyConnected = util::make_id<DeviceTypeID>(2);
+
+	inline boost::optional<DeviceTypeID> parseFromString(const std::string& s) {
+		if (s == "wilton") {
+			return Wilton;
+		} else if (s == "fc" || s == "fully_connected") {
+			return FullyConnected;
+		} else {
+			return boost::none;
+		}
+	}
 }
+
+} // end namespace device
 
 #endif // DEVICE__CONNECTORS_H

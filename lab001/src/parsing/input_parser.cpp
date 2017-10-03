@@ -28,7 +28,7 @@ namespace {
 namespace parsing {
 namespace input {
 
-boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
+boost::variant<ParseResult, std::string> parse_data(std::istream& is, boost::optional<device::DeviceTypeID> default_device_type) {
 	std::stringstream is_as_ss;
 	is_as_ss << is.rdbuf();
 	auto is_as_string = is_as_ss.str();
@@ -60,11 +60,13 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 	using std::begin;
 	using std::end;
 
-	device::DeviceInfo device_info;
-	device_info.bounds = geom::BoundBox<int>(0,0,get<0>(parse_results)-1,get<0>(parse_results)-1);
-	device_info.track_width = get<1>(parse_results);
-	device_info.pins_per_block_side = 1;
-	device_info.num_blocks_adjacent_to_channel = 2;
+	device::DeviceInfo device_info{
+		*default_device_type,
+		geom::BoundBox<int>(0,0,get<0>(parse_results)-1,get<0>(parse_results)-1),
+		get<1>(parse_results),
+		1,
+		2,
+	};
 
 	util::Netlist<PinGID> netlist;
 

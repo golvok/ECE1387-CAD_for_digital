@@ -3,6 +3,7 @@
 #define PARSING__CMDARGS_PARSER_H
 
 #include <util/logging.hpp>
+#include <device/device.hpp>
 
 #include <string>
 
@@ -28,6 +29,7 @@ public:
 	bool shouldEnableGraphics() const  { return graphics_enabled; }
 	bool shouldDoFanoutTest() const { return fanout_test; }
 	bool shouldJustRouteAsIs() const { return route_as_is; }
+	const auto& deviceTypeOverride() const { return device_type_override; }
 	const boost::optional<int>& channelWidthOverride() const { return channel_width_override; }
 	const std::string& getDataFileName() const { return data_file_name; }
 
@@ -38,6 +40,7 @@ private:
 	bool fanout_test;
 	bool route_as_is;
 	boost::optional<int> channel_width_override;
+	boost::optional<device::DeviceTypeID> device_type_override;
 
 	/// The printing levels that should be enabled. Duplicate entries are possible & allowed
 	std::vector<DebugLevel::Level> levels_to_enable;

@@ -94,7 +94,7 @@ public:
 						str << "Trying track width of " << dev_info_copy.track_width;
 					});
 
-					const Device modified_dev(dev_info_copy, typename Device::Connector(dev_info_copy));
+					const Device modified_dev(dev_info_copy);
 					const auto route_success = RouteAsIsFlow<Device>(modified_dev).flow_main(pin_to_pin_netlist);
 
 					if (route_success) {
@@ -130,8 +130,20 @@ namespace {
 	using DeviceVariant = boost::variant<ALL_DEVICES_COMMA_SEP>;
 
 	DeviceVariant make_device(const device::DeviceInfo& dev_desc) {
-		device::WiltonConnector connector(dev_desc);
-		return device::Device<std::remove_reference_t<decltype(connector)>>(dev_desc, connector);
+		const auto& dtype = dev_desc.type();
+
+		if (dtype == device::DeviceType::Wilton) {
+			return device::Device<device::WiltonConnector>(dev_desc);
+
+		} else if (dtype == device::DeviceType::FullyConnected) {
+			return device::Device<device::FullyConnectedConnector>(dev_desc);
+
+		} else {
+			util::print_and_throw<std::runtime_error>([&](auto&& str) {
+				str << "don't understand device type " << dtype.getValue();
+			});
+			throw "impossible";
+		}
 	}
 }
 

@@ -7,6 +7,7 @@
 #include <iosfwd>
 #include <tuple>
 
+#include <boost/optional.hpp>
 #include <boost/variant.hpp>
 
 namespace parsing {
@@ -20,7 +21,7 @@ struct ParseResult {
 /**
  * returns the input data for the program to work on
  */
-boost::variant<ParseResult, std::string> parse_data(std::istream& is);
+boost::variant<ParseResult, std::string> parse_data(std::istream& is, boost::optional<device::DeviceTypeID> default_device_type);
 
 } // end namespace parsing
 } // end namespace input

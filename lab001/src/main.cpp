@@ -18,6 +18,7 @@ struct ProgramConfig {
 	bool fanout_test;
 	bool route_as_is;
 	boost::optional<int> channel_width_override;
+	boost::optional<device::DeviceTypeID> device_type_override;
 };
 
 int program_main(const ProgramConfig& config);
@@ -44,7 +45,8 @@ int main(int argc, char const** argv) {
 		parsed_args.getDataFileName(),
 		parsed_args.shouldDoFanoutTest(),
 		parsed_args.shouldJustRouteAsIs(),
-		parsed_args.channelWidthOverride()
+		parsed_args.channelWidthOverride(),
+		parsed_args.deviceTypeOverride()
 	});
 
 	graphics::get().close();
@@ -57,7 +59,7 @@ int program_main(const ProgramConfig& config) {
 
 	std::ifstream data_file(config.data_file_name);
 
-	auto parse_result = parsing::input::parse_data(data_file);
+	auto parse_result = parsing::input::parse_data(data_file, config.device_type_override);
 	auto visitor = util::compose<boost::static_visitor<void>>(
 		[&](const std::string& err_str) {
 			util::print_and_throw<std::invalid_argument>([&](auto&& str) {

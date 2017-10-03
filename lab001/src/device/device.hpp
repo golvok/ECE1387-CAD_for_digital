@@ -178,11 +178,18 @@ inline std::ostream& operator<<(std::ostream& os, Direction dir) {
 	return os;
 }
 
+struct DeviceTypeIDTag { static const int DEFAULT_VALUE = -1; };
+using DeviceTypeID = util::ID<int, DeviceTypeIDTag>;
+
 struct DeviceInfo {
+	DeviceTypeID m_type;
 	geom::BoundBox<int> bounds{};
 	int track_width = -1;
 	int pins_per_block_side = -1;
 	int num_blocks_adjacent_to_channel = -1;
+
+	      auto& type()       { return m_type; }
+	const auto& type() const { return m_type; }
 };
 
 template<
@@ -192,13 +199,13 @@ class Device {
 public:
 	using Connector = CONNECTOR;
 
-	template<typename L_CONNECTOR>
+	template<typename... CONNECTOR_ARGS>
 	Device(
 		const DeviceInfo& dev_info,
-		L_CONNECTOR&& connector
+		CONNECTOR_ARGS&&... connector_args
 	)
 		: dev_info(dev_info)
-		, connector(std::forward<L_CONNECTOR>(connector))
+		, connector(this->dev_info, std::forward<CONNECTOR_ARGS>(connector_args)...)
 	{ }
 
 	const auto& info() const {
