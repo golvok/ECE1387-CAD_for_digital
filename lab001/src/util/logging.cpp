@@ -27,6 +27,7 @@ namespace DebugLevel {
 	 */
 	std::vector<std::vector<Level>> enable_chains {
 		{ MAZE_ROUTE_STEP, ROUTE_D4, ROUTE_D3, ROUTE_D2, ROUTE_D1, },
+		{ MAZE_ROUTE_STEP, PIN_BY_PIN_STEP, },
 		{ DATA_READ1, },
 	};
 
@@ -51,6 +52,7 @@ namespace DebugLevel {
 		{ ROUTE_D3, "ROUTE_D3" },
 		{ ROUTE_D4, "ROUTE_D4" },
 
+		{ PIN_BY_PIN_STEP, "PIN_BY_PIN_STEP" },
 		{ MAZE_ROUTE_STEP, "MAZE_ROUTE_STEP" },
 
 		{ DATA_READ1, "DATA_READ1" },

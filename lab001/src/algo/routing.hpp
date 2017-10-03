@@ -65,8 +65,10 @@ RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, NetOrder&& 
 					prev = id;
 				}
 
-				const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, {*new_routing}, true);
-				graphics::get().waitForPress();
+				if (dout(DL::PIN_BY_PIN_STEP).enabled()) {
+					const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, {*new_routing}, true);
+					graphics::get().waitForPress();
+				}
 			} else {
 				result.unroutedPins().addConnection(src_pin, sink_pin);
 				encountered_failing_pin = true;
