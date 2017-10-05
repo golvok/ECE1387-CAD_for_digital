@@ -47,6 +47,8 @@ public:
 		}
 	}
 
+	bool empty() const { return connections.empty(); }
+
 	auto& roots() const { return m_roots; }
 	auto& roots()       { return m_roots; }
 

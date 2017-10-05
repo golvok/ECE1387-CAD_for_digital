@@ -55,21 +55,82 @@ class RouteAsIsFlow : public FlowBase<Device> {
 	using FlowBase<Device>::FlowBase;
 	using FlowBase<Device>::dev;
 public:
-	bool flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist) const {
-		const auto result = algo::route_all<false>(pin_to_pin_netlist, pin_to_pin_netlist.roots(), dev);
+	template<typename RouteTheseSourcesFirst = std::vector<device::PinGID>>
+	auto flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist, RouteTheseSourcesFirst route_these_sources_first = {}) const {
+		const auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
+			str << "RouteAsIs Flow ( track_width = " << this->dev.info().track_width << " )";
+		});
 
-		bool found_fail = false;
+		std::unordered_set<device::PinGID> in_route_these_first;
+		std::vector<device::PinGID> net_order;
+		for (const auto& pin : route_these_sources_first) {
+			in_route_these_first.insert(pin);
+			net_order.emplace_back(pin);
+		}
+
+		std::copy_if(
+			begin(pin_to_pin_netlist.roots()),
+			end(pin_to_pin_netlist.roots()),
+			std::back_inserter(net_order),
+			[&](const device::PinGID& pin) {
+				return in_route_these_first.find(pin) == end(in_route_these_first);
+			}
+		);
+
+		const auto result = algo::route_all<false>(pin_to_pin_netlist, net_order, dev);
+		const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushState(&dev, result.netlist());
+		dout(DL::INFO) << "routing attempt finished\n";
+
 		for (const auto& source : result.unroutedPins().all_ids()) {
 			for (const auto& sink : result.unroutedPins().fanout(source)) {
-				found_fail = true;
 				dout(DL::INFO) << "failed to route " << source << " -> " << sink << '\n';
 			}
 		}
 
-		const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushState(&dev, result.netlist());
 		graphics::get().waitForPress();
 
-		return !found_fail;
+		return result;
+	}
+};
+
+template<typename Device>
+class RouteWithRetryFlow : public FlowBase<Device> {
+	using FlowBase<Device>::FlowBase;
+	using FlowBase<Device>::dev;
+public:
+	bool flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist) const {
+		const auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
+			str << "RouteWithRetry Flow";
+		});
+
+		std::unordered_set<device::PinGID> in_route_these_sources_first;
+		std::list<device::PinGID> route_these_sources_first;
+
+		while (true) {
+			const auto result = RouteAsIsFlow<Device>(dev).flow_main(pin_to_pin_netlist, route_these_sources_first);
+			// const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushState(&dev, result.netlist());
+
+			bool added_something = false;
+			for (const auto& source : result.unroutedPins().all_ids()) {
+				const bool already_there = in_route_these_sources_first.find(source) != end(in_route_these_sources_first);
+				const bool has_fanout = !util::empty(result.unroutedPins().fanout(source));
+				if (!already_there && has_fanout) {
+					dout(DL::INFO) << "new failure on : " << source << '\n';
+					route_these_sources_first.push_back(source);
+					in_route_these_sources_first.insert(source);
+					added_something = true;
+				}
+			}
+
+			// graphics::get().waitForPress();
+
+			if (result.unroutedPins().empty()) {
+				return true;
+			} else if (!added_something) {
+				dout(DL::INFO) << "Failed to route the same nets. Giving up.\n";
+				return false;
+			}
+		}
 	}
 };
 
@@ -79,6 +140,10 @@ class TrackWidthExplorationFlow : public FlowBase<Device> {
 	using FlowBase<Device>::dev;
 public:
 	void flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist) const {
+		const auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
+			str << "TrackWidthExploration Flow";
+		});
+
 		std::unordered_map<int, bool> attempt_statuses;
 		auto track_width_range = boost::irange(1, dev.info().track_width+1); // +1 as last argument is a past-end
 		const auto SENTINEL = -1; // something note in the above range, specifically less than everything
@@ -95,7 +160,8 @@ public:
 					});
 
 					const Device modified_dev(dev_info_copy);
-					const auto route_success = RouteAsIsFlow<Device>(modified_dev).flow_main(pin_to_pin_netlist);
+					const auto route_success = RouteWithRetryFlow<Device>(modified_dev).flow_main(pin_to_pin_netlist);
+					// const auto route_success = RouteAsIsFlow<Device>(modified_dev).flow_main(pin_to_pin_netlist).unroutedPins().empty();
 
 					if (route_success) {
 						dout(DL::INFO) << "Circuit successfully routed with track width of " << modified_dev.info().track_width << '\n';
