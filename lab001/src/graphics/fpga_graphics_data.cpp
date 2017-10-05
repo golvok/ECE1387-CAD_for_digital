@@ -218,9 +218,9 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 		}
 	};
 
-	uint_fast8_t net_number = 0;
+	{ int net_number = 0;
 	for (const auto& root_id : data.getNetlist().roots()) {
-		const auto net_colour = t_color(0x00, (uint_fast8_t)((0x66 + (net_number*0x8)) % 0xFF), 0x00);
+		const auto net_colour = t_color(0x00, (uint_fast8_t)(0x66 + (net_number*0x07) % (0xFF-0x66)), (uint_fast8_t)(0x66 + (net_number*0x05) % (0xCC-0x66)));
 		struct IterState {
 			device::RouteElementID parent = util::make_id<device::RouteElementID>();
 			std::pair<graphics::t_point, graphics::t_point> parent_loc = {};
@@ -235,7 +235,7 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 			return {id, wire_loc};
 		});
 		net_number++;
-	}
+	}}
 
 	for (const auto& path : data.getPaths()) {
 		boost::optional<std::pair<device::RouteElementID, std::pair<graphics::t_point, graphics::t_point>>> prev_loc;
