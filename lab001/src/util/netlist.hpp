@@ -3,6 +3,7 @@
 
 #include <util/generator.hpp>
 
+#include <list>
 #include <unordered_map>
 #include <unordered_set>
 #include <stdexcept>
@@ -66,6 +67,24 @@ public:
 				return elem->first;
 			}
 		);
+	}
+
+	template<typename VisitorState, typename Visitor>
+	auto for_all_descendants(NODE_ID start, VisitorState&& initial_state, Visitor&& visitor) const {
+		std::list<std::pair<NODE_ID, VisitorState>> to_visit;
+		to_visit.emplace_back(start, initial_state);
+
+		while (!to_visit.empty()) {
+			const auto& curr_and_state = to_visit.front();
+
+			auto new_state = visitor(curr_and_state.first, curr_and_state.second);
+
+			for (const auto& node : fanout(curr_and_state.first)) {
+				to_visit.emplace_back(node, new_state);
+			}
+
+			to_visit.pop_front();
+		}
 	}
 private:
 	ConnectionStorage connections;

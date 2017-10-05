@@ -1,6 +1,7 @@
 #include "fpga_graphics_data.hpp"
 
 #include <graphics/graphics.hpp>
+#include <util/graph_algorithms.hpp>
 #include <util/logging.hpp>
 
 namespace graphics {
@@ -25,64 +26,118 @@ void FPGAGraphicsData::do_graphics_refresh(bool reset_view, const geom::BoundBox
 	graphics::refresh_graphics();
 }
 
+
+template<typename X, typename Y>
+auto bounds_for_xy(X x, Y y) {
+	auto x1 = static_cast<float>(x)*1.0f;
+	auto y1 = static_cast<float>(y)*1.0f;
+	return graphics::t_bound_box(x1, y1, x1 + 1.0f, y1 + 1.0f);
+}
+
+auto block_bounds_within(graphics::t_bound_box grid_square_bounds) {
+	return graphics::t_bound_box(
+		grid_square_bounds.bottom_left() + graphics::t_point(grid_square_bounds.get_width()/2, grid_square_bounds.get_height()/2),
+		grid_square_bounds.top_right()
+	);
+}
+
+template<typename X, typename Y, typename Dir>
+auto channel_bounds_for_block_at(X x, Y y, Dir dir) -> graphics::t_bound_box {
+	const auto bound_of_me = bounds_for_xy(x, y);
+	const auto bound_of_the_right = bounds_for_xy(x+1, y);
+	const auto bound_of_the_above = bounds_for_xy(x, y+1);
+	const auto block_bounds = block_bounds_within(bound_of_me);
+	const auto block_bounds_of_the_right = block_bounds_within(bound_of_the_right);
+	const auto block_bounds_of_the_above = block_bounds_within(bound_of_the_above);
+	switch (dir) {
+		case decltype(dir)::LEFT: {
+			return {bound_of_me.top_left(), block_bounds.bottom_left()};
+		} break;
+		case decltype(dir)::RIGHT: {
+			return {block_bounds.top_right(), block_bounds_of_the_right.bottom_left()};
+		} break;
+		case decltype(dir)::TOP: {
+			return {block_bounds.top_right(), block_bounds_of_the_above.bottom_left()};
+		} break;
+		case decltype(dir)::BOTTOM: {
+			return {bound_of_me.bottom_right(), block_bounds.bottom_left()};
+		} break;
+		default:
+			dout(DL::WARN) << "not sure how calculate bounds of " << dir << " channel\n";
+			return block_bounds;
+		break;
+	}
+}
+
+template<typename Dir>
+auto channel_location(Dir dir) {
+	switch (dir) {
+		case decltype(dir)::HORIZONTAL:
+			return device::BlockSide::BOTTOM;
+		case decltype(dir)::VERTICAL:
+			return device::BlockSide::LEFT;
+		default:
+			return device::BlockSide::OTHER;
+	}
+}
+
+template<typename Device>
+static std::pair<graphics::t_point, graphics::t_point> calculateWireLocation(const device::RouteElementID& reid, Device&& device) {
+	const auto xy_loc = geom::make_point(
+		reid.getX().getValue(),
+		reid.getY().getValue()
+	);
+
+	const auto grid_square_bounds = bounds_for_xy(xy_loc.x(), xy_loc.y());
+	const auto block_bounds = block_bounds_within(grid_square_bounds);
+
+	if (reid.isPin()) {
+		const auto as_pin = reid.asPin();
+		const auto pin_side = device->get_block_pin_side(as_pin);
+		const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), pin_side);
+
+		const auto block_side = block_bounds.get_side(pin_side);
+		const auto channel_side = channel_bounds.get_side(pin_side);
+
+		const auto block_point = interpolate(block_side.first, 2.0f/3.0f, block_side.second);
+		const auto channel_point = interpolate(channel_side.first, 2.0f/3.0f, channel_side.second);
+
+		const auto p1 = block_point;
+		const auto p2 = interpolate(block_point, 0.9f, channel_point);
+
+		return {p1, p2};
+	} else { // if (device->is_channel(reid)) {
+		const auto wire_dir = device->wire_direction(reid);
+		const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), channel_location(wire_dir));
+
+		const auto sides = [&]() -> std::pair<std::pair<t_point, t_point>, std::pair<t_point, t_point>> {
+			using device::BlockSide;
+			switch (wire_dir) {
+				case decltype(wire_dir)::HORIZONTAL:
+					return {channel_bounds.get_side(BlockSide::LEFT), channel_bounds.get_side(BlockSide::RIGHT)};
+				case decltype(wire_dir)::VERTICAL:
+				default:
+					return {channel_bounds.get_side(BlockSide::TOP), channel_bounds.get_side(BlockSide::BOTTOM)};
+			}
+		}();
+
+		const auto channel_pos = ((float)device->index_in_channel(reid) + 0.5f) / (float)device->info().track_width;
+		const auto p1 = interpolate(sides.first.first, channel_pos, sides.first.second);
+		const auto p2 = interpolate(sides.second.second, channel_pos, sides.second.first);
+		return {p1, p2};
+	}
+}
+
 template<typename Device>
 static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 	if (!device) return;
 
 	graphics::setcolor(0,0,0);
 
-	const auto bounds_for_xy = [&](auto x, auto y) {
-		auto x1 = static_cast<float>(x)*1.0f;
-		auto y1 = static_cast<float>(y)*1.0f;
-		return graphics::t_bound_box(x1, y1, x1 + 1.0f, y1 + 1.0f);
-	};
+	std::vector<device::RouteElementID> reIDs_to_draw;
+	std::unordered_set<device::RouteElementID> already_drawn;
+	std::unordered_map<device::RouteElementID, graphics::t_color> colour_overrides;
 
-	const auto block_bounds_within = [&](graphics::t_bound_box grid_square_bounds) {
-		return graphics::t_bound_box(
-			grid_square_bounds.bottom_left() + graphics::t_point(grid_square_bounds.get_width()/2, grid_square_bounds.get_height()/2),
-			grid_square_bounds.top_right()
-		);
-	};
-
-	const auto channel_bounds_for_block_at = [&](auto x, auto y, auto dir) -> graphics::t_bound_box {
-		const auto bound_of_me = bounds_for_xy(x, y);
-		const auto bound_of_the_right = bounds_for_xy(x+1, y);
-		const auto bound_of_the_above = bounds_for_xy(x, y+1);
-		const auto block_bounds = block_bounds_within(bound_of_me);
-		const auto block_bounds_of_the_right = block_bounds_within(bound_of_the_right);
-		const auto block_bounds_of_the_above = block_bounds_within(bound_of_the_above);
-		switch (dir) {
-			case decltype(dir)::LEFT: {
-				return {bound_of_me.top_left(), block_bounds.bottom_left()};
-			} break;
-			case decltype(dir)::RIGHT: {
-				return {block_bounds.top_right(), block_bounds_of_the_right.bottom_left()};
-			} break;
-			case decltype(dir)::TOP: {
-				return {block_bounds.top_right(), block_bounds_of_the_above.bottom_left()};
-			} break;
-			case decltype(dir)::BOTTOM: {
-				return {bound_of_me.bottom_right(), block_bounds.bottom_left()};
-			} break;
-			default:
-				dout(DL::WARN) << "not sure how calculate bounds of " << dir << " channel\n";
-				return block_bounds;
-			break;
-		}
-	};
-
-	const auto channel_location = [](auto dir) {
-		switch (dir) {
-			case decltype(dir)::HORIZONTAL:
-				return device::BlockSide::BOTTOM;
-			case decltype(dir)::VERTICAL:
-				return device::BlockSide::LEFT;
-			default:
-				return device::BlockSide::OTHER;
-		}
-	};
-
-	std::list<device::RouteElementID> reIDs_to_draw;
 	for (const auto& block : device->blocks()) {
 		const auto xy_loc = geom::make_point(
 			block.getX().getValue(),
@@ -101,95 +156,72 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 		}
 	}
 
-	std::unordered_map<device::RouteElementID, graphics::t_color> colour_overrides;
-	for (const auto& id : data.getNetlist().all_ids()) {
-		colour_overrides[id] = t_color(0x00, 0xFF, 0x00);
-	}
-	for (const auto& path : data.getPaths()) {
-		for (const auto& id : path) {
-			colour_overrides[id] = t_color(0x00, 0x00, 0xFF);
-		}
-	}
+	const auto& drawWire = [&](const auto& curr, boost::optional<t_color> colour = boost::none) {
+		const auto wire_loc = calculateWireLocation(curr, device);
+		const auto angle = geom::inclination(geom::make_point(wire_loc.first.x, wire_loc.first.y), geom::make_point(wire_loc.second.x, wire_loc.second.y));
 
-	std::unordered_set<device::RouteElementID> reIDs_already_seen;
-	while (!reIDs_to_draw.empty()) {
-		const auto curr = reIDs_to_draw.front();
-		reIDs_to_draw.pop_front();
-
-		if (reIDs_already_seen.insert(curr).second == false) {
-			continue;
-		}
-
-		for (const auto& fanout : device->fanout(curr)) {
-			if (reIDs_already_seen.find(fanout) == end(reIDs_already_seen)) {
-				reIDs_already_seen.insert(curr);
-				reIDs_to_draw.push_back(fanout);
-			}
-		}
-
-		const auto xy_loc = geom::make_point(
-			curr.getX().getValue(),
-			curr.getY().getValue()
-		);
-
-		const auto grid_square_bounds = bounds_for_xy(xy_loc.x(), xy_loc.y());
-		const auto block_bounds = block_bounds_within(grid_square_bounds);
-
-		const auto colour_overrides_find_result = colour_overrides.find(curr);
-		if (colour_overrides_find_result != end(colour_overrides)) {
-			graphics::setcolor(colour_overrides_find_result->second);
+		if (colour) {
+			graphics::setcolor(*colour);
 		} else {
-			const auto extracolours_find_result = data.getExtraColours().find(curr);
-			if (extracolours_find_result != end(data.getExtraColours())) {
-				graphics::setcolor(extracolours_find_result->second);
+			const auto colour_overrides_find_result = colour_overrides.find(curr);
+			if (colour_overrides_find_result != end(colour_overrides)) {
+				graphics::setcolor(colour_overrides_find_result->second);
+			} else {
+				const auto extracolours_find_result = data.getExtraColours().find(curr);
+				if (extracolours_find_result != end(data.getExtraColours())) {
+					graphics::setcolor(extracolours_find_result->second);
+				}
 			}
 		}
 
-		if (curr.isPin()) {
-			const auto as_pin = curr.asPin();
-			const auto pin_side = device->get_block_pin_side(as_pin);
-			const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), pin_side);
-
-			const auto block_side = block_bounds.get_side(pin_side);
-			const auto channel_side = channel_bounds.get_side(pin_side);
-
-			const auto block_point = interpolate(block_side.first, 2.0f/3.0f, block_side.second);
-			const auto channel_point = interpolate(channel_side.first, 2.0f/3.0f, channel_side.second);
-
-			const auto p1 = block_point;
-			const auto p2 = interpolate(block_point, 0.9f, channel_point);
-			const auto angle = inclination(geom::make_point(p1.x, p1.y), geom::make_point(p2.x, p2.y));
-
-			graphics::drawline(p1, p2);
-			graphics::settextrotation((int)angle.degreeValue() % 180);
-			graphics::drawtext_in(graphics::t_bound_box(p1,p2), util::stringify_through_stream(curr), 0.02f);
-		} else { // if (device->is_channel(curr)) {
-			const auto wire_dir = device->wire_direction(curr);
-			const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), channel_location(wire_dir));
-
-			const auto sides = [&]() -> std::pair<std::pair<t_point, t_point>, std::pair<t_point, t_point>> {
-				using device::BlockSide;
-				switch (wire_dir) {
-					case decltype(wire_dir)::HORIZONTAL:
-						return {channel_bounds.get_side(BlockSide::LEFT), channel_bounds.get_side(BlockSide::RIGHT)};
-					case decltype(wire_dir)::VERTICAL:
-					default:
-						return {channel_bounds.get_side(BlockSide::TOP), channel_bounds.get_side(BlockSide::BOTTOM)};
-				}
-			}();
-
-			const auto channel_pos = ((float)device->index_in_channel(curr) + 0.5f) / (float)device->info().track_width;
-			const auto p1 = interpolate(sides.first.first, channel_pos, sides.first.second);
-			const auto p2 = interpolate(sides.second.second, channel_pos, sides.second.first);
-			const auto angle = inclination(geom::make_point(p1.x, p1.y), geom::make_point(p2.x, p2.y));
-
-			graphics::drawline(p1, p2);
-			graphics::settextrotation((int)angle.degreeValue() % 180);
-			graphics::drawtext_in(graphics::t_bound_box(p1,p2), util::stringify_through_stream(curr), 0.02f);
-		}
+		graphics::drawline(wire_loc.first, wire_loc.second);
+		graphics::settextrotation((int)angle.degreeValue() % 180);
+		graphics::drawtext_in(graphics::t_bound_box(wire_loc.first,wire_loc.second), util::stringify_through_stream(curr), 0.02f);
 
 		graphics::setcolor(0,0,0);
+
+		return wire_loc;
+	};
+
+	uint_fast8_t net_number = 0;
+	for (const auto& root_id : data.getNetlist().roots()) {
+		const auto net_colour = t_color(0x00, (uint_fast8_t)((0x66 + (net_number*0x8)) % 0xFF), 0x00);
+		struct IterState {
+			device::RouteElementID parent = util::make_id<device::RouteElementID>();
+			std::pair<graphics::t_point, graphics::t_point> parent_loc = {};
+		};
+		data.getNetlist().for_all_descendants(root_id, IterState(), [&](const auto& id, const auto& state) -> IterState {
+			auto wire_loc = drawWire(id, net_colour);
+			if (state.parent != (IterState()).parent) {
+				graphics::setcolor(net_colour);
+				graphics::drawline(state.parent_loc.second, wire_loc.first);
+			}
+			already_drawn.insert(id);
+			return {id, wire_loc};
+		});
+		net_number++;
 	}
+
+	for (const auto& path : data.getPaths()) {
+		boost::optional<std::pair<graphics::t_point, graphics::t_point>> prev_loc;
+		const auto path_colour = t_color(0x00, 0x00, 0xFF);
+		for (const auto& id : path) {
+			auto wire_loc = drawWire(id, path_colour);
+			if (prev_loc) {
+				graphics::setcolor(path_colour);
+				graphics::drawline(prev_loc->second, wire_loc.first);
+			}
+			prev_loc = wire_loc;
+			already_drawn.insert(id);
+		}
+	}
+
+
+	util::breadthFirstVisit<device::RouteElementID>(*device, reIDs_to_draw, [&](const auto& curr) {
+		if (already_drawn.find(curr) == end(already_drawn)) {
+			drawWire(curr);
+		}
+	});
 
 }
 
