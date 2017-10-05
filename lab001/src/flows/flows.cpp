@@ -56,7 +56,7 @@ class RouteAsIsFlow : public FlowBase<Device> {
 	using FlowBase<Device>::dev;
 public:
 	template<typename RouteTheseSourcesFirst = std::vector<device::PinGID>>
-	auto flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist, RouteTheseSourcesFirst route_these_sources_first = {}) const {
+	auto flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist, RouteTheseSourcesFirst route_these_sources_first = {}, bool present_graphics = true) const {
 		const auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
 			str << "RouteAsIs Flow ( track_width = " << this->dev.info().track_width << " )";
 		});
@@ -78,7 +78,6 @@ public:
 		);
 
 		const auto result = algo::route_all<false>(pin_to_pin_netlist, net_order, dev);
-		const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushState(&dev, result.netlist());
 		dout(DL::INFO) << "routing attempt finished\n";
 
 		for (const auto& source : result.unroutedPins().all_ids()) {
@@ -87,7 +86,10 @@ public:
 			}
 		}
 
-		graphics::get().waitForPress();
+		if (present_graphics) {
+			const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushState(&dev, result.netlist());
+			graphics::get().waitForPress();
+		}
 
 		return result;
 	}
@@ -107,8 +109,7 @@ public:
 		std::list<device::PinGID> route_these_sources_first;
 
 		while (true) {
-			const auto result = RouteAsIsFlow<Device>(dev).flow_main(pin_to_pin_netlist, route_these_sources_first);
-			// const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushState(&dev, result.netlist());
+			const auto result = RouteAsIsFlow<Device>(dev).flow_main(pin_to_pin_netlist, route_these_sources_first, false);
 
 			bool added_something = false;
 			for (const auto& source : result.unroutedPins().all_ids()) {
@@ -122,12 +123,15 @@ public:
 				}
 			}
 
-			// graphics::get().waitForPress();
 
 			if (result.unroutedPins().empty()) {
+				const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushState(&dev, result.netlist());
+				graphics::get().waitForPress();
 				return true;
 			} else if (!added_something) {
 				dout(DL::INFO) << "Failed to route the same nets. Giving up.\n";
+				const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushState(&dev, result.netlist());
+				graphics::get().waitForPress();
 				return false;
 			}
 		}
