@@ -135,6 +135,7 @@ boost::optional<std::vector<ID>> maze_route(IDSet&& sources, ID2&& sink, FanoutG
 	boost::optional<std::vector<ID>> reversed_result = std::vector<ID>();
 	auto traceback_curr = sink;
 	while (true) {
+		reversed_result->push_back(traceback_curr);
 		if (sources.find(traceback_curr) != end(sources)) {
 			dout(DL::ROUTE_D1) << traceback_curr << '\n';
 			break;
@@ -144,7 +145,6 @@ boost::optional<std::vector<ID>> maze_route(IDSet&& sources, ID2&& sink, FanoutG
 			break;
 		} else {
 			dout(DL::ROUTE_D1) << traceback_curr << " -> ";
-			reversed_result->push_back(traceback_curr);
 			const auto& fanin = data[traceback_curr].fanin;
 			traceback_curr = *std::min_element(begin(fanin), end(fanin), [&](const auto& lhs, const auto& rhs) {
 				return data[lhs].distance < data[rhs].distance;
