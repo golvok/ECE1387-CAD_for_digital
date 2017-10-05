@@ -416,7 +416,7 @@ bool LOD_min_dim_test(float dim_threshold);
  * this function returns false it means that bounding box passed in will 
  * occupy less than (screen_area_threshold pixels)^2 on the screen.
  */
-bool LOD_screen_area_test(t_bound_box test, float screen_area_threshold);
+bool LOD_screen_area_test(t_bound_box test, float screen_area_threshold = 3.0f);
 
 
 /**

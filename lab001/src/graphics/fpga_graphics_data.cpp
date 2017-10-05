@@ -183,6 +183,41 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 		return wire_loc;
 	};
 
+	const auto& drawConnection = [&](const auto& colour, const std::pair<device::RouteElementID, std::pair<graphics::t_point, graphics::t_point>>& wire_and_loc1, const std::pair<device::RouteElementID, std::pair<graphics::t_point, graphics::t_point>>& wire_and_loc2) {
+		const auto point_list = {
+			std::make_pair(wire_and_loc1.second.first,  wire_and_loc2.second.first),
+			std::make_pair(wire_and_loc1.second.first,  wire_and_loc2.second.second),
+			std::make_pair(wire_and_loc1.second.second, wire_and_loc2.second.first),
+			std::make_pair(wire_and_loc1.second.second, wire_and_loc2.second.second),
+		};
+
+		const auto point_pair = *std::min_element(begin(point_list), end(point_list), [](const auto& lhs, const auto& rhs) {
+			return geom::l1_distance(geom::make_point(lhs.first.x, lhs.first.y), geom::make_point(lhs.second.x, lhs.second.y))
+				< geom::l1_distance(geom::make_point(rhs.first.x, rhs.first.y), geom::make_point(rhs.second.x, rhs.second.y));
+		});
+
+		graphics::setcolor(colour);
+		graphics::drawline(point_pair.first, point_pair.second);
+
+		const float arrow_size = 0.01f;
+		if (LOD_screen_area_test(graphics::t_bound_box({0,0}, arrow_size, arrow_size))) {
+
+			const auto t_point_delta = point_pair.second - point_pair.first;
+			const auto delta = geom::make_point(t_point_delta.x, t_point_delta.y);
+			const auto unit_delta = unit(delta);
+			const auto perp = unit(perpindictular(delta));
+			const auto offset1 = ( perp - unit_delta)*arrow_size;
+			const auto offset2 = (-perp - unit_delta)*arrow_size;
+			graphics::t_point arrow_points[] = {
+				point_pair.second,
+				point_pair.second + graphics::t_point(offset1.x(), offset1.y()),
+				point_pair.second + graphics::t_point(offset2.x(), offset2.y()),
+			};
+
+			graphics::fillpoly(arrow_points, (int)std::distance(std::begin(arrow_points), std::end(arrow_points)));
+		}
+	};
+
 	uint_fast8_t net_number = 0;
 	for (const auto& root_id : data.getNetlist().roots()) {
 		const auto net_colour = t_color(0x00, (uint_fast8_t)((0x66 + (net_number*0x8)) % 0xFF), 0x00);
@@ -193,26 +228,26 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 		data.getNetlist().for_all_descendants(root_id, IterState(), [&](const auto& id, const auto& state) -> IterState {
 			auto wire_loc = drawWire(id, net_colour);
 			if (state.parent != (IterState()).parent) {
-				graphics::setcolor(net_colour);
-				graphics::drawline(state.parent_loc.second, wire_loc.first);
+				drawConnection(net_colour, {state.parent, state.parent_loc}, {id, wire_loc});
 			}
 			already_drawn.insert(id);
+			reIDs_to_draw.push_back(id); // make sure that other fanouts are drawn?
 			return {id, wire_loc};
 		});
 		net_number++;
 	}
 
 	for (const auto& path : data.getPaths()) {
-		boost::optional<std::pair<graphics::t_point, graphics::t_point>> prev_loc;
+		boost::optional<std::pair<device::RouteElementID, std::pair<graphics::t_point, graphics::t_point>>> prev_loc;
 		const auto path_colour = t_color(0x00, 0x00, 0xFF);
 		for (const auto& id : path) {
 			auto wire_loc = drawWire(id, path_colour);
 			if (prev_loc) {
-				graphics::setcolor(path_colour);
-				graphics::drawline(prev_loc->second, wire_loc.first);
+				drawConnection(path_colour, *prev_loc, {id, wire_loc});
 			}
-			prev_loc = wire_loc;
+			prev_loc = std::make_pair(id, wire_loc);
 			already_drawn.insert(id);
+			reIDs_to_draw.push_back(id); // make sure that other fanouts are drawn?
 		}
 	}
 

@@ -63,6 +63,10 @@ public:
 		m_y = src.y();
 	}
 
+	Point operator-() const {
+		return Point(-m_x, -m_y);
+	}
+
 	/**
 	 * Behaves like a 2 argument plusequals.
 	 */
@@ -203,6 +207,10 @@ template<typename PRECISION, typename PRECISION2>
 auto distance(Point<PRECISION> p1, Point<PRECISION2> p2) {
 	return sqrt(pow(deltaX(p1, p2), 2) + pow(deltaY(p1, p2), 2));
 }
+template<typename PRECISION, typename PRECISION2>
+auto l1_distance(Point<PRECISION> p1, Point<PRECISION2> p2) {
+	return std::abs(deltaX(p1, p2)) + std::abs(deltaY(p1, p2));
+}
 template<typename PRECISION>
 auto magnitudeSquared(Point<PRECISION> p) {
 	return pow(p.x(), 2) + pow(p.y(), 2);
@@ -225,7 +233,7 @@ auto inclination(Point<PRECISION> p1, Point<PRECISION2> p2) {
 	return make_radian_angle(atan2(delta_vec.y(), delta_vec.x()));
 }
 template<typename PRECISION>
-Point<PRECISION> getPerpindular(Point<PRECISION> p) {
+Point<PRECISION> perpindictular(Point<PRECISION> p) {
 	return {p.y(),-p.x()};
 }
 template<typename PRECISION, typename PRECISION2>
