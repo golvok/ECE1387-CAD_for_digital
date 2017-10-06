@@ -267,6 +267,46 @@ void print_container(
 	os << suffix_str;
 }
 
+template<typename CONTAINER, typename OSTREAM, typename FUNC = ::util::detail::printer>
+void print_assoc_container(
+	const CONTAINER& c,
+	OSTREAM&& os,
+	const std::string& sep,
+	const std::string& prefix_str,
+	const std::string& suffix_str,
+	FUNC func = FUNC{}
+) {
+	auto beg = begin(c);
+	auto en = end(c);
+
+	os << prefix_str;
+	if (beg != en) {
+		os << prefix_str;
+		func(os,beg->first);
+		os << " -> ";
+		func(os,beg->second);
+		os << suffix_str;
+		std::for_each(std::next(beg), en, [&](const auto& v){
+			os << sep;
+			os << prefix_str;
+			func(os,v.first);
+			os << " -> ";
+			func(os,v.second);
+			os << suffix_str;
+		});
+	}
+	os << suffix_str;
 }
+
+template<typename CONTAINER, typename OSTREAM, typename FUNC = ::util::detail::printer>
+void print_assoc_container(
+	const CONTAINER& c,
+	OSTREAM&& os,
+	FUNC func = FUNC{}
+) {
+	print_assoc_container(c, os, ", ", "{ ", " }", func);
+}
+
+} // end namespace util
 
 #endif /* UTIL_H */
