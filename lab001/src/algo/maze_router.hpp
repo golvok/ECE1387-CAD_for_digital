@@ -77,13 +77,12 @@ boost::optional<std::vector<ID>> maze_route(IDSet&& sources, ID2&& sink, FanoutG
 
 	std::unordered_map<ID, VertexData> data;
 
-	bool set_next_graphics_update = false;
-	auto next_graphics_update = to_visit.front();
+	auto next_graphics_update = boost::make_optional(to_visit.front());
 	while (!to_visit.empty()) {
 		const auto explore_curr = to_visit.front();
 		if (explore_curr == next_graphics_update) {
 			detail::displayWavefront<ID>(sources, sink, fanout_gen, std::vector<ID>(), std::vector<ID>(), to_visit);
-			set_next_graphics_update = false;
+			next_graphics_update = boost::none;
 		}
 		to_visit.pop_front();
 
@@ -104,18 +103,16 @@ boost::optional<std::vector<ID>> maze_route(IDSet&& sources, ID2&& sink, FanoutG
 				data[fanout].distance = data[explore_curr].distance + 1;
 				data[fanout].put_in_queue = true;
 				to_visit.push_back(fanout);
-				if (!set_next_graphics_update) {
+				if (!next_graphics_update) {
 					next_graphics_update = fanout;
-					set_next_graphics_update = true;
 				}
 			} else {
 				dout(DL::ROUTE_D3) << "skipping " << fanout << "... ";
 			}
 		}
 
-		if (!set_next_graphics_update && !to_visit.empty()) {
+		if (!next_graphics_update && !to_visit.empty()) {
 			next_graphics_update = to_visit.back();
-			set_next_graphics_update = true;
 		}
 
 		if (explore_curr == sink) {
