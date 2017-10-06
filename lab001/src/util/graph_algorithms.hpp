@@ -11,6 +11,22 @@
 
 namespace util {
 
+template<typename VertexID_>
+class DefaultGraphVisitor {
+public:
+	using VertexID = VertexID_;
+	template<typename VertexCollection>
+	void onWaveStart(const VertexCollection&) { }
+
+	void onExplore(const VertexID&) { }
+
+	void onSkippedExplore(const VertexID&) { }
+
+	void onFanout(const VertexID&, const VertexID&) { }
+
+	void onSkippedFanout(const VertexID&, const VertexID&) { }
+};
+
 namespace detail {
 	struct AlwaysFalse {
 		template<typename... T>
@@ -84,6 +100,8 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 	}
 
 	while(true) {
+		visitor.onWaveStart(curr_wave);
+
 		std::vector<std::thread> threads;
 		for (int ithread = 0; ithread < NTHREADS; ++ithread) {
 			threads.emplace_back(
@@ -99,15 +117,18 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 
 				for (const auto& id : my_curr_wave) {
 					if (should_ignore(id)) {
+						visitor.onSkippedExplore(id);
 						continue;
 					} else {
+						visitor.onExplore(id);
 						for (const auto& fanout : fanout_gen.fanout(id)) {
 							if (data.find(fanout) == end(data) && !should_ignore(fanout)) {
 								my_next_wave.emplace_back(ExploreData{id, fanout});
+								visitor.onFanout(id, fanout);
 							} else {
+								visitor.onSkippedFanout(id, fanout);
 							}
 						}
-						visitor.visit(id);
 					}
 				}
 			}

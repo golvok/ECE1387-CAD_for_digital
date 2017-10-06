@@ -59,18 +59,26 @@ namespace detail {
 
 }
 
+template<typename VertexID, typename OnWaveStart>
+struct Visitor : public util::DefaultGraphVisitor<VertexID> {
+	Visitor(OnWaveStart&& ows) : onWaveStart(std::move(ows)) { }
+	Visitor(const OnWaveStart& ows) : onWaveStart(ows) { }
+
+	OnWaveStart onWaveStart;
+
+	void onExplore(VertexID id) {
+		dout(DL::ROUTE_D1) << "visit: " << id << '\n';
+	}
+};
+
 template<typename ID, typename IDSet, typename ID2, typename FanoutGenerator, typename ShouldIgnore>
 boost::optional<std::vector<ID>> maze_route(IDSet&& sources, ID2&& sink, FanoutGenerator&& fanout_gen, ShouldIgnore&& should_ignore) {
 
-	struct Visitor {
-		using VertexID = ID;
-		void visit(VertexID id) {
-			(void)id;
-			// dout(DL::INFO) << "visit: " << id << '\n';
-		}
+	const auto onWaveStart = [&](const auto& wave) {
+		detail::displayWavefront<ID>(sources, sink, fanout_gen, std::vector<ID>(), std::vector<ID>(), wave);
 	};
 
-	const auto data2 = util::wavedBreadthFirstVisit(fanout_gen, sources, sink, Visitor(), should_ignore);
+	const auto data2 = util::wavedBreadthFirstVisit(fanout_gen, sources, sink, Visitor<ID, decltype(onWaveStart)>(onWaveStart), should_ignore);
 
 	dout(DL::ROUTE_D1) << "tracing2back... ";
 
