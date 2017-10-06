@@ -60,7 +60,7 @@ int program_main(const ProgramConfig& config) {
 	std::ifstream data_file(config.data_file_name);
 
 	auto parse_result = parsing::input::parse_data(data_file, config.device_type_override);
-	auto visitor = util::compose<boost::static_visitor<void>>(
+	auto visitor = util::compose_withbase<boost::static_visitor<void>>(
 		[&](const std::string& err_str) {
 			util::print_and_throw<std::invalid_argument>([&](auto&& str) {
 				str << err_str;
