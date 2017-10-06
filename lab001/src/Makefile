@@ -23,7 +23,7 @@ else
 # remove ALL implicit rules & all suffixes
 MAKEFLAGS+=" -r "
 
-BUILD_MODE ?= debug
+BUILD_MODE ?= release
 
 BUILD_DIR = ../build/
 EXE_DIR  = $(BUILD_DIR)EXE/
