@@ -1,7 +1,13 @@
 #ifndef UTIL__GRAPH_ALGORITHMS_H
-#define UTIL__GRAPH_ALGORITHMS_H
+#define UTIL__GRAPH_ALGORIT
 
+#include <list>
+#include <thread>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
+#include <boost/range/iterator_range.hpp>
 
 namespace util {
 
@@ -46,6 +52,103 @@ void breadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_list, 
 		visitor(explore_curr);
 	}
 
+}
+
+template<typename FanoutGen, typename InitialList, typename Target, typename Visitor, typename ShouldIgnore = detail::AlwaysFalse>
+auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_list, Target&& target, Visitor&& visitor, ShouldIgnore&& should_ignore = ShouldIgnore()) {
+
+	const int NTHREADS = 4;
+	using ID = typename Visitor::VertexID;
+
+	struct VertexData {
+		std::vector<ID> fanin = {};
+	};
+
+	std::unordered_map<ID, VertexData> data;
+
+	struct ExploreData {
+		ID parent;
+		ID fanout;
+	};
+
+	std::vector<ID> curr_wave = {};
+	struct WaveData {
+		std::vector<ExploreData> next_wave = {};
+	};
+
+	std::vector<WaveData> waveData(NTHREADS);
+
+	for (const auto& vertex : initial_list) {
+		curr_wave.push_back(vertex);
+		data[vertex];
+	}
+
+	while(true) {
+		std::vector<std::thread> threads;
+		for (int ithread = 0; ithread < NTHREADS; ++ithread) {
+			threads.emplace_back(
+			[&waveData, &curr_wave, ithread, &data, &should_ignore, &fanout_gen, &visitor]() {
+				const auto& num_data_per_thread = 1 + ((curr_wave.size()-1)/NTHREADS); // ronuds up
+				const auto& my_curr_wave_begin_index = ithread*num_data_per_thread;
+				const auto& my_curr_wave_end_index =   (ithread + 1)*num_data_per_thread + 1;
+				const auto& my_curr_wave = boost::make_iterator_range(
+					std::next(begin(curr_wave), std::min(curr_wave.size(), my_curr_wave_begin_index)),
+					std::next(begin(curr_wave), std::min(curr_wave.size(), my_curr_wave_end_index))
+				);
+				auto& my_next_wave = waveData[ithread].next_wave;
+
+				for (const auto& id : my_curr_wave) {
+					if (should_ignore(id)) {
+						continue;
+					} else {
+						for (const auto& fanout : fanout_gen.fanout(id)) {
+							if (data.find(fanout) == end(data) && !should_ignore(fanout)) {
+								my_next_wave.emplace_back(ExploreData{id, fanout});
+							} else {
+							}
+						}
+						visitor.visit(id);
+					}
+				}
+			}
+			);
+		}
+
+		for (auto& thread : threads) {
+			thread.join();
+		}
+
+		bool found_target = false;
+		std::vector<ExploreData> explorations_to_new_nodes;
+		std::unordered_set<ID> in_next_wave;
+		curr_wave.clear();
+		for (auto& waveDatum : waveData) {
+			for (auto& exploreData : waveDatum.next_wave) {
+				if (data.find(exploreData.fanout) == end(data)) {
+					explorations_to_new_nodes.emplace_back(exploreData);
+					if (in_next_wave.find(exploreData.fanout) == end(in_next_wave)) {
+						in_next_wave.emplace(exploreData.fanout);
+						curr_wave.push_back(exploreData.fanout);
+					}
+				}
+
+				if (exploreData.fanout == target) {
+					found_target = true;
+				}
+
+			}
+		}
+
+		for (const auto& exploreData : explorations_to_new_nodes) {
+			data[exploreData.fanout].fanin.emplace_back(exploreData.parent);
+		}
+
+		if (found_target || curr_wave.empty()) {
+			break;
+		}
+	}
+
+	return data;
 }
 
 } // end namespace util

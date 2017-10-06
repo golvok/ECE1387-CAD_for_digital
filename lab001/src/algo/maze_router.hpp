@@ -2,6 +2,7 @@
 #define ALGO__MAZE_ROUTER_H
 
 #include <graphics/graphics_types.hpp>
+#include <util/graph_algorithms.hpp>
 #include <util/logging.hpp>
 
 #include <list>
@@ -34,6 +35,7 @@ namespace detail {
 		const Explored& explored,
 		const Wavefront& wavefront
 	) {
+		// dout(DL::INFO) << "wavefront size = " << wavefront.size() << '\n';
 		if (!dout(DL::MAZE_ROUTE_STEP).enabled()) {
 			return;
 		}
@@ -59,75 +61,18 @@ namespace detail {
 
 template<typename ID, typename IDSet, typename ID2, typename FanoutGenerator, typename ShouldIgnore>
 boost::optional<std::vector<ID>> maze_route(IDSet&& sources, ID2&& sink, FanoutGenerator&& fanout_gen, ShouldIgnore&& should_ignore) {
-	std::list<ID> to_visit;
 
-	dout(DL::ROUTE_D1) << "starting with: ";
-	for (const auto& source : sources) {
-		dout(DL::ROUTE_D1) << source << ' ';
-		to_visit.push_back(source);
-	}
-	dout(DL::ROUTE_D1) << '\n';
-
-	struct VertexData {
-		std::vector<ID> fanin{};
-		int distance = 0;
-		bool put_in_queue = false;
-		bool expanded = false;
+	struct Visitor {
+		using VertexID = ID;
+		void visit(VertexID id) {
+			(void)id;
+			// dout(DL::INFO) << "visit: " << id << '\n';
+		}
 	};
 
-	std::unordered_map<ID, VertexData> data;
+	const auto data2 = util::wavedBreadthFirstVisit(fanout_gen, sources, sink, Visitor(), should_ignore);
 
-	auto next_graphics_update = boost::make_optional(to_visit.front());
-	while (!to_visit.empty()) {
-		const auto explore_curr = to_visit.front();
-		if (explore_curr == next_graphics_update) {
-			detail::displayWavefront<ID>(sources, sink, fanout_gen, std::vector<ID>(), std::vector<ID>(), to_visit);
-			next_graphics_update = boost::none;
-		}
-		to_visit.pop_front();
-
-		dout(DL::ROUTE_D1) << "examining " << explore_curr << "... ";
-
-		if (data[explore_curr].expanded) {
-			dout(DL::ROUTE_D1) << "already seen it\n";
-			continue;
-		} else if (should_ignore(explore_curr)) {
-			dout(DL::ROUTE_D1) << "should be ignored\n";
-			continue;
-		}
-
-		for (const auto& fanout : fanout_gen.fanout(explore_curr)) {
-			data[fanout].fanin.push_back(explore_curr);
-			if (!data[fanout].put_in_queue && !data[fanout].expanded && !should_ignore(fanout)) {
-				dout(DL::ROUTE_D2) << "adding " << fanout << "... ";
-				data[fanout].distance = data[explore_curr].distance + 1;
-				data[fanout].put_in_queue = true;
-				to_visit.push_back(fanout);
-				if (!next_graphics_update) {
-					next_graphics_update = fanout;
-				}
-			} else {
-				dout(DL::ROUTE_D3) << "skipping " << fanout << "... ";
-			}
-		}
-
-		if (!next_graphics_update && !to_visit.empty()) {
-			next_graphics_update = to_visit.back();
-		}
-
-		if (explore_curr == sink) {
-			dout(DL::ROUTE_D1) << "is the target!\n";
-			break;
-		}
-
-		data[explore_curr].expanded = true;
-
-		dout(DL::ROUTE_D1) << "done\n";
-	}
-
-	detail::displayWavefront<ID>(sources, sink, fanout_gen, std::vector<ID>(), std::vector<ID>(), to_visit);
-
-	dout(DL::ROUTE_D1) << "tracing back... ";
+	dout(DL::ROUTE_D1) << "tracing2back... ";
 
 	boost::optional<std::vector<ID>> reversed_result = std::vector<ID>();
 	auto traceback_curr = sink;
@@ -136,16 +81,16 @@ boost::optional<std::vector<ID>> maze_route(IDSet&& sources, ID2&& sink, FanoutG
 		if (sources.find(traceback_curr) != end(sources)) {
 			dout(DL::ROUTE_D1) << traceback_curr << '\n';
 			break;
-		} else if (data[traceback_curr].fanin.empty()) {
-			dout(DL::ROUTE_D1) << "couldn't trace back past " << traceback_curr << '\n';
-			reversed_result = boost::none;
-			break;
 		} else {
-			dout(DL::ROUTE_D1) << traceback_curr << " -> ";
-			const auto& fanin = data[traceback_curr].fanin;
-			traceback_curr = *std::min_element(begin(fanin), end(fanin), [&](const auto& lhs, const auto& rhs) {
-				return data[lhs].distance < data[rhs].distance;
-			});
+			const auto& found_data = data2.find(traceback_curr);
+			if (found_data == end(data2) || found_data->second.fanin.empty()) {
+				dout(DL::ROUTE_D1) << "couldn't trace back past " << traceback_curr << '\n';
+				reversed_result = boost::none;
+				break;
+			} else {
+				dout(DL::ROUTE_D1) << traceback_curr << " -> ";
+				traceback_curr = found_data->second.fanin.front();
+			}
 		}
 	}
 
