@@ -236,23 +236,23 @@ namespace {
 void fanout_test(const device::DeviceInfo& dev_desc) {
 	auto device_variant = make_device(dev_desc);
 	apply_visitor([](auto&& device) {
-		FanoutTestFlow<std::remove_reference_t<decltype(device)>> flow(device);
+		FanoutTestFlow<std::decay_t<decltype(device)>> flow(device);
 		flow.flow_main();
 	}, device_variant);
 }
 
 void track_width_exploration(const device::DeviceInfo& dev_desc, const util::Netlist<device::PinGID>& pin_to_pin_netlist) {
 	auto device_variant = make_device(dev_desc);
-	apply_visitor([&](auto& device) {
-		TrackWidthExplorationFlow<std::remove_reference_t<decltype(device)>> flow(device);
+	apply_visitor([&](auto&& device) {
+		TrackWidthExplorationFlow<std::decay_t<decltype(device)>> flow(device);
 		flow.flow_main(pin_to_pin_netlist);
 	}, device_variant);
 }
 
 void route_as_is(const device::DeviceInfo& dev_desc, const util::Netlist<device::PinGID>& pin_to_pin_netlist) {
 	auto device_variant = make_device(dev_desc);
-	apply_visitor([&](auto& device) {
-		RouteAsIsFlow<std::remove_reference_t<decltype(device)>> flow(device);
+	apply_visitor([&](auto&& device) {
+		RouteAsIsFlow<std::decay_t<decltype(device)>> flow(device);
 		flow.flow_main(pin_to_pin_netlist);
 	}, device_variant);
 }
