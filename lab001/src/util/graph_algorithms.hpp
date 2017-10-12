@@ -102,41 +102,46 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 	while(true) {
 		visitor.onWaveStart(curr_wave);
 
-		std::vector<std::thread> threads;
-		for (int ithread = 0; ithread < NTHREADS; ++ithread) {
-			threads.emplace_back(
-			[&waveData, &curr_wave, ithread, &data, &should_ignore, &fanout_gen, &visitor]() {
-				const auto& num_data_per_thread = 1 + ((curr_wave.size()-1)/NTHREADS); // ronuds up
-				const auto& my_curr_wave_begin_index = ithread*num_data_per_thread;
-				const auto& my_curr_wave_end_index =   (ithread + 1)*num_data_per_thread + 1;
-				const auto& my_curr_wave = boost::make_iterator_range(
-					std::next(begin(curr_wave), std::min(curr_wave.size(), my_curr_wave_begin_index)),
-					std::next(begin(curr_wave), std::min(curr_wave.size(), my_curr_wave_end_index))
-				);
-				auto& my_next_wave = waveData[ithread].next_wave;
+		const auto expand_wave_code = [&](int ithread) {
+			const auto& num_data_per_thread = 1 + ((curr_wave.size()-1)/NTHREADS); // ronuds up
+			const auto& my_curr_wave_begin_index = ithread*num_data_per_thread;
+			const auto& my_curr_wave_end_index =   (ithread + 1)*num_data_per_thread + 1;
+			const auto& my_curr_wave = boost::make_iterator_range(
+				std::next(begin(curr_wave), std::min(curr_wave.size(), my_curr_wave_begin_index)),
+				std::next(begin(curr_wave), std::min(curr_wave.size(), my_curr_wave_end_index))
+			);
+			auto& my_next_wave = waveData[ithread].next_wave;
 
-				for (const auto& id : my_curr_wave) {
-					if (should_ignore(id)) {
-						visitor.onSkippedExplore(id);
-						continue;
-					} else {
-						visitor.onExplore(id);
-						for (const auto& fanout : fanout_gen.fanout(id)) {
-							if (data.find(fanout) == end(data) && !should_ignore(fanout)) {
-								my_next_wave.emplace_back(ExploreData{id, fanout});
-								visitor.onFanout(id, fanout);
-							} else {
-								visitor.onSkippedFanout(id, fanout);
-							}
+			for (const auto& id : my_curr_wave) {
+				if (should_ignore(id)) {
+					visitor.onSkippedExplore(id);
+					continue;
+				} else {
+					visitor.onExplore(id);
+					for (const auto& fanout : fanout_gen.fanout(id)) {
+						if (data.find(fanout) == end(data) && !should_ignore(fanout)) {
+							my_next_wave.emplace_back(ExploreData{id, fanout});
+							visitor.onFanout(id, fanout);
+						} else {
+							visitor.onSkippedFanout(id, fanout);
 						}
 					}
 				}
 			}
-			);
-		}
+		};
 
-		for (auto& thread : threads) {
-			thread.join();
+		if (NTHREADS == 1) {
+			expand_wave_code(0);
+		} else {
+			std::vector<std::thread> threads;
+
+			for (int ithread = 0; ithread < NTHREADS; ++ithread) {
+				threads.emplace_back(expand_wave_code, ithread);
+			}
+
+			for (auto& thread : threads) {
+				thread.join();
+			}
 		}
 
 		bool found_target = false;
