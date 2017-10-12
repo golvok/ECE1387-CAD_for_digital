@@ -1,5 +1,5 @@
 #ifndef UTIL__GRAPH_ALGORITHMS_H
-#define UTIL__GRAPH_ALGORIT
+#define UTIL__GRAPH_ALGORITHMS_H
 
 #include <list>
 #include <thread>

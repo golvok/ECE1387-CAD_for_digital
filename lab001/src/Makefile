@@ -39,7 +39,7 @@ BUILD_SUBDIRS = $(EXE_DIR) $(OBJ_DIR) $(DEPS_DIR)
 WARNING_FLAGS += -Wall -Wextra -pedantic -Weffc++ -Wconversion -Werror
 
 # put other flags for both the compiler & linker here
-EXTRA_FLAGS = -std=c++14 -D X11
+EXTRA_FLAGS = -std=c++14 -D X11 -fopenmp
 
 # add flags for debugging
 ifeq ($(BUILD_MODE),debug)
@@ -57,6 +57,8 @@ LIBRARY_LINK_FLAGS += \
 	$(shell pkg-config --libs fontconfig) \
 	$(shell pkg-config --libs x11) \
 	$(shell pkg-config --libs xft) \
+	-lboost_system \
+	-lboost_thread \
 	-lpthread
 
 INCLUDE_FLAGS += \

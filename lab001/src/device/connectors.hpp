@@ -3,10 +3,17 @@
 
 #include <device/device.hpp>
 #include <parsing/input_parser.hpp>
+#include <util/graph_algorithms.hpp>
 #include <util/logging.hpp>
+#include <util/netlist.hpp>
 #include <util/template_utils.hpp>
 
+#include <memory>
+#include <mutex>
+#include <shared_mutex>
+
 #include <boost/optional.hpp>
+#include <boost/thread/shared_mutex.hpp>
 
 namespace device {
 
@@ -391,15 +398,173 @@ public:
 	}
 };
 
+template<typename BaseConnector>
+class FanoutCachingConnector : public BaseConnector {
+	mutable std::unordered_map<RouteElementID, std::unique_ptr<std::vector<RouteElementID>>> cache = {};
+	mutable std::unique_ptr<boost::shared_mutex> mutex = std::make_unique<boost::shared_mutex>();
+public:
+	using BaseConnector::BaseConnector;
+
+	auto fanout_begin(const RouteElementID& re) const {
+		using std::begin;
+		return begin(get_fanout(re));
+	}
+
+	template<typename Index>
+	bool is_end_index(const RouteElementID& re, const Index& index) const {
+		using std::end;
+		return index == end(get_fanout(re));
+	}
+
+	template<typename Index>
+	auto next_fanout(const RouteElementID& re, const Index& index) const {
+		(void)re;
+		return std::next(index);
+	}
+
+	template<typename Index>
+	auto re_from_index(const RouteElementID& re, const Index& out_index) const {
+		(void)re;
+		return *out_index;
+	}
+
+	const auto& get_fanout(const RouteElementID& re) const {
+		mutex->lock_shared();
+		const auto find_result = cache.find(re);
+		if (find_result == end(cache)) {
+			mutex->unlock_shared();
+			std::lock_guard<decltype(*mutex)> lock_holder(*mutex);
+			const auto find_result_with_write_perms = cache.find(re);
+			if (find_result == end(cache)) {
+				return *cache.emplace(re, std::make_unique<std::vector<RouteElementID>>(compute_all_fanout(re))).first->second;
+			} else {
+				return *find_result_with_write_perms->second;
+			}
+		} else {
+			const auto& result = *find_result->second;
+			mutex->unlock_shared();
+			return result;
+		}
+	}
+
+	auto compute_all_fanout(const RouteElementID& re) const {
+		std::vector<RouteElementID> result;
+		for (
+			auto it = BaseConnector::fanout_begin(re);
+			!BaseConnector::is_end_index(re, it);
+			it = BaseConnector::next_fanout(re, it)
+		) {
+			result.emplace_back(BaseConnector::re_from_index(re, it));
+		}
+		return result;
+	}
+};
+
+template<typename BaseConnector>
+class FanoutPreCachingConnector : public BaseConnector {
+	std::unordered_map<RouteElementID, std::vector<RouteElementID>> cache;
+public:
+	FanoutPreCachingConnector(const DeviceInfo& dev_info)
+		: BaseConnector(dev_info)
+		, cache(make_cache(dev_info))
+	{ }
+	FanoutPreCachingConnector(const FanoutPreCachingConnector&) = default;
+	FanoutPreCachingConnector& operator=(const FanoutPreCachingConnector&) = default;
+	FanoutPreCachingConnector(FanoutPreCachingConnector&&) = default;
+	FanoutPreCachingConnector& operator=(FanoutPreCachingConnector&&) = default;
+
+	auto fanout_begin(const RouteElementID& re) const {
+		using std::begin;
+		return begin(get_fanout(re));
+	}
+
+	template<typename Index>
+	bool is_end_index(const RouteElementID& re, const Index& index) const {
+		using std::end;
+		return index == end(get_fanout(re));
+	}
+
+	template<typename Index>
+	auto next_fanout(const RouteElementID& re, const Index& index) const {
+		(void)re;
+		return std::next(index);
+	}
+
+	template<typename Index>
+	auto re_from_index(const RouteElementID& re, const Index& out_index) const {
+		(void)re;
+		return *out_index;
+	}
+
+	const auto& get_fanout(const RouteElementID& re) const {
+		const auto find_result = cache.find(re);
+		if (find_result == end(cache)) {
+			throw std::runtime_error("don't have cached connections for a route element");
+		} else {
+			return find_result->second;
+		}
+	}
+
+	auto compute_all_fanout(const RouteElementID& re) const {
+		std::vector<RouteElementID> result;
+		for (
+			auto it = BaseConnector::fanout_begin(re);
+			!BaseConnector::is_end_index(re, it);
+			it = BaseConnector::next_fanout(re, it)
+		) {
+			result.emplace_back(BaseConnector::re_from_index(re, it));
+		}
+		return result;
+	}
+
+	static auto make_cache(const DeviceInfo& dev_info) {
+		Device<BaseConnector> device(dev_info);
+
+		std::vector<RouteElementID> initial_list;
+		for (const auto& block : device.blocks()) {
+			for (const auto& pin : device.fanout(block)) {
+				initial_list.push_back(pin);
+			}
+		}
+
+		decltype(FanoutPreCachingConnector::cache) result;
+		util::breadthFirstVisit<RouteElementID>(device, initial_list, [&](auto& re) {
+			for (const auto& fanout : device.fanout(re)) {
+				result[re].emplace_back(fanout);
+			}
+		});
+
+		return result;
+	}
+};
+
 #define ALL_DEVICES_COMMA_SEP \
+	device::Device<device::FanoutPreCachingConnector<device::WiltonConnector>>, \
+	device::Device<device::FanoutPreCachingConnector<device::FullyConnectedConnector>>, \
+	\
+	device::Device<device::FanoutCachingConnector<device::WiltonConnector>>, \
+	device::Device<device::FanoutCachingConnector<device::FullyConnectedConnector>>, \
+	\
 	device::Device<device::WiltonConnector>, \
 	device::Device<device::FullyConnectedConnector>
 
 #define ALL_DEVICES_COMMA_SEP_REF \
+	device::Device<device::FanoutPreCachingConnector<device::WiltonConnector>>, \
+	device::Device<device::FanoutPreCachingConnector<device::FullyConnectedConnector>>, \
+	\
+	device::Device<device::FanoutCachingConnector<device::WiltonConnector>>, \
+	device::Device<device::FanoutCachingConnector<device::FullyConnectedConnector>>, \
+	\
 	device::Device<device::WiltonConnector>&, \
 	device::Device<device::FullyConnectedConnector>&
 
 #define ALL_DEVICES_COMMA_SEP_CONST_REF \
+	const device::Device<device::FanoutPreCachingConnector<device::WiltonConnector>>, \
+	const device::Device<device::FanoutPreCachingConnector<device::FullyConnectedConnector>>, \
+	\
+	const device::Device<device::FanoutCachingConnector<device::WiltonConnector>>, \
+	const device::Device<device::FanoutCachingConnector<device::FullyConnectedConnector>>, \
+	\
 	const device::Device<device::WiltonConnector>&, \
 	const device::Device<device::FullyConnectedConnector>&
 
@@ -419,11 +584,25 @@ namespace DeviceType {
 	static const DeviceTypeID Wilton = util::make_id<DeviceTypeID>(1);
 	static const DeviceTypeID FullyConnected = util::make_id<DeviceTypeID>(2);
 
+	static const DeviceTypeID Wilton_Cached = util::make_id<DeviceTypeID>(3);
+	static const DeviceTypeID FullyConnected_Cached = util::make_id<DeviceTypeID>(4);
+
+	static const DeviceTypeID Wilton_PreCached = util::make_id<DeviceTypeID>(5);
+	static const DeviceTypeID FullyConnected_PreCached = util::make_id<DeviceTypeID>(6);
+
 	inline boost::optional<DeviceTypeID> parseFromString(const std::string& s) {
 		if (s == "wilton") {
 			return Wilton;
 		} else if (s == "fc" || s == "fully_connected") {
 			return FullyConnected;
+		} else if (s == "wilton-cached") {
+			return Wilton_Cached;
+		} else if (s == "fc-cached" || s == "fully_connected-cached") {
+			return FullyConnected_Cached;
+		} else if (s == "wilton-precached") {
+			return Wilton_PreCached;
+		} else if (s == "fc-precached" || s == "fully_connected-precached") {
+			return FullyConnected_PreCached;
 		} else {
 			return boost::none;
 		}

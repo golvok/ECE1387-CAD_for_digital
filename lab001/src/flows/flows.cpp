@@ -212,6 +212,18 @@ namespace {
 		} else if (dtype == device::DeviceType::FullyConnected) {
 			return device::Device<device::FullyConnectedConnector>(dev_desc);
 
+		} else if (dtype == device::DeviceType::Wilton_Cached) {
+			return device::Device<device::FanoutCachingConnector<device::WiltonConnector>>(dev_desc);
+
+		} else if (dtype == device::DeviceType::FullyConnected_Cached) {
+			return device::Device<device::FanoutCachingConnector<device::FullyConnectedConnector>>(dev_desc);
+
+		} else if (dtype == device::DeviceType::Wilton_PreCached) {
+			return device::Device<device::FanoutPreCachingConnector<device::WiltonConnector>>(dev_desc);
+
+		} else if (dtype == device::DeviceType::FullyConnected_PreCached) {
+			return device::Device<device::FanoutPreCachingConnector<device::FullyConnectedConnector>>(dev_desc);
+
 		} else {
 			util::print_and_throw<std::runtime_error>([&](auto&& str) {
 				str << "don't understand device type " << dtype.getValue();
