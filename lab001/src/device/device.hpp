@@ -215,8 +215,9 @@ public:
 	const auto& getConnector() const { return connector; }
 
 	auto fanout(RouteElementID src) const {
-		return util::make_generator<typename CONNECTOR::Index>(
-			connector.fanout_begin(src),
+		const auto begin_it = connector.fanout_begin(src);
+		return util::make_generator<std::decay_t<decltype(begin_it)>>(
+			begin_it,
 			[=](auto&& index) { return connector.is_end_index(src, index); },
 			[=](auto&& index) { return connector.next_fanout(src, index); },
 			[=](auto&& index) { return connector.re_from_index(src, index); }
@@ -224,8 +225,9 @@ public:
 	}
 
 	auto fanout(BlockID block) const {
-		return util::make_generator<typename CONNECTOR::BlockFanoutIndex>(
-			connector.block_fanout_begin(block),
+		const auto begin_it = connector.block_fanout_begin(block);
+		return util::make_generator<std::decay_t<decltype(begin_it)>>(
+			begin_it,
 			[=](auto&& index) { return connector.block_fanout_index_is_end(block, index); },
 			[=](auto&& index) { return connector.next_block_fanout(block, index); },
 			[=](auto&& index) { return connector.re_from_block_fanout_index(block, index); }
@@ -233,8 +235,9 @@ public:
 	}
 
 	auto blocks() const {
-		return util::make_generator<typename CONNECTOR::BlockIndex>(
-			connector.blocks_begin(),
+		const auto begin_it = connector.blocks_begin();
+		return util::make_generator<std::decay_t<decltype(begin_it)>>(
+			begin_it,
 			[=](auto&& index) { return connector.block_index_is_end(index); },
 			[=](auto&& index) { return connector.next_block(index); },
 			[=](auto&& index) { return connector.block_from_block_index(index); }
