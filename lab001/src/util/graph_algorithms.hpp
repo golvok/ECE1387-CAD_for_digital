@@ -149,6 +149,10 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 		data[vertex];
 	}
 
+	// the follewing are cleared and reused
+	std::vector<ExploreData> explorations_to_new_nodes;
+	std::unordered_set<ID> in_next_wave;
+
 	while(true) {
 		visitor.onWaveStart(curr_wave);
 
@@ -195,8 +199,8 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 		}
 
 		bool found_target = false;
-		std::vector<ExploreData> explorations_to_new_nodes;
-		std::unordered_set<ID> in_next_wave;
+		explorations_to_new_nodes.clear();
+		in_next_wave.clear();
 		curr_wave.clear();
 		for (auto& waveDatum : waveData) {
 			for (auto& exploreData : waveDatum.next_wave) {
