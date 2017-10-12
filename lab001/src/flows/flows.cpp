@@ -78,7 +78,11 @@ public:
 		);
 
 		const auto result = algo::route_all<false>(pin_to_pin_netlist, net_order, dev);
-		dout(DL::INFO) << "routing attempt finished\n";
+		const auto num_REs = std::count_if(begin(result.netlist().all_ids()), end(result.netlist().all_ids()), [](const auto& reid) {
+			return !reid.isPin();
+		});
+
+		dout(DL::INFO) << "routing attempt finished. Used " << num_REs << " routing resources.\n";
 
 		for (const auto& source : result.unroutedPins().all_ids()) {
 			for (const auto& sink : result.unroutedPins().fanout(source)) {
