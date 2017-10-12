@@ -252,7 +252,7 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 	}
 
 
-	util::breadthFirstVisit<device::RouteElementID>(*device, reIDs_to_draw, [&](const auto& curr) {
+	util::GraphAlgo<device::RouteElementID>().breadthFirstVisit(*device, reIDs_to_draw, [&](const auto& curr) {
 		if (already_drawn.find(curr) == end(already_drawn)) {
 			drawWire(curr);
 		}
@@ -272,6 +272,5 @@ void FPGAGraphicsData::drawAll() {
 		drawDevice(device, data);
 	}, data.getDevice());
 }
-
 
 } // end namespace graphics

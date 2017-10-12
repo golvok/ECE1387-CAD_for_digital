@@ -26,7 +26,7 @@ private:
 };
 
 template<bool exitAtFirstNoRoute, typename Netlist, typename NetOrder, typename FanoutGenerator>
-RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, NetOrder&& net_order, FanoutGenerator&& fanout_gen) {
+RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, NetOrder&& net_order, FanoutGenerator&& fanout_gen, int ntheads = 1) {
 	RouteAllResult<Netlist> result;
 	std::unordered_set<device::RouteElementID> used;
 
@@ -52,7 +52,7 @@ RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, NetOrder&& 
 
 			const auto& new_routing = algo::maze_route<device::RouteElementID>(used_by_this_net, sink_pin_re, fanout_gen, [&](auto&& reid) {
 				return (reid != sink_pin && reid != src_pin && reid.isPin()) || (used.find(reid) != end(used) && used_by_this_net.find(reid) == end(used_by_this_net));
-			});
+			}, ntheads);
 
 			if (new_routing) {
 				boost::optional<device::RouteElementID> prev;

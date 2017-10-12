@@ -32,6 +32,7 @@ public:
 	const auto& deviceTypeOverride() const { return device_type_override; }
 	const boost::optional<int>& channelWidthOverride() const { return channel_width_override; }
 	const std::string& getDataFileName() const { return data_file_name; }
+	int nThreads() const { return m_nThreads; }
 
 private:
 	friend ParsedArguments parse(int arc_int, char const** argv);
@@ -46,6 +47,8 @@ private:
 	std::vector<DebugLevel::Level> levels_to_enable;
 
 	std::string data_file_name;
+
+	int m_nThreads;
 
 	ParsedArguments(int arc_int, char const** argv);
 };

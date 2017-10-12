@@ -19,6 +19,7 @@ struct ProgramConfig {
 	bool route_as_is;
 	boost::optional<int> channel_width_override;
 	boost::optional<device::DeviceTypeID> device_type_override;
+	int nThreads;
 };
 
 int program_main(const ProgramConfig& config);
@@ -46,7 +47,8 @@ int main(int argc, char const** argv) {
 		parsed_args.shouldDoFanoutTest(),
 		parsed_args.shouldJustRouteAsIs(),
 		parsed_args.channelWidthOverride(),
-		parsed_args.deviceTypeOverride()
+		parsed_args.deviceTypeOverride(),
+		parsed_args.nThreads()
 	});
 
 	graphics::get().close();
@@ -75,13 +77,13 @@ int program_main(const ProgramConfig& config) {
 			}
 
 			if (config.fanout_test) {
-				flows::fanout_test(device_info_to_use);
+				flows::fanout_test(device_info_to_use, config.nThreads);
 			}
 
 			if (config.route_as_is) {
-				flows::route_as_is(device_info_to_use, pr.pin_to_pin_netlist);
+				flows::route_as_is(device_info_to_use, pr.pin_to_pin_netlist, config.nThreads);
 			} else {
-				flows::track_width_exploration(device_info_to_use, pr.pin_to_pin_netlist);
+				flows::track_width_exploration(device_info_to_use, pr.pin_to_pin_netlist, config.nThreads);
 			}
 		}
 	);

@@ -32,10 +32,64 @@ namespace detail {
 		template<typename... T>
 		bool operator()(T&&...) { return false; }
 	};
+
+	template<template <typename...> class Map, typename... InitialParams>
+	struct BasicMapMaker {
+		template<typename... RestParams>
+		auto makeMap() const {
+			return Map<InitialParams..., RestParams...>();
+		}
+	};
 }
 
-template<typename ID, typename FanoutGen, typename InitialList, typename Visitor, typename ShouldIgnore = detail::AlwaysFalse>
-void breadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_list, Visitor&& visitor, ShouldIgnore&& should_ignore = ShouldIgnore()) {
+template<
+	typename ID,
+	typename MapGen = detail::BasicMapMaker<std::unordered_map, ID> >
+class GraphAlgo {
+private:
+	int NTHREADS = 1;
+	MapGen vertexMapGen = {};
+
+public:
+	GraphAlgo() { }
+
+	template<typename NewMapGen>
+	GraphAlgo(
+		int NTHREADS,
+		NewMapGen&& vertexMapGen
+	)
+		: NTHREADS(NTHREADS)
+		, vertexMapGen(std::forward<NewMapGen>(vertexMapGen))
+	{ }
+
+	auto withThreads(int NTHREADS) const {
+		return GraphAlgo<
+			ID,
+			MapGen
+		>(
+			NTHREADS,
+			vertexMapGen
+		);
+	}
+
+	template<typename NewMapGen>
+	auto withMapGen(NewMapGen&& newVertexMapGen) const {
+		return GraphAlgo<
+			ID,
+			std::decay_t<NewMapGen>
+		>(
+			NTHREADS,
+			std::forward<NewMapGen>(newVertexMapGen)
+		);
+	}
+
+	template<typename... Params>
+	auto makeVertexMap() const {
+		return this->vertexMapGen.template makeMap<Params...>();
+	}
+
+template<typename FanoutGen, typename InitialList, typename Visitor, typename ShouldIgnore = detail::AlwaysFalse>
+void breadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_list, Visitor&& visitor, ShouldIgnore&& should_ignore = ShouldIgnore()) const {
 	struct VertexData {
 		bool put_in_queue = false;
 		bool expanded = false;
@@ -71,16 +125,12 @@ void breadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_list, 
 }
 
 template<typename FanoutGen, typename InitialList, typename Target, typename Visitor, typename ShouldIgnore = detail::AlwaysFalse>
-auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_list, Target&& target, Visitor&& visitor, ShouldIgnore&& should_ignore = ShouldIgnore()) {
-
-	const int NTHREADS = 4;
-	using ID = typename Visitor::VertexID;
-
+auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_list, Target&& target, Visitor&& visitor, ShouldIgnore&& should_ignore = ShouldIgnore()) const {
 	struct VertexData {
 		std::vector<ID> fanin = {};
 	};
 
-	std::unordered_map<ID, VertexData> data;
+	auto data = makeVertexMap<VertexData>();
 
 	struct ExploreData {
 		ID parent;
@@ -176,6 +226,8 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 
 	return data;
 }
+
+}; // end class GraphAlgo
 
 } // end namespace util
 

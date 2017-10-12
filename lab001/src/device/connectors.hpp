@@ -537,7 +537,7 @@ public:
 		}
 
 		decltype(FanoutPreCachingConnector::cache) result;
-		util::breadthFirstVisit<RouteElementID>(device, initial_list, [&](auto& re) {
+		util::GraphAlgo<RouteElementID>().breadthFirstVisit(device, initial_list, [&](auto& re) {
 			for (const auto& fanout : device.fanout(re)) {
 				result[re].emplace_back(fanout);
 			}

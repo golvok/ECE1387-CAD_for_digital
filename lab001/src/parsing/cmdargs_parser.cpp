@@ -17,6 +17,7 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 	, device_type_override(boost::none)
 	, levels_to_enable(DebugLevel::getDefaultSet())
 	, data_file_name()
+	, m_nThreads(2)
  {
 	uint arg_count = argc_int;
 	std::vector<std::string> args;
@@ -73,7 +74,7 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 				auto result = std::stoi(*cwo_number_it);
 				if (pos != cwo_number_it->size()) {
 					util::print_and_throw<std::invalid_argument>([&](auto&& str) {
-						str << "--channel-width-override argument has extra junk at the end";
+						str << "--channel-width-override argument is malformed";
 					});
 				}
 				channel_width_override = result;
@@ -146,6 +147,29 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 				data_file_name = *data_file_it;
 				used.insert(std::distance(begin(args), data_flag_it));
 				used.insert(std::distance(begin(args), data_file_it));
+			}
+		}
+	}
+
+	{
+		auto thread_flag_it = std::find(begin(args),end(args),"--num-threads");
+		if (thread_flag_it != end(args)) {
+			auto thread_number_it = std::next(thread_flag_it);
+			if (thread_number_it == end(args)) {
+				util::print_and_throw<std::invalid_argument>([&](auto&& str) {
+					str << "--num-threads requires an argument";
+				});
+			} else {
+				std::size_t pos = thread_number_it->size();
+				auto result = std::stoi(*thread_number_it);
+				if (pos != thread_number_it->size()) {
+					util::print_and_throw<std::invalid_argument>([&](auto&& str) {
+						str << "--num-threads argument is malformed";
+					});
+				}
+				m_nThreads = result;
+				used.insert(std::distance(begin(args), thread_flag_it));
+				used.insert(std::distance(begin(args), thread_number_it));
 			}
 		}
 	}

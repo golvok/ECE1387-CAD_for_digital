@@ -72,13 +72,13 @@ struct Visitor : public util::DefaultGraphVisitor<VertexID> {
 };
 
 template<typename ID, typename IDSet, typename ID2, typename FanoutGenerator, typename ShouldIgnore>
-boost::optional<std::vector<ID>> maze_route(IDSet&& sources, ID2&& sink, FanoutGenerator&& fanout_gen, ShouldIgnore&& should_ignore) {
+boost::optional<std::vector<ID>> maze_route(IDSet&& sources, ID2&& sink, FanoutGenerator&& fanout_gen, ShouldIgnore&& should_ignore, int nthreads = 1) {
 
 	const auto onWaveStart = [&](const auto& wave) {
 		detail::displayWavefront<ID>(sources, sink, fanout_gen, std::vector<ID>(), std::vector<ID>(), wave);
 	};
 
-	const auto data2 = util::wavedBreadthFirstVisit(fanout_gen, sources, sink, Visitor<ID, decltype(onWaveStart)>(onWaveStart), should_ignore);
+	const auto data2 = util::GraphAlgo<ID>().withThreads(nthreads).wavedBreadthFirstVisit(fanout_gen, sources, sink, Visitor<ID, decltype(onWaveStart)>(onWaveStart), should_ignore);
 
 	dout(DL::ROUTE_D1) << "tracing2back... ";
 

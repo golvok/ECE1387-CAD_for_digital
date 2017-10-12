@@ -13,17 +13,23 @@ namespace flows {
 template<typename Device>
 class FlowBase {
 public:
-	FlowBase(const Device& dev)
+	FlowBase(
+		const Device& dev,
+		int nThreads = 1
+	)
 		: dev(dev)
+		, nThreads(nThreads)
 	{ }
 
 	const Device& dev;
+	const int nThreads;
 };
 
 template<typename Device>
 class FanoutTestFlow : public FlowBase<Device> {
 	using FlowBase<Device>::FlowBase;
 	using FlowBase<Device>::dev;
+	using FlowBase<Device>::nThreads;
 public:
 	void flow_main() const {
 		bool do_view_reset = true;
@@ -54,6 +60,7 @@ template<typename Device>
 class RouteAsIsFlow : public FlowBase<Device> {
 	using FlowBase<Device>::FlowBase;
 	using FlowBase<Device>::dev;
+	using FlowBase<Device>::nThreads;
 public:
 	template<typename RouteTheseSourcesFirst = std::vector<device::PinGID>>
 	auto flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist, RouteTheseSourcesFirst route_these_sources_first = {}, bool present_graphics = true) const {
@@ -77,7 +84,7 @@ public:
 			}
 		);
 
-		const auto result = algo::route_all<false>(pin_to_pin_netlist, net_order, dev);
+		const auto result = algo::route_all<false>(pin_to_pin_netlist, net_order, dev, nThreads);
 		const auto num_REs = std::count_if(begin(result.netlist().all_ids()), end(result.netlist().all_ids()), [](const auto& reid) {
 			return !reid.isPin();
 		});
@@ -103,6 +110,7 @@ template<typename Device>
 class RouteWithRetryFlow : public FlowBase<Device> {
 	using FlowBase<Device>::FlowBase;
 	using FlowBase<Device>::dev;
+	using FlowBase<Device>::nThreads;
 public:
 	bool flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist) const {
 		const auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
@@ -146,6 +154,7 @@ template<typename Device>
 class TrackWidthExplorationFlow : public FlowBase<Device> {
 	using FlowBase<Device>::FlowBase;
 	using FlowBase<Device>::dev;
+	using FlowBase<Device>::nThreads;
 public:
 	void flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist) const {
 		const auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
@@ -233,26 +242,26 @@ namespace {
 	}
 }
 
-void fanout_test(const device::DeviceInfo& dev_desc) {
+void fanout_test(const device::DeviceInfo& dev_desc, int nThreads) {
 	auto device_variant = make_device(dev_desc);
-	apply_visitor([](auto&& device) {
-		FanoutTestFlow<std::decay_t<decltype(device)>> flow(device);
+	apply_visitor([&](auto&& device) {
+		FanoutTestFlow<std::decay_t<decltype(device)>> flow(device, nThreads);
 		flow.flow_main();
 	}, device_variant);
 }
 
-void track_width_exploration(const device::DeviceInfo& dev_desc, const util::Netlist<device::PinGID>& pin_to_pin_netlist) {
+void track_width_exploration(const device::DeviceInfo& dev_desc, const util::Netlist<device::PinGID>& pin_to_pin_netlist, int nThreads) {
 	auto device_variant = make_device(dev_desc);
 	apply_visitor([&](auto&& device) {
-		TrackWidthExplorationFlow<std::decay_t<decltype(device)>> flow(device);
+		TrackWidthExplorationFlow<std::decay_t<decltype(device)>> flow(device, nThreads);
 		flow.flow_main(pin_to_pin_netlist);
 	}, device_variant);
 }
 
-void route_as_is(const device::DeviceInfo& dev_desc, const util::Netlist<device::PinGID>& pin_to_pin_netlist) {
+void route_as_is(const device::DeviceInfo& dev_desc, const util::Netlist<device::PinGID>& pin_to_pin_netlist, int nThreads) {
 	auto device_variant = make_device(dev_desc);
 	apply_visitor([&](auto&& device) {
-		RouteAsIsFlow<std::decay_t<decltype(device)>> flow(device);
+		RouteAsIsFlow<std::decay_t<decltype(device)>> flow(device, nThreads);
 		flow.flow_main(pin_to_pin_netlist);
 	}, device_variant);
 }
