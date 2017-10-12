@@ -11,10 +11,9 @@
 
 namespace util {
 
-template<typename VertexID_>
+template<typename VertexID>
 class DefaultGraphVisitor {
 public:
-	using VertexID = VertexID_;
 	template<typename VertexCollection>
 	void onWaveStart(const VertexCollection&) { }
 
@@ -25,6 +24,20 @@ public:
 	void onFanout(const VertexID&, const VertexID&) { }
 
 	void onSkippedFanout(const VertexID&, const VertexID&) { }
+
+	void onExploreStart() { }
+
+	void onExploreEnd() { }
+
+	void onNextWaveCalcStart() { }
+
+	void onNextWaveCalcEnd() { }
+
+	void onDataEntryStart() { }
+
+	void onDataEntryEnd() { }
+
+	void onWaveEnd() { }
 };
 
 namespace detail {
@@ -155,6 +168,7 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 
 	while(true) {
 		visitor.onWaveStart(curr_wave);
+		visitor.onExploreStart();
 
 		const auto expand_wave_code = [&](int ithread) {
 			const auto& num_data_per_thread = 1 + ((curr_wave.size()-1)/NTHREADS); // ronuds up
@@ -198,6 +212,9 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 			}
 		}
 
+		visitor.onExploreEnd();
+		visitor.onNextWaveCalcStart();
+
 		bool found_target = false;
 		explorations_to_new_nodes.clear();
 		in_next_wave.clear();
@@ -219,6 +236,9 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 			}
 		}
 
+		visitor.onNextWaveCalcEnd();
+		visitor.onDataEntryStart();
+
 		for (const auto& exploreData : explorations_to_new_nodes) {
 			data[exploreData.fanout].fanin.emplace_back(exploreData.parent);
 		}
@@ -226,6 +246,9 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 		if (found_target || curr_wave.empty()) {
 			break;
 		}
+
+		visitor.onDataEntryEnd();
+		visitor.onWaveEnd();
 	}
 
 	return data;

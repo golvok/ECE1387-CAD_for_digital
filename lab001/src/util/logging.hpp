@@ -32,6 +32,7 @@ namespace DebugLevel {
 
 		PIN_BY_PIN_STEP, // Stepping though the results of routing each pin
 		MAZE_ROUTE_STEP, // Stepping though the algorithm
+		ROUTE_TIME, // route time measurement
 
 		DATA_READ1, // reading of data
 

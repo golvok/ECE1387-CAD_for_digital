@@ -59,8 +59,42 @@ namespace detail {
 
 }
 
+template<typename VertexID>
+struct RouteTimeVisitor : public util::DefaultGraphVisitor<VertexID> {
+
+	std::chrono::time_point<std::chrono::high_resolution_clock> explore_start = {};
+	std::chrono::time_point<std::chrono::high_resolution_clock> next_wave_calc_start = {};
+	std::chrono::time_point<std::chrono::high_resolution_clock> data_entry_start = {};
+
+	template<typename Time>
+	static void setRouteTimeToNow(Time& time) {
+		if (!dout(DL::ROUTE_TIME).enabled()) { return; }
+		time = std::chrono::high_resolution_clock::now();
+	}
+
+	template<typename Stream, typename Time>
+	static void printTimeSince(Stream&& os, const Time& time) {
+		os << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - time).count() << "μs";
+	}
+
+	template<typename Name, typename Time>
+	static void printRouteTimeSince(const Name& name, const Time& time) {
+		if (!dout(DL::ROUTE_TIME).enabled()) { return; }
+		dout(DL::ROUTE_TIME) << name << " time: ";
+		printTimeSince(dout(DL::ROUTE_TIME), time);
+		dout(DL::ROUTE_TIME) << "\n";
+	}
+
+	void onExploreStart()      { setRouteTimeToNow(explore_start); }
+	void onExploreEnd()        { printRouteTimeSince("explore", explore_start); }
+	void onNextWaveCalcStart() { setRouteTimeToNow(next_wave_calc_start); }
+	void onNextWaveCalcEnd()   { printRouteTimeSince("next wave calc", next_wave_calc_start); }
+	void onDataEntryStart()    { setRouteTimeToNow(data_entry_start); }
+	void onDataEntryEnd()      { printRouteTimeSince( "data entry", data_entry_start); }
+};
+
 template<typename VertexID, typename OnWaveStart>
-struct Visitor : public util::DefaultGraphVisitor<VertexID> {
+struct Visitor : public RouteTimeVisitor<VertexID> {
 	Visitor(OnWaveStart&& ows) : onWaveStart(std::move(ows)) { }
 	Visitor(const OnWaveStart& ows) : onWaveStart(ows) { }
 
