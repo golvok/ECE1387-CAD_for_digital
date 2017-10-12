@@ -462,7 +462,8 @@ public:
 
 template<typename BaseConnector>
 class FanoutPreCachingConnector : public BaseConnector {
-	std::unordered_map<RouteElementID, std::vector<RouteElementID>> cache;
+	using CacheElement = std::vector<RouteElementID>;
+	std::unordered_map<RouteElementID, CacheElement> cache;
 public:
 	FanoutPreCachingConnector(const DeviceInfo& dev_info)
 		: BaseConnector(dev_info)
@@ -473,27 +474,35 @@ public:
 	FanoutPreCachingConnector(FanoutPreCachingConnector&&) = default;
 	FanoutPreCachingConnector& operator=(FanoutPreCachingConnector&&) = default;
 
-	auto fanout_begin(const RouteElementID& re) const {
+	struct Index {
+		CacheElement::const_iterator curr;
+		const CacheElement* cache_element;
+
+		bool operator==(const Index& rhs) const {
+			return std::forward_as_tuple(curr, cache_element) == std::forward_as_tuple(rhs.curr, rhs.cache_element);
+		}
+	};
+
+	Index fanout_begin(const RouteElementID& re) const {
 		using std::begin;
-		return begin(get_fanout(re));
+		const auto& cache_element = get_fanout(re);
+		return { begin(cache_element), &cache_element };
 	}
 
-	template<typename Index>
 	bool is_end_index(const RouteElementID& re, const Index& index) const {
-		using std::end;
-		return index == end(get_fanout(re));
-	}
-
-	template<typename Index>
-	auto next_fanout(const RouteElementID& re, const Index& index) const {
 		(void)re;
-		return std::next(index);
+		using std::end;
+		return index.curr == end(*index.cache_element);
 	}
 
-	template<typename Index>
+	Index next_fanout(const RouteElementID& re, const Index& index) const {
+		(void)re;
+		return { std::next(index.curr), index.cache_element };
+	}
+
 	auto re_from_index(const RouteElementID& re, const Index& out_index) const {
 		(void)re;
-		return *out_index;
+		return *out_index.curr;
 	}
 
 	const auto& get_fanout(const RouteElementID& re) const {
