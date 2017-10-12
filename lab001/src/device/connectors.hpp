@@ -548,37 +548,39 @@ public:
 	device::Device<device::WiltonConnector>, \
 	device::Device<device::FullyConnectedConnector>
 
-#define ALL_DEVICES_COMMA_SEP_REF \
-	device::Device<device::FanoutPreCachingConnector<device::WiltonConnector>>, \
-	device::Device<device::FanoutPreCachingConnector<device::FullyConnectedConnector>>, \
-	\
-	device::Device<device::FanoutCachingConnector<device::WiltonConnector>>, \
-	device::Device<device::FanoutCachingConnector<device::FullyConnectedConnector>>, \
-	\
-	device::Device<device::WiltonConnector>&, \
-	device::Device<device::FullyConnectedConnector>&
+/* #define ALL_DEVICES_COMMA_SEP_REF \
+// 	device::Device<device::FanoutPreCachingConnector<device::WiltonConnector>>&, \
+// 	device::Device<device::FanoutPreCachingConnector<device::FullyConnectedConnector>>&, \
+// 	\
+// 	device::Device<device::FanoutCachingConnector<device::WiltonConnector>>&, \
+// 	device::Device<device::FanoutCachingConnector<device::FullyConnectedConnector>>&, \
+// 	\
+// 	device::Device<device::WiltonConnector>&, \
+// 	device::Device<device::FullyConnectedConnector>&
+*/
 
-#define ALL_DEVICES_COMMA_SEP_CONST_REF \
-	const device::Device<device::FanoutPreCachingConnector<device::WiltonConnector>>, \
-	const device::Device<device::FanoutPreCachingConnector<device::FullyConnectedConnector>>, \
-	\
-	const device::Device<device::FanoutCachingConnector<device::WiltonConnector>>, \
-	const device::Device<device::FanoutCachingConnector<device::FullyConnectedConnector>>, \
-	\
-	const device::Device<device::WiltonConnector>&, \
-	const device::Device<device::FullyConnectedConnector>&
+/* #define ALL_DEVICES_COMMA_SEP_CONST_REF \
+// 	const device::Device<device::FanoutPreCachingConnector<device::WiltonConnector>>&, \
+// 	const device::Device<device::FanoutPreCachingConnector<device::FullyConnectedConnector>>&, \
+// 	\
+// 	const device::Device<device::FanoutCachingConnector<device::WiltonConnector>>&, \
+// 	const device::Device<device::FanoutCachingConnector<device::FullyConnectedConnector>>&, \
+// 	\
+// 	const device::Device<device::WiltonConnector>&, \
+// 	const device::Device<device::FullyConnectedConnector>&
+*/
 
 static const util::type_vector<
 	ALL_DEVICES_COMMA_SEP
 > ALL_DEVICES;
 
-static const util::type_vector<
-	ALL_DEVICES_COMMA_SEP_REF
-> ALL_DEVICES_REF;
+// static const util::type_vector<
+// 	ALL_DEVICES_COMMA_SEP_REF
+// > ALL_DEVICES_REF;
 
-static const util::type_vector<
-	ALL_DEVICES_COMMA_SEP_CONST_REF
-> ALL_DEVICES_CONST_REF;
+// static const util::type_vector<
+// 	ALL_DEVICES_COMMA_SEP_CONST_REF
+// > ALL_DEVICES_CONST_REF;
 
 namespace DeviceType {
 	static const DeviceTypeID Wilton = util::make_id<DeviceTypeID>(1);
