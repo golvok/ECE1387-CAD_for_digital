@@ -208,6 +208,11 @@ public:
 		, connector(this->dev_info, std::forward<CONNECTOR_ARGS>(connector_args)...)
 	{ }
 
+	Device(const Device&) = default;
+	Device& operator=(const Device&) = default;
+	Device(Device&&) = default;
+	Device& operator=(Device&&) = default;
+
 	const auto& info() const {
 		return dev_info;
 	}
