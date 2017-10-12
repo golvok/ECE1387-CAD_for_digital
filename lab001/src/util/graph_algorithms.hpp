@@ -153,6 +153,9 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 	std::vector<ID> curr_wave = {};
 	struct WaveData {
 		std::vector<ExploreData> next_wave = {};
+		void clear() {
+			next_wave.clear();
+		}
 	};
 
 	std::vector<WaveData> waveData(NTHREADS);
@@ -234,6 +237,7 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 				}
 
 			}
+			waveDatum.clear();
 		}
 
 		visitor.onNextWaveCalcEnd();
