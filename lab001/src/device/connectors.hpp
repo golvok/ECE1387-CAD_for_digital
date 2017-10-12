@@ -64,7 +64,7 @@ struct FullyConnectedConnector {
 
 	using BlockFanoutIndex = PinGID;
 
-	const DeviceInfo& dev_info;
+	const DeviceInfo dev_info;
 	decltype(dev_info.bounds) wire_bb;
 
 	FullyConnectedConnector(const DeviceInfo& dev_info)
