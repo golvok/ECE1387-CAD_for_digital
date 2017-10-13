@@ -13,13 +13,23 @@ namespace flows {
 template<typename Device>
 class FlowBase {
 public:
+	FlowBase(const FlowBase&) = default;
+	FlowBase(FlowBase&&) = default;
+
 	FlowBase(
 		const Device& dev,
-		int nThreads = 1
+		int nThreads
 	)
 		: dev(dev)
 		, nThreads(nThreads)
 	{ }
+
+	FlowBase withDevice(const Device& newDev) const {
+		return {
+			newDev,
+			nThreads
+		};
+	}
 
 	const Device& dev;
 	const int nThreads;
@@ -27,10 +37,15 @@ public:
 
 template<typename Device>
 class FanoutTestFlow : public FlowBase<Device> {
+public:
 	using FlowBase<Device>::FlowBase;
 	using FlowBase<Device>::dev;
 	using FlowBase<Device>::nThreads;
-public:
+	FanoutTestFlow(const FanoutTestFlow&) = default;
+	FanoutTestFlow(FanoutTestFlow&&) = default;
+	FanoutTestFlow(FlowBase<Device>&& fb) : FlowBase<Device>(std::move(fb)) { }
+	FanoutTestFlow(const FlowBase<Device>& fb) : FlowBase<Device>(fb) { }
+
 	void flow_main() const {
 		bool do_view_reset = true;
 		for (int i = 0; i < dev.info().track_width*2; ++i) {
@@ -58,10 +73,15 @@ public:
 
 template<typename Device>
 class RouteAsIsFlow : public FlowBase<Device> {
+public:
 	using FlowBase<Device>::FlowBase;
 	using FlowBase<Device>::dev;
 	using FlowBase<Device>::nThreads;
-public:
+	RouteAsIsFlow(const RouteAsIsFlow&) = default;
+	RouteAsIsFlow(RouteAsIsFlow&&) = default;
+	RouteAsIsFlow(FlowBase<Device>&& fb) : FlowBase<Device>(std::move(fb)) { }
+	RouteAsIsFlow(const FlowBase<Device>& fb) : FlowBase<Device>(fb) { }
+
 	template<typename RouteTheseSourcesFirst = std::vector<device::PinGID>>
 	auto flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist, RouteTheseSourcesFirst route_these_sources_first = {}, bool present_graphics = true) const {
 		const auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
@@ -108,10 +128,15 @@ public:
 
 template<typename Device>
 class RouteWithRetryFlow : public FlowBase<Device> {
+public:
 	using FlowBase<Device>::FlowBase;
 	using FlowBase<Device>::dev;
 	using FlowBase<Device>::nThreads;
-public:
+	RouteWithRetryFlow(const RouteWithRetryFlow&) = default;
+	RouteWithRetryFlow(RouteWithRetryFlow&&) = default;
+	RouteWithRetryFlow(FlowBase<Device>&& fb) : FlowBase<Device>(std::move(fb)) { }
+	RouteWithRetryFlow(const FlowBase<Device>& fb) : FlowBase<Device>(fb) { }
+
 	bool flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist) const {
 		const auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
 			str << "RouteWithRetry Flow";
@@ -121,7 +146,7 @@ public:
 		std::list<device::PinGID> route_these_sources_first;
 
 		while (true) {
-			const auto result = RouteAsIsFlow<Device>(dev).flow_main(pin_to_pin_netlist, route_these_sources_first, false);
+			const auto result = RouteAsIsFlow<Device>(*this).flow_main(pin_to_pin_netlist, route_these_sources_first, false);
 
 			bool added_something = false;
 			for (const auto& source : result.unroutedPins().all_ids()) {
@@ -152,10 +177,15 @@ public:
 
 template<typename Device>
 class TrackWidthExplorationFlow : public FlowBase<Device> {
+public:
 	using FlowBase<Device>::FlowBase;
 	using FlowBase<Device>::dev;
 	using FlowBase<Device>::nThreads;
-public:
+	TrackWidthExplorationFlow(const TrackWidthExplorationFlow&) = default;
+	TrackWidthExplorationFlow(TrackWidthExplorationFlow&&) = default;
+	TrackWidthExplorationFlow(FlowBase<Device>&& fb) : FlowBase<Device>(std::move(fb)) { }
+	TrackWidthExplorationFlow(const FlowBase<Device>& fb) : FlowBase<Device>(fb) { }
+
 	void flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist) const {
 		const auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
 			str << "TrackWidthExploration Flow";
@@ -176,8 +206,12 @@ public:
 						str << "Trying track width of " << dev_info_copy.track_width;
 					});
 
+					auto indent = dout(DL::INFO).indentWithTitle("Creating New Device");
 					const Device modified_dev(dev_info_copy);
-					const auto route_success = RouteWithRetryFlow<Device>(modified_dev).flow_main(pin_to_pin_netlist);
+					dout(DL::INFO) << "done creating new device\n";
+					indent.endIndent();
+
+					const auto route_success = RouteWithRetryFlow<Device>(this->withDevice(modified_dev)).flow_main(pin_to_pin_netlist);
 					// const auto route_success = RouteAsIsFlow<Device>(modified_dev).flow_main(pin_to_pin_netlist).unroutedPins().empty();
 
 					if (route_success) {
@@ -213,6 +247,10 @@ namespace {
 	using DeviceVariant = boost::variant<ALL_DEVICES_COMMA_SEP>;
 
 	DeviceVariant make_device(const device::DeviceInfo& dev_desc) {
+		auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
+			str << "Initial Device Creation";
+		});
+
 		const auto& dtype = dev_desc.type();
 
 		if (dtype == device::DeviceType::Wilton) {
