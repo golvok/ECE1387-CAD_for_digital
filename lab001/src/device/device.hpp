@@ -29,6 +29,7 @@ class BlockID : public util::ID <std::uint32_t, BlockIDTag>, public util::print_
 public:
 	template<typename T>
 	explicit BlockID(T&& t) : util::ID <std::uint32_t, BlockIDTag>(std::forward<T>(t)) { } // ECF compiler seems to need this???
+	explicit BlockID() : util::ID <std::uint32_t, BlockIDTag>() { } // ECF compiler seems to need this???
 	using ID::IDType;
 private:
 	static IDType makeValueFromXY(XID x, YID y) { return (util::no_sign_ext_cast<IDType>(x.getValue()) << 16) | util::no_sign_ext_cast<IDType>(y.getValue()); }
@@ -54,6 +55,7 @@ class PinGID : public util::ID<std::uint64_t, PinGIDTag>, public util::print_pri
 public:
 	template<typename T>
 	explicit PinGID(T&& t) : util::ID<std::uint64_t, PinGIDTag>(std::forward<T>(t)) { } // ECF compiler seems to need this???
+	explicit PinGID() : util::ID<std::uint64_t, PinGIDTag>() { } // ECF compiler seems to need this???
 	using ID::IDType;
 
 	PinGID(BlockID b, BlockPinID bp) : ID(makeValueFromBlockAndPin(b,bp)) { }
@@ -81,6 +83,7 @@ class RouteElementID : public util::ID<std::uint64_t, RouteElementIDTag>, public
 public:
 	template<typename T>
 	explicit RouteElementID(T&& t) : util::ID<std::uint64_t, RouteElementIDTag>(std::forward<T>(t)) { } // ECF compiler seems to need this???
+	explicit RouteElementID() : util::ID<std::uint64_t, RouteElementIDTag>() { } // ECF compiler seems to need this???
 	using ID::IDType;
 	using REIndex = std::int16_t;
 
