@@ -27,6 +27,8 @@ struct BlockIDTag { static const std::uint32_t DEFAULT_VALUE = 0x80008000; };
 class BlockID : public util::ID <std::uint32_t, BlockIDTag>, public util::print_printable {
 	using ID::ID;
 public:
+	template<typename T>
+	explicit BlockID(T&& t) : util::ID <std::uint32_t, BlockIDTag>(std::forward<T>(t)) { } // ECF compiler seems to need this???
 	using ID::IDType;
 private:
 	static IDType makeValueFromXY(XID x, YID y) { return (util::no_sign_ext_cast<IDType>(x.getValue()) << 16) | util::no_sign_ext_cast<IDType>(y.getValue()); }
@@ -50,6 +52,8 @@ struct PinGIDTag { static const std::uint64_t DEFAULT_VALUE = 0x8000800080008000
 class PinGID : public util::ID<std::uint64_t, PinGIDTag>, public util::print_printable {
 	using ID::ID;
 public:
+	template<typename T>
+	explicit PinGID(T&& t) : util::ID<std::uint64_t, PinGIDTag>(std::forward<T>(t)) { } // ECF compiler seems to need this???
 	using ID::IDType;
 
 	PinGID(BlockID b, BlockPinID bp) : ID(makeValueFromBlockAndPin(b,bp)) { }
@@ -75,6 +79,8 @@ struct RouteElementIDTag { static const std::uint64_t DEFAULT_VALUE = 0x80008000
 class RouteElementID : public util::ID<std::uint64_t, RouteElementIDTag>, public util::print_printable, public boost::equality_comparable<RouteElementID, PinGID> {
 	using ID::ID;
 public:
+	template<typename T>
+	explicit RouteElementID(T&& t) : util::ID<std::uint64_t, RouteElementIDTag>(std::forward<T>(t)) { } // ECF compiler seems to need this???
 	using ID::IDType;
 	using REIndex = std::int16_t;
 
