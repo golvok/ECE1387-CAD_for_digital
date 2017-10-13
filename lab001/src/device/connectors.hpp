@@ -184,7 +184,7 @@ struct FullyConnectedConnector {
 					case 5:
 						return offset_re_new_index(re,  0,  1, (track_number + dev_info.track_width) % (dev_info.track_width*2), is_horiz);
 					default:
-						return RouteElementID();
+						return util::make_id<RouteElementID>();
 				}
 			}
 		}

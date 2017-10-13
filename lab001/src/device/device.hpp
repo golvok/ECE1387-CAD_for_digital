@@ -25,6 +25,7 @@ using XYIDPair = std::pair<XID,YID>;
 
 struct BlockIDTag { static const std::uint32_t DEFAULT_VALUE = 0x80008000; };
 class BlockID : public util::ID <std::uint32_t, BlockIDTag>, public util::print_printable {
+	using ID::ID;
 public:
 	using ID::IDType;
 private:
@@ -35,7 +36,6 @@ private:
 
 public:
 	BlockID(XID x, YID y) : ID(makeValueFromXY(x,y)) { }
-	using ID::ID;
 
 	auto getX() const { return xFromValue(getValue()); }
 	auto getY() const { return yFromValue(getValue()); }
@@ -48,11 +48,11 @@ public:
 
 struct PinGIDTag { static const std::uint64_t DEFAULT_VALUE = 0x8000800080008000; };
 class PinGID : public util::ID<std::uint64_t, PinGIDTag>, public util::print_printable {
+	using ID::ID;
 public:
 	using ID::IDType;
 
 	PinGID(BlockID b, BlockPinID bp) : ID(makeValueFromBlockAndPin(b,bp)) { }
-	using ID::ID;
 private:
 	static IDType makeValueFromBlockAndPin(BlockID b, BlockPinID bp)      { return (util::no_sign_ext_cast<IDType>(b.getValue()) << 16) | util::no_sign_ext_cast<IDType>(bp.getValue()); }
 	static std::pair<BlockID, BlockPinID> blockAndPinFromValue(IDType id) { return {blockFromValue(id), blockPinFromValue(id)}; }
@@ -73,11 +73,11 @@ public:
 
 struct RouteElementIDTag { static const std::uint64_t DEFAULT_VALUE = 0x8000800080008000; };
 class RouteElementID : public util::ID<std::uint64_t, RouteElementIDTag>, public util::print_printable, public boost::equality_comparable<RouteElementID, PinGID> {
+	using ID::ID;
 public:
 	using ID::IDType;
 	using REIndex = std::int16_t;
 
-	using ID::ID;
 	explicit RouteElementID(PinGID p) : ID(makeValueFromPin(p)) { }
 	RouteElementID(XID x, YID y, REIndex i) : ID(makeValueFromXYIndex(x,y,i)) { }
 
