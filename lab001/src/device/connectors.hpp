@@ -140,7 +140,7 @@ struct FullyConnectedConnector {
 				case BlockSide::LEFT:
 					return offset_re_same_index(base_re, 0, 0);
 				default:
-					return RouteElementID();
+					return util::make_id<RouteElementID>();
 			}
 		} else {
 			const bool is_horiz = wire_direction(re) == Direction::HORIZONTAL;
