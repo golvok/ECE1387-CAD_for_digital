@@ -54,17 +54,17 @@ public:
 
 	boost::iterator_range<typename ConnectionStorage::mapped_type::const_iterator> fanout(const NODE_ID source) const {
 		const auto lookup_result = connections.find(source);
-		if (lookup_result == end(connections)) {
+		if (lookup_result == std::end(connections)) {
 			return { };
 		} else {
-			return { begin(lookup_result->second), end(lookup_result->second) };
+			return { std::begin(lookup_result->second), std::end(lookup_result->second) };
 		}
 	}
 
 	auto all_ids() const {
 		return util::xrange_forward_pe<typename decltype(connections)::const_iterator>(
-			begin(connections),
-			end(connections),
+			std::begin(connections),
+			std::end(connections),
 			[](auto& elem) {
 				return elem->first;
 			}

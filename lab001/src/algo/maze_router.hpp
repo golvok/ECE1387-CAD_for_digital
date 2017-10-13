@@ -120,12 +120,12 @@ boost::optional<std::vector<ID>> maze_route(IDSet&& sources, ID2&& sink, FanoutG
 	auto traceback_curr = sink;
 	while (true) {
 		reversed_result->push_back(traceback_curr);
-		if (sources.find(traceback_curr) != end(sources)) {
+		if (sources.find(traceback_curr) != std::end(sources)) {
 			dout(DL::ROUTE_D1) << traceback_curr << '\n';
 			break;
 		} else {
 			const auto& found_data = data2.find(traceback_curr);
-			if (found_data == end(data2) || found_data->second.fanin.empty()) {
+			if (found_data == std::end(data2) || found_data->second.fanin.empty()) {
 				dout(DL::ROUTE_D1) << "couldn't trace back past " << traceback_curr << '\n';
 				reversed_result = boost::none;
 				break;

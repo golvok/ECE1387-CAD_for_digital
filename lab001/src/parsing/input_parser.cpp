@@ -7,10 +7,9 @@
 #include <string>
 #include <vector>
 
-#include <boost/fusion/adapted/std_tuple.hpp>
+#include <boost/fusion/adapted/boost_tuple.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/tuple.hpp>
-#include <boost/graph/graphviz.hpp>
 #include <boost/spirit/home/x3.hpp>
 
 namespace {
@@ -43,7 +42,7 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is, boost::opt
 	using device::BlockID;
 	using device::PinGID;
 
-	std::tuple<int, int, std::vector< std::tuple<
+	boost::tuple<int, int, std::vector< boost::tuple<
 		XID::IDType, YID::IDType, BlockPinID::IDType, XID::IDType, YID::IDType, BlockPinID::IDType
 	> > > parse_results;
 

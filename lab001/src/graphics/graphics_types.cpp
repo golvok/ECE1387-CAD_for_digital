@@ -2,6 +2,10 @@
 
 #include "math.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wfloat-conversion"
+
 using namespace std;
 
 namespace graphics {
@@ -341,3 +345,7 @@ bool t_color::operator!=(color_types rhs) const {
 }
 
 }
+
+#pragma GCC diagnostic pop
+
+

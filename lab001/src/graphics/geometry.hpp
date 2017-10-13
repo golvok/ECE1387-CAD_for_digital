@@ -220,7 +220,7 @@ auto magnitude(Point<PRECISION> p) {
 	return sqrt(magnitudeSquared(p));
 }
 template<typename PRECISION>
-auto unit(Point<PRECISION> p) {
+auto unit(Point<PRECISION> p) -> decltype(divide(p, (PRECISION)magnitude(p))) {
 	return divide(p, (PRECISION) magnitude(p));
 }
 template<typename PRECISION, typename PRECISION2>

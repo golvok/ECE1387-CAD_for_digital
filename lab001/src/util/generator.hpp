@@ -68,6 +68,7 @@ template<typename INDEX_TYPE, typename NEXT, typename DONE, typename TRANSFORM>
 class generator {
 public:
 	using iterator = generator_iterator<INDEX_TYPE,NEXT,DONE,TRANSFORM>;
+	using const_iterator = generator_iterator<INDEX_TYPE,NEXT,DONE,TRANSFORM>;
 	using reference = typename std::iterator_traits<iterator>::reference;
 private:
 	INDEX_TYPE current;

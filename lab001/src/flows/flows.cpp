@@ -2,6 +2,7 @@
 
 #include <algo/routing.hpp>
 #include <graphics/graphics_wrapper.hpp>
+#include <util/lambda_compose.hpp>
 #include <util/logging.hpp>
 
 #include <algorithm>
@@ -96,16 +97,16 @@ public:
 		}
 
 		std::copy_if(
-			begin(pin_to_pin_netlist.roots()),
-			end(pin_to_pin_netlist.roots()),
+			std::begin(pin_to_pin_netlist.roots()),
+			std::end(pin_to_pin_netlist.roots()),
 			std::back_inserter(net_order),
 			[&](const device::PinGID& pin) {
-				return in_route_these_first.find(pin) == end(in_route_these_first);
+				return in_route_these_first.find(pin) == std::end(in_route_these_first);
 			}
 		);
 
 		const auto result = algo::route_all<false>(pin_to_pin_netlist, net_order, dev, nThreads);
-		const auto num_REs = std::count_if(begin(result.netlist().all_ids()), end(result.netlist().all_ids()), [](const auto& reid) {
+		const auto num_REs = std::count_if(std::begin(result.netlist().all_ids()), std::end(result.netlist().all_ids()), [](const auto& reid) {
 			return !reid.isPin();
 		});
 
@@ -150,7 +151,7 @@ public:
 
 			bool added_something = false;
 			for (const auto& source : result.unroutedPins().all_ids()) {
-				const bool already_there = in_route_these_sources_first.find(source) != end(in_route_these_sources_first);
+				const bool already_there = in_route_these_sources_first.find(source) != std::end(in_route_these_sources_first);
 				const bool has_fanout = !util::empty(result.unroutedPins().fanout(source));
 				if (!already_there && has_fanout) {
 					dout(DL::INFO) << "new failure on : " << source << '\n';
@@ -195,13 +196,13 @@ public:
 		auto track_width_range = boost::irange(1, dev.info().track_width+1); // +1 as last argument is a past-end
 		const auto SENTINEL = -1; // something note in the above range, specifically less than everything
 		using std::begin; using std::end;
-		std::binary_search(begin(track_width_range), end(track_width_range), SENTINEL, [&](const auto& rhs, const auto& lhs) {
+		std::binary_search(std::begin(track_width_range), std::end(track_width_range), SENTINEL, [&](const auto& rhs, const auto& lhs) {
 			auto dev_info_copy = this->dev.info();
 			dev_info_copy.track_width = std::max(rhs,lhs); // get the non-sentinel
 
 			const auto route_success = [&](){
 				const auto attempt_find_result = attempt_statuses.find(dev_info_copy.track_width);
-				if (attempt_find_result == end(attempt_statuses)) {
+				if (attempt_find_result == std::end(attempt_statuses)) {
 					const auto indent_scope = dout(DL::INFO).indentWithTitle([&](auto&& str) {
 						str << "Trying track width of " << dev_info_copy.track_width;
 					});
@@ -259,11 +260,11 @@ namespace {
 		} else if (dtype == device::DeviceType::FullyConnected) {
 			return device::Device<device::FullyConnectedConnector>(dev_desc);
 
-		} else if (dtype == device::DeviceType::Wilton_Cached) {
-			return device::Device<device::FanoutCachingConnector<device::WiltonConnector>>(dev_desc);
+		// } else if (dtype == device::DeviceType::Wilton_Cached) {
+		// 	return device::Device<device::FanoutCachingConnector<device::WiltonConnector>>(dev_desc);
 
-		} else if (dtype == device::DeviceType::FullyConnected_Cached) {
-			return device::Device<device::FanoutCachingConnector<device::FullyConnectedConnector>>(dev_desc);
+		// } else if (dtype == device::DeviceType::FullyConnected_Cached) {
+		// 	return device::Device<device::FanoutCachingConnector<device::FullyConnectedConnector>>(dev_desc);
 
 		} else if (dtype == device::DeviceType::Wilton_PreCached) {
 			return device::Device<device::FanoutPreCachingConnector<device::WiltonConnector>>(dev_desc);
@@ -282,26 +283,26 @@ namespace {
 
 void fanout_test(const device::DeviceInfo& dev_desc, int nThreads) {
 	auto device_variant = make_device(dev_desc);
-	apply_visitor([&](auto&& device) {
+	apply_visitor(util::compose_withbase<boost::static_visitor<void>>([&](auto&& device) {
 		FanoutTestFlow<std::decay_t<decltype(device)>> flow(device, nThreads);
 		flow.flow_main();
-	}, device_variant);
+	}), device_variant);
 }
 
 void track_width_exploration(const device::DeviceInfo& dev_desc, const util::Netlist<device::PinGID>& pin_to_pin_netlist, int nThreads) {
 	auto device_variant = make_device(dev_desc);
-	apply_visitor([&](auto&& device) {
+	apply_visitor(util::compose_withbase<boost::static_visitor<void>>([&](auto&& device) {
 		TrackWidthExplorationFlow<std::decay_t<decltype(device)>> flow(device, nThreads);
 		flow.flow_main(pin_to_pin_netlist);
-	}, device_variant);
+	}), device_variant);
 }
 
 void route_as_is(const device::DeviceInfo& dev_desc, const util::Netlist<device::PinGID>& pin_to_pin_netlist, int nThreads) {
 	auto device_variant = make_device(dev_desc);
-	apply_visitor([&](auto&& device) {
+	apply_visitor(util::compose_withbase<boost::static_visitor<void>>([&](auto&& device) {
 		RouteAsIsFlow<std::decay_t<decltype(device)>> flow(device, nThreads);
 		flow.flow_main(pin_to_pin_netlist);
-	}, device_variant);
+	}), device_variant);
 }
 
 } // end namespace flows
