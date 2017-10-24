@@ -1,5 +1,5 @@
-#ifndef INPUT_PARSER_H
-#define INPUT_PARSER_H
+#ifndef PARSING__ROUTING_INPUT_PARSER_H
+#define PARSING__ROUTING_INPUT_PARSER_H
 
 #include <device/device.hpp>
 #include <util/netlist.hpp>
@@ -12,6 +12,7 @@
 #include <boost/variant.hpp>
 
 namespace parsing {
+namespace routing {
 namespace input {
 
 struct ParseResult {
@@ -26,6 +27,7 @@ struct ParseResult {
 boost::variant<ParseResult, std::string> parse_data(std::istream& is, boost::optional<device::DeviceTypeID> default_device_type);
 
 } // end namespace parsing
+} // end namespace routing
 } // end namespace input
 
-#endif /* INPUT_PARSER_H */
+#endif /* PARSING__ROUTING_INPUT_PARSER_H */

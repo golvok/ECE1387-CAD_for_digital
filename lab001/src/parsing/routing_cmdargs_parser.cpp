@@ -1,11 +1,13 @@
 
-#include "cmdargs_parser.hpp"
+#include "routing_cmdargs_parser.hpp"
 
 #include <device/connectors.hpp>
 
 #include <unordered_set>
 
 namespace parsing {
+
+namespace routing {
 
 namespace cmdargs {
 
@@ -197,6 +199,8 @@ ParsedArguments parse(int arc_int, char const** argv) {
 }
 
 } // end namespace cmdargs
+
+} // end namespace routing
 
 } // end namespace parsing
 

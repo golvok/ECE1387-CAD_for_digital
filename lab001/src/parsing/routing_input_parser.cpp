@@ -1,4 +1,4 @@
-#include "input_parser.hpp"
+#include "routing_input_parser.hpp"
 
 #include <util/logging.hpp>
 #include <util/iteration_utils.hpp>
@@ -21,6 +21,7 @@
 #endif
 
 namespace parsing {
+namespace routing {
 namespace input {
 
 boost::variant<ParseResult, std::string> parse_data(std::istream& is, boost::optional<device::DeviceTypeID> default_device_type) {
@@ -113,5 +114,6 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is, boost::opt
 	return ParseResult{device_info, netlist, pin_order_in_input};
 }
 
+}
 }
 }

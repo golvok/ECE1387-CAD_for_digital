@@ -1,6 +1,6 @@
 
-#ifndef PARSING__CMDARGS_PARSER_H
-#define PARSING__CMDARGS_PARSER_H
+#ifndef PARSING__ROUTING_CMDARGS_PARSER_H
+#define PARSING__ROUTING_CMDARGS_PARSER_H
 
 #include <util/logging.hpp>
 #include <device/device.hpp>
@@ -10,6 +10,8 @@
 #include <boost/optional.hpp>
 
 namespace parsing {
+
+namespace routing {
 
 namespace cmdargs {
 
@@ -61,6 +63,8 @@ ParsedArguments parse(int arc_int, char const** argv);
 
 } // end namespace cmdargs
 
+} // end namespace routing
+
 } // end namespace parsing
 
-#endif /* PARSING__CMDARGS_PARSER_H */
+#endif /* PARSING__ROUTING_CMDARGS_PARSER_H */

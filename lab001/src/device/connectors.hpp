@@ -2,7 +2,6 @@
 #define DEVICE__CONNECTORS_H
 
 #include <device/device.hpp>
-#include <parsing/input_parser.hpp>
 #include <util/graph_algorithms.hpp>
 #include <util/logging.hpp>
 #include <util/netlist.hpp>
@@ -13,6 +12,7 @@
 #include <shared_mutex>
 
 #include <boost/optional.hpp>
+#include <boost/variant.hpp>
 #include <boost/thread/shared_mutex.hpp>
 
 namespace device {

@@ -1,8 +1,8 @@
 
 #include <flows/flows.hpp>
 #include <graphics/graphics_wrapper.hpp>
-#include <parsing/cmdargs_parser.hpp>
-#include <parsing/input_parser.hpp>
+#include <parsing/routing_cmdargs_parser.hpp>
+#include <parsing/routing_input_parser.hpp>
 #include <util/lambda_compose.hpp>
 #include <util/logging.hpp>
 
@@ -22,15 +22,17 @@ struct ProgramConfig {
 	int nThreads;
 };
 
+using namespace parsing::routing;
+
 int program_main(const ProgramConfig& config);
 
-void do_optional_input_data_dump(const std::string& data_file_name, const parsing::input::ParseResult& pr);
+void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr);
 
 int main(int argc, char const** argv) {
 
 	dout.setHighestTitleRank(7);
 
-	const auto parsed_args = parsing::cmdargs::parse(argc,argv);
+	const auto parsed_args = cmdargs::parse(argc,argv);
 	// enable logging levels
 	for (auto& l : parsed_args.getDebugLevelsToEnable()) {
 		dout.enable_level(l);
@@ -61,14 +63,14 @@ int program_main(const ProgramConfig& config) {
 
 	std::ifstream data_file(config.data_file_name);
 
-	auto parse_result = parsing::input::parse_data(data_file, config.device_type_override);
+	auto parse_result = input::parse_data(data_file, config.device_type_override);
 	auto visitor = util::compose_withbase<boost::static_visitor<void>>(
 		[&](const std::string& err_str) {
 			util::print_and_throw<std::invalid_argument>([&](auto&& str) {
 				str << err_str;
 			});
 		},
-		[&](const parsing::input::ParseResult& pr) {
+		[&](const input::ParseResult& pr) {
 			do_optional_input_data_dump(config.data_file_name, pr);
 
 			auto device_info_to_use = pr.device_info; // make copy
@@ -92,7 +94,7 @@ int program_main(const ProgramConfig& config) {
 	return 0;
 }
 
-void do_optional_input_data_dump(const std::string& data_file_name, const parsing::input::ParseResult& pr) {
+void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr) {
 	if (!dout(DL::DATA_READ1).enabled()) {
 		return;
 	}
