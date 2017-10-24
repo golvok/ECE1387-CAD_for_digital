@@ -24,7 +24,8 @@ else
 MAKEFLAGS+=" -r "
 BOOST_COMPAT_VERSION_THRESH = 104200
 MAKE_COMPAT_VERSION_THRESH = 3.81
-MAKE_COMPAT = $(shell [ $$(echo '$(MAKE_VERSION) <= $(MAKE_COMPAT_VERSION_THRESH)' | bc -l) -eq 1 ] && echo yes || echo no)
+MAKE_COMPAT__GREATER_VERSION = $(shell echo -e '$(MAKE_VERSION)\n$(MAKE_COMPAT_VERSION_THRESH)' | sort -V | tail -n 1)
+MAKE_COMPAT = $(shell [ $(MAKE_COMPAT__GREATER_VERSION) = $(MAKE_COMPAT_VERSION_THRESH) ] && echo yes || echo no)
 
 BUILD_MODE ?= release
 
