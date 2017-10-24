@@ -81,9 +81,9 @@ int program_main(const ProgramConfig& config) {
 			}
 
 			if (config.route_as_is) {
-				flows::route_as_is(device_info_to_use, pr.pin_to_pin_netlist, config.nThreads);
+				flows::route_as_is(device_info_to_use, pr.pin_to_pin_netlist, pr.pin_order_in_input, config.nThreads);
 			} else {
-				flows::track_width_exploration(device_info_to_use, pr.pin_to_pin_netlist, config.nThreads);
+				flows::track_width_exploration(device_info_to_use, pr.pin_to_pin_netlist, pr.pin_order_in_input, config.nThreads);
 			}
 		}
 	);

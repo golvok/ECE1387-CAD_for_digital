@@ -83,7 +83,7 @@ public:
 	RouteAsIsFlow(const FlowBase<Device>& fb) : FlowBase<Device>(fb) { }
 
 	template<typename RouteTheseSourcesFirst = std::vector<device::PinGID>>
-	auto flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist, RouteTheseSourcesFirst route_these_sources_first = {}, bool present_graphics = true) const {
+	auto flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist, const RouteTheseSourcesFirst& route_these_sources_first = {}, bool present_graphics = true) const {
 		const auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
 			str << "RouteAsIs Flow ( track_width = " << this->dev.info().track_width << " )";
 		});
@@ -91,8 +91,10 @@ public:
 		std::unordered_set<device::PinGID> in_route_these_first;
 		std::vector<device::PinGID> net_order;
 		for (const auto& pin : route_these_sources_first) {
-			in_route_these_first.insert(pin);
-			net_order.emplace_back(pin);
+			if (in_route_these_first.find(pin) == end(in_route_these_first)) {
+				in_route_these_first.insert(pin);
+				net_order.emplace_back(pin);
+			}
 		}
 
 		std::copy_if(
@@ -137,7 +139,11 @@ public:
 	RouteWithRetryFlow(FlowBase<Device>&& fb) : FlowBase<Device>(std::move(fb)) { }
 	RouteWithRetryFlow(const FlowBase<Device>& fb) : FlowBase<Device>(fb) { }
 
-	bool flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist) const {
+	template<typename PinOrder>
+	bool flow_main(
+		const util::Netlist<device::PinGID>& pin_to_pin_netlist,
+		const PinOrder& base_pin_order
+	) const {
 		const auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
 			str << "RouteWithRetry Flow";
 		});
@@ -146,7 +152,15 @@ public:
 		std::list<device::PinGID> route_these_sources_first;
 
 		while (true) {
-			const auto result = RouteAsIsFlow<Device>(*this).flow_main(pin_to_pin_netlist, route_these_sources_first, false);
+			std::vector<device::PinGID> source_order;
+			std::copy(begin(route_these_sources_first), end(route_these_sources_first), std::back_inserter(source_order));
+			for (const auto& source_and_sink : base_pin_order) {
+				const auto& source = source_and_sink.first;
+				if (in_route_these_sources_first.find(source) == end(in_route_these_sources_first)) {
+					source_order.push_back(source);
+				}
+			}
+			const auto result = RouteAsIsFlow<Device>(*this).flow_main(pin_to_pin_netlist, source_order, false);
 
 			bool added_something = false;
 			for (const auto& source : result.unroutedPins().all_ids()) {
@@ -186,7 +200,10 @@ public:
 	TrackWidthExplorationFlow(FlowBase<Device>&& fb) : FlowBase<Device>(std::move(fb)) { }
 	TrackWidthExplorationFlow(const FlowBase<Device>& fb) : FlowBase<Device>(fb) { }
 
-	void flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist) const {
+	void flow_main(
+		const util::Netlist<device::PinGID>& pin_to_pin_netlist,
+		const std::vector<std::pair<device::PinGID, device::PinGID>>& base_pin_order
+	) const {
 		const auto indent = dout(DL::INFO).indentWithTitle([&](auto&& str) {
 			str << "TrackWidthExploration Flow";
 		});
@@ -211,7 +228,7 @@ public:
 					dout(DL::INFO) << "done creating new device\n";
 					indent.endIndent();
 
-					const auto route_success = RouteWithRetryFlow<Device>(this->withDevice(modified_dev)).flow_main(pin_to_pin_netlist);
+					const auto route_success = RouteWithRetryFlow<Device>(this->withDevice(modified_dev)).flow_main(pin_to_pin_netlist, base_pin_order);
 					// const auto route_success = RouteAsIsFlow<Device>(modified_dev).flow_main(pin_to_pin_netlist).unroutedPins().empty();
 
 					if (route_success) {
@@ -280,7 +297,10 @@ namespace {
 	}
 }
 
-void fanout_test(const device::DeviceInfo& dev_desc, int nThreads) {
+void fanout_test(
+	const device::DeviceInfo& dev_desc,
+	int nThreads
+) {
 	auto device_variant = make_device(dev_desc);
 	apply_visitor([&](auto&& device) {
 		FanoutTestFlow<std::decay_t<decltype(device)>> flow(device, nThreads);
@@ -288,19 +308,33 @@ void fanout_test(const device::DeviceInfo& dev_desc, int nThreads) {
 	}, device_variant);
 }
 
-void track_width_exploration(const device::DeviceInfo& dev_desc, const util::Netlist<device::PinGID>& pin_to_pin_netlist, int nThreads) {
+void track_width_exploration(
+	const device::DeviceInfo& dev_desc,
+	const util::Netlist<device::PinGID>& pin_to_pin_netlist,
+	const std::vector<std::pair<device::PinGID, device::PinGID>>& base_pin_order,
+	int nThreads
+) {
 	auto device_variant = make_device(dev_desc);
 	apply_visitor([&](auto&& device) {
 		TrackWidthExplorationFlow<std::decay_t<decltype(device)>> flow(device, nThreads);
-		flow.flow_main(pin_to_pin_netlist);
+		flow.flow_main(pin_to_pin_netlist, base_pin_order);
 	}, device_variant);
 }
 
-void route_as_is(const device::DeviceInfo& dev_desc, const util::Netlist<device::PinGID>& pin_to_pin_netlist, int nThreads) {
+void route_as_is(
+	const device::DeviceInfo& dev_desc,
+	const util::Netlist<device::PinGID>& pin_to_pin_netlist,
+	const std::vector<std::pair<device::PinGID, device::PinGID>>& base_pin_order,
+	int nThreads
+) {
 	auto device_variant = make_device(dev_desc);
 	apply_visitor([&](auto&& device) {
 		RouteAsIsFlow<std::decay_t<decltype(device)>> flow(device, nThreads);
-		flow.flow_main(pin_to_pin_netlist);
+		flow.flow_main(pin_to_pin_netlist, util::xrange_forward_pe<decltype(begin(base_pin_order))>(
+			begin(base_pin_order),
+			end(base_pin_order),
+			[](auto& source_and_sink) { return source_and_sink->first; }
+		));
 	}, device_variant);
 }
 

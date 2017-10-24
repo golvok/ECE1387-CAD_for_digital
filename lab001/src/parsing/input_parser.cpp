@@ -69,6 +69,7 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is, boost::opt
 	};
 
 	util::Netlist<PinGID> netlist;
+	decltype(ParseResult::pin_order_in_input) pin_order_in_input;
 
 	for (const auto& route_request_parse : get<2>(parse_results)) {
 
@@ -76,7 +77,7 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is, boost::opt
 			break;
 		}
 
-		netlist.addConnection(
+		pin_order_in_input.emplace_back(
 			util::make_id<PinGID>(
 				util::make_id<BlockID>(
 					util::make_id<XID>(get<0>(route_request_parse)),
@@ -91,6 +92,11 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is, boost::opt
 				),
 				util::make_id<BlockPinID>(get<5>(route_request_parse))
 			)
+		);
+
+		netlist.addConnection(
+			pin_order_in_input.back().first,
+			pin_order_in_input.back().second
 		);
 	}
 
@@ -109,7 +115,7 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is, boost::opt
 		return err_stream.str();
 	}
 
-	return ParseResult{device_info, netlist};
+	return ParseResult{device_info, netlist, pin_order_in_input};
 }
 
 }

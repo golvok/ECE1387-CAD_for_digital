@@ -6,6 +6,7 @@
 
 #include <iosfwd>
 #include <tuple>
+#include <vector>
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
@@ -16,6 +17,7 @@ namespace input {
 struct ParseResult {
 	device::DeviceInfo device_info{};
 	util::Netlist<device::PinGID> pin_to_pin_netlist{};
+	std::vector<std::pair<device::PinGID, device::PinGID>> pin_order_in_input = {};
 };
 
 /**
