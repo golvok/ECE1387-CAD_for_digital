@@ -132,6 +132,7 @@ template<typename Device>
 static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 	if (!device) return;
 
+	graphics::setlinestyle(SOLID);
 	graphics::setcolor(0,0,0);
 
 	std::vector<device::RouteElementID> reIDs_to_draw;
@@ -149,6 +150,7 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 
 		graphics::drawrect(block_bounds);
 		graphics::settextrotation(0);
+		graphics::setfontsize(6);
 		graphics::drawtext_in(block_bounds, util::stringify_through_stream(geom::make_point(block.getX().getValue(), block.getY().getValue())));
 
 		for (const auto& pin_re : device->fanout(block)) {
@@ -170,6 +172,8 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 				const auto extracolours_find_result = data.getExtraColours().find(curr);
 				if (extracolours_find_result != end(data.getExtraColours())) {
 					graphics::setcolor(extracolours_find_result->second);
+				} else {
+					return wire_loc;
 				}
 			}
 		}
