@@ -10,19 +10,15 @@
 #include <boost/fusion/adapted/boost_tuple.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/tuple.hpp>
-#include <boost/spirit/home/x3.hpp>
 
-namespace {
-    template <typename T>
-    struct as_type {
-        template <typename Expr>
-            auto operator[](Expr&& expr) const {
-                return boost::spirit::x3::rule<struct _, T>{"as"} = boost::spirit::x3::as_parser(std::forward<Expr>(expr));
-            }
-    };
-
-    template <typename T> static const as_type<T> as = {};
-}
+#ifndef ECF_BOOST_COMPAT
+	#include <boost/spirit/home/x3.hpp>
+#else
+	#include <boost/spirit/include/qi.hpp>
+	#include <boost/spirit/include/phoenix_core.hpp>
+	#include <boost/spirit/include/phoenix_operator.hpp>
+	#define x3 qi // please be lenient...
+#endif
 
 namespace parsing {
 namespace input {
@@ -61,34 +57,34 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is, boost::opt
 
 	device::DeviceInfo device_info{
 		*default_device_type,
-		geom::BoundBox<int>(0,0,get<0>(parse_results)-1,get<0>(parse_results)-1),
-		get<1>(parse_results),
+		geom::BoundBox<int>(0,0,boost::get<0>(parse_results)-1,boost::get<0>(parse_results)-1),
+		boost::get<1>(parse_results),
 		1,
 		2,
 	};
 
 	util::Netlist<PinGID> netlist;
 
-	for (const auto& route_request_parse : get<2>(parse_results)) {
+	for (const auto& route_request_parse : boost::get<2>(parse_results)) {
 
-		if (get<0>(route_request_parse) < 0) {
+		if (boost::get<0>(route_request_parse) < 0) {
 			break;
 		}
 
 		netlist.addConnection(
 			util::make_id<PinGID>(
 				util::make_id<BlockID>(
-					util::make_id<XID>(get<0>(route_request_parse)),
-					util::make_id<YID>(get<1>(route_request_parse))
+					util::make_id<XID>(boost::get<0>(route_request_parse)),
+					util::make_id<YID>(boost::get<1>(route_request_parse))
 				),
-				util::make_id<BlockPinID>(get<2>(route_request_parse))
+				util::make_id<BlockPinID>(boost::get<2>(route_request_parse))
 			),
 			util::make_id<PinGID>(
 				util::make_id<BlockID>(
-					util::make_id<XID>(get<3>(route_request_parse)),
-					util::make_id<YID>(get<4>(route_request_parse))
+					util::make_id<XID>(boost::get<3>(route_request_parse)),
+					util::make_id<YID>(boost::get<4>(route_request_parse))
 				),
-				util::make_id<BlockPinID>(get<5>(route_request_parse))
+				util::make_id<BlockPinID>(boost::get<5>(route_request_parse))
 			)
 		);
 	}

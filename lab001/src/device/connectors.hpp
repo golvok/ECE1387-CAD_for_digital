@@ -398,68 +398,68 @@ public:
 	}
 };
 
-// template<typename BaseConnector>
-// class FanoutCachingConnector : public BaseConnector {
-// 	mutable std::unordered_map<RouteElementID, std::unique_ptr<std::vector<RouteElementID>>> cache = {};
-// 	mutable std::unique_ptr<boost::shared_mutex> mutex = std::make_unique<boost::shared_mutex>();
-// public:
-// 	using BaseConnector::BaseConnector;
+template<typename BaseConnector>
+class FanoutCachingConnector : public BaseConnector {
+	mutable std::unordered_map<RouteElementID, std::unique_ptr<std::vector<RouteElementID>>> cache = {};
+	mutable std::unique_ptr<boost::shared_mutex> mutex = std::make_unique<boost::shared_mutex>();
+public:
+	using BaseConnector::BaseConnector;
 
-// 	auto fanout_begin(const RouteElementID& re) const {
-// 		using std::begin;
-// 		return begin(get_fanout(re));
-// 	}
+	auto fanout_begin(const RouteElementID& re) const {
+		using std::begin;
+		return begin(get_fanout(re));
+	}
 
-// 	template<typename Index>
-// 	bool is_end_index(const RouteElementID& re, const Index& index) const {
-// 		using std::end;
-// 		return index == std::end(get_fanout(re));
-// 	}
+	template<typename Index>
+	bool is_end_index(const RouteElementID& re, const Index& index) const {
+		using std::end;
+		return index == std::end(get_fanout(re));
+	}
 
-// 	template<typename Index>
-// 	auto next_fanout(const RouteElementID& re, const Index& index) const {
-// 		(void)re;
-// 		return std::next(index);
-// 	}
+	template<typename Index>
+	auto next_fanout(const RouteElementID& re, const Index& index) const {
+		(void)re;
+		return std::next(index);
+	}
 
-// 	template<typename Index>
-// 	auto re_from_index(const RouteElementID& re, const Index& out_index) const {
-// 		(void)re;
-// 		return *out_index;
-// 	}
+	template<typename Index>
+	auto re_from_index(const RouteElementID& re, const Index& out_index) const {
+		(void)re;
+		return *out_index;
+	}
 
-// 	const auto& get_fanout(const RouteElementID& re) const {
-// 		using std::end;
-// 		mutex->lock_shared();
-// 		const auto find_result = cache.find(re);
-// 		if (find_result == std::end(cache)) {
-// 			mutex->unlock_shared();
-// 			std::lock_guard<decltype(*mutex)> lock_holder(*mutex);
-// 			const auto find_result_with_write_perms = cache.find(re);
-// 			if (find_result == std::end(cache)) {
-// 				return *cache.emplace(re, std::make_unique<std::vector<RouteElementID>>(compute_all_fanout(re))).first->second;
-// 			} else {
-// 				return *find_result_with_write_perms->second;
-// 			}
-// 		} else {
-// 			const auto& result = *find_result->second;
-// 			mutex->unlock_shared();
-// 			return result;
-// 		}
-// 	}
+	const auto& get_fanout(const RouteElementID& re) const {
+		using std::end;
+		mutex->lock_shared();
+		const auto find_result = cache.find(re);
+		if (find_result == std::end(cache)) {
+			mutex->unlock_shared();
+			std::lock_guard<decltype(*mutex)> lock_holder(*mutex);
+			const auto find_result_with_write_perms = cache.find(re);
+			if (find_result == std::end(cache)) {
+				return *cache.emplace(re, std::make_unique<std::vector<RouteElementID>>(compute_all_fanout(re))).first->second;
+			} else {
+				return *find_result_with_write_perms->second;
+			}
+		} else {
+			const auto& result = *find_result->second;
+			mutex->unlock_shared();
+			return result;
+		}
+	}
 
-// 	auto compute_all_fanout(const RouteElementID& re) const {
-// 		std::vector<RouteElementID> result;
-// 		for (
-// 			auto it = BaseConnector::fanout_begin(re);
-// 			!BaseConnector::is_end_index(re, it);
-// 			it = BaseConnector::next_fanout(re, it)
-// 		) {
-// 			result.emplace_back(BaseConnector::re_from_index(re, it));
-// 		}
-// 		return result;
-// 	}
-// };
+	auto compute_all_fanout(const RouteElementID& re) const {
+		std::vector<RouteElementID> result;
+		for (
+			auto it = BaseConnector::fanout_begin(re);
+			!BaseConnector::is_end_index(re, it);
+			it = BaseConnector::next_fanout(re, it)
+		) {
+			result.emplace_back(BaseConnector::re_from_index(re, it));
+		}
+		return result;
+	}
+};
 
 template<typename BaseConnector>
 class FanoutPreCachingConnector : public BaseConnector {
