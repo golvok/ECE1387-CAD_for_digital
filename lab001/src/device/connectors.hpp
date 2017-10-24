@@ -413,7 +413,7 @@ public:
 	template<typename Index>
 	bool is_end_index(const RouteElementID& re, const Index& index) const {
 		using std::end;
-		return index == end(get_fanout(re));
+		return index == std::end(get_fanout(re));
 	}
 
 	template<typename Index>
@@ -429,13 +429,14 @@ public:
 	}
 
 	const auto& get_fanout(const RouteElementID& re) const {
+		using std::end;
 		mutex->lock_shared();
 		const auto find_result = cache.find(re);
-		if (find_result == end(cache)) {
+		if (find_result == std::end(cache)) {
 			mutex->unlock_shared();
 			std::lock_guard<decltype(*mutex)> lock_holder(*mutex);
 			const auto find_result_with_write_perms = cache.find(re);
-			if (find_result == end(cache)) {
+			if (find_result == std::end(cache)) {
 				return *cache.emplace(re, std::make_unique<std::vector<RouteElementID>>(compute_all_fanout(re))).first->second;
 			} else {
 				return *find_result_with_write_perms->second;
@@ -486,13 +487,13 @@ public:
 	Index fanout_begin(const RouteElementID& re) const {
 		using std::begin;
 		const auto& cache_element = get_fanout(re);
-		return { begin(cache_element), &cache_element };
+		return { std::begin(cache_element), &cache_element };
 	}
 
 	bool is_end_index(const RouteElementID& re, const Index& index) const {
 		(void)re;
 		using std::end;
-		return index.curr == end(*index.cache_element);
+		return index.curr == std::end(*index.cache_element);
 	}
 
 	Index next_fanout(const RouteElementID& re, const Index& index) const {
@@ -506,8 +507,9 @@ public:
 	}
 
 	const auto& get_fanout(const RouteElementID& re) const {
+		using std::end;
 		const auto find_result = cache.find(re);
-		if (find_result == end(cache)) {
+		if (find_result == std::end(cache)) {
 			throw std::runtime_error("don't have cached connections for a route element");
 		} else {
 			return find_result->second;
@@ -550,9 +552,6 @@ public:
 #define ALL_DEVICES_COMMA_SEP \
 	device::Device<device::FanoutPreCachingConnector<device::WiltonConnector>>, \
 	device::Device<device::FanoutPreCachingConnector<device::FullyConnectedConnector>>, \
-	\
-	device::Device<device::FanoutCachingConnector<device::WiltonConnector>>, \
-	device::Device<device::FanoutCachingConnector<device::FullyConnectedConnector>>, \
 	\
 	device::Device<device::WiltonConnector>, \
 	device::Device<device::FullyConnectedConnector>

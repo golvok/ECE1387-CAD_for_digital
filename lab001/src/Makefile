@@ -22,6 +22,9 @@ else
 
 # remove ALL implicit rules & all suffixes
 MAKEFLAGS+=" -r "
+BOOST_COMPAT_VERSION_THRESH = 104200
+MAKE_COMPAT_VERSION_THRESH = 3.81
+MAKE_COMPAT = $(shell [ $$(echo '$(MAKE_VERSION) <= $(MAKE_COMPAT_VERSION_THRESH)' | bc -l) -eq 1 ] && echo yes || echo no)
 
 BUILD_MODE ?= release
 
@@ -41,6 +44,13 @@ WARNING_FLAGS += -Wall -Wextra -pedantic -Weffc++ -Wconversion -Werror
 # put other flags for both the compiler & linker here
 EXTRA_FLAGS = -std=c++14 -D X11 -fopenmp
 
+BOOST_VERSION_TEST_INPUT = \#include <boost/version.hpp>\nBOOST_VERSION\n
+BOOST_VERSION = $(shell echo -e '$(BOOST_VERSION_TEST_INPUT)' | gcc -x c++ -E - | tail -n 1)
+USE_BOOST_COMPAT = $(shell [ $(BOOST_VERSION) -le $(BOOST_COMPAT_VERSION_THRESH) ] && echo yes || echo no)
+ifeq ($(USE_BOOST_COMPAT),yes)
+	EXTRA_FLAGS += -D ECF_BOOST_COMPAT
+endif
+
 # add flags for debugging
 ifeq ($(BUILD_MODE),debug)
 	EXTRA_FLAGS += -ggdb -D DEBUG # -D _GLIBCXX_DEBUG
@@ -58,8 +68,13 @@ LIBRARY_LINK_FLAGS += \
 	$(shell pkg-config --libs x11) \
 	$(shell pkg-config --libs xft) \
 	-lboost_system \
-	-lboost_thread \
 	-lpthread
+
+ifeq ($(USE_BOOST_COMPAT),yes)
+	LIBRARY_LINK_FLAGS += -lboost_thread-mt
+else
+	LIBRARY_LINK_FLAGS += -lboost_thread
+endif
 
 INCLUDE_FLAGS += \
 	-I .
@@ -96,6 +111,14 @@ test: $(patsubst %, run_%, $(TEST_EXES))
 build_info:
 	@echo "Building with makeflags ${MAKEFLAGS}"
 	@echo "In build mode ${BUILD_MODE}"
+ifeq ($(MAKE_COMPAT),yes)
+ifneq ($(NO_MAKE_VER_WARN),yes)
+	@echo -e "WARNING: #############################################################################################"
+	@echo -e "WARNING: You seem to be  building with an old version of Make. Building may require multiple attempts."
+	@echo -e "WARNING: Set NO_MAKE_VER_WARN=yes to hide this"
+	@echo -e "WARNING: #############################################################################################"
+endif
+endif
 
 # add more dependencies here:
 $(EXE_DIR)maize-router: \
@@ -158,7 +181,13 @@ $(patsubst %, run_%, $(EXES)): $$(patsubst run_%, %, $$(@))
 $(DIRS):
 	mkdir -p $@
 
+ifeq ($(MAKE_COMPAT),yes)
+clean:
+	rm -rf $(BUILD_DIR)
+else
 clean: $(BUILD_DIR:%=delete_%_dir)
+endif
+
 
 $(patsubst %, delete_%_dir, $(BUILD_DIR)    ): $$(patsubst %, delete_%_dir, $(BUILD_SUBDIRS))
 $(patsubst %, delete_%_dir, $(OBJ_DIR)      ): $$(patsubst %, delete_%_dir, $$(ALL_OBJ_DIRS))

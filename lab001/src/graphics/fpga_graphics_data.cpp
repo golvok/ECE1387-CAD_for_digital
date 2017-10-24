@@ -2,6 +2,7 @@
 
 #include <graphics/graphics.hpp>
 #include <util/graph_algorithms.hpp>
+#include <util/lambda_compose.hpp>
 #include <util/logging.hpp>
 
 namespace graphics {
@@ -10,7 +11,7 @@ namespace {
 	template<typename T>
 	bool is_contained_in_a_path(device::RouteElementID reid, const T& paths) {
 		for (const auto& path : paths) {
-			if (std::find(begin(path), end(path), reid) != end(path)) {
+			if (std::find(begin(path), std::end(path), reid) != std::end(path)) {
 				return true;
 			}
 		}
@@ -166,11 +167,11 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 			graphics::setcolor(*colour);
 		} else {
 			const auto colour_overrides_find_result = colour_overrides.find(curr);
-			if (colour_overrides_find_result != end(colour_overrides)) {
+			if (colour_overrides_find_result != std::end(colour_overrides)) {
 				graphics::setcolor(colour_overrides_find_result->second);
 			} else {
 				const auto extracolours_find_result = data.getExtraColours().find(curr);
-				if (extracolours_find_result != end(data.getExtraColours())) {
+				if (extracolours_find_result != std::end(data.getExtraColours())) {
 					graphics::setcolor(extracolours_find_result->second);
 				} else {
 					return wire_loc;
@@ -195,7 +196,7 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 			std::make_pair(wire_and_loc1.second.second, wire_and_loc2.second.second),
 		};
 
-		const auto point_pair = *std::min_element(begin(point_list), end(point_list), [](const auto& lhs, const auto& rhs) {
+		const auto point_pair = *std::min_element(begin(point_list), std::end(point_list), [](const auto& lhs, const auto& rhs) {
 			return geom::l1_distance(geom::make_point(lhs.first.x, lhs.first.y), geom::make_point(lhs.second.x, lhs.second.y))
 				< geom::l1_distance(geom::make_point(rhs.first.x, rhs.first.y), geom::make_point(rhs.second.x, rhs.second.y));
 		});
@@ -257,7 +258,7 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 
 
 	util::GraphAlgo<device::RouteElementID>().breadthFirstVisit(*device, reIDs_to_draw, [&](const auto& curr) {
-		if (already_drawn.find(curr) == end(already_drawn)) {
+		if (already_drawn.find(curr) == std::end(already_drawn)) {
 			drawWire(curr);
 		}
 	});
@@ -272,9 +273,9 @@ void FPGAGraphicsData::drawAll() {
 	const auto& data_and_lock_copy = dataAndLock();
 	const auto& data = data_and_lock_copy.first;
 
-	boost::apply_visitor([&](auto&& device) {
+	boost::apply_visitor(util::compose_withbase<boost::static_visitor<void>>([&](auto&& device) {
 		drawDevice(device, data);
-	}, data.getDevice());
+	}), data.getDevice());
 }
 
 } // end namespace graphics
