@@ -178,8 +178,8 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 			const auto& my_curr_wave_begin_index = ithread*num_data_per_thread;
 			const auto& my_curr_wave_end_index =   (ithread + 1)*num_data_per_thread + 1;
 			const auto& my_curr_wave = boost::make_iterator_range(
-				std::next(std::begin(curr_wave), std::min(curr_wave.size(), my_curr_wave_begin_index)),
-				std::next(std::begin(curr_wave), std::min(curr_wave.size(), my_curr_wave_end_index))
+				std::next(begin(curr_wave), std::min(curr_wave.size(), my_curr_wave_begin_index)),
+				std::next(begin(curr_wave), std::min(curr_wave.size(), my_curr_wave_end_index))
 			);
 			auto& my_next_wave = waveData[ithread].next_wave;
 
@@ -190,7 +190,7 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 				} else {
 					visitor.onExplore(id);
 					for (const auto& fanout : fanout_gen.fanout(id)) {
-						if (data.find(fanout) == std::end(data) && !should_ignore(fanout)) {
+						if (data.find(fanout) == end(data) && !should_ignore(fanout)) {
 							my_next_wave.emplace_back(ExploreData{id, fanout});
 							visitor.onFanout(id, fanout);
 						} else {
@@ -224,9 +224,9 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 		curr_wave.clear();
 		for (auto& waveDatum : waveData) {
 			for (auto& exploreData : waveDatum.next_wave) {
-				if (data.find(exploreData.fanout) == std::end(data)) {
+				if (data.find(exploreData.fanout) == end(data)) {
 					explorations_to_new_nodes.emplace_back(exploreData);
-					if (in_next_wave.find(exploreData.fanout) == std::end(in_next_wave)) {
+					if (in_next_wave.find(exploreData.fanout) == end(in_next_wave)) {
 						in_next_wave.emplace(exploreData.fanout);
 						curr_wave.push_back(exploreData.fanout);
 					}

@@ -262,7 +262,7 @@ auto zip(COLLECTION_TYPES&... containers) {
 
 template<typename CONTAINER>
 auto iterate_with_iterators(CONTAINER& c) {
-	return xrange_forward_pe<decltype(std::begin(c))>(
+	return xrange_forward_pe<decltype(begin(c))>(
 		begin(c),
 		end(c)
 	);

@@ -99,16 +99,16 @@ public:
 		}
 
 		std::copy_if(
-			std::begin(pin_to_pin_netlist.roots()),
-			std::end(pin_to_pin_netlist.roots()),
+			begin(pin_to_pin_netlist.roots()),
+			end(pin_to_pin_netlist.roots()),
 			std::back_inserter(net_order),
 			[&](const device::PinGID& pin) {
-				return in_route_these_first.find(pin) == std::end(in_route_these_first);
+				return in_route_these_first.find(pin) == end(in_route_these_first);
 			}
 		);
 
 		const auto result = algo::route_all<false>(pin_to_pin_netlist, net_order, dev, nThreads);
-		const auto num_REs = std::count_if(std::begin(result.netlist().all_ids()), std::end(result.netlist().all_ids()), [](const auto& reid) {
+		const auto num_REs = std::count_if(begin(result.netlist().all_ids()), end(result.netlist().all_ids()), [](const auto& reid) {
 			return !reid.isPin();
 		});
 
@@ -165,7 +165,7 @@ public:
 
 			bool added_something = false;
 			for (const auto& source : result.unroutedPins().all_ids()) {
-				const bool already_there = in_route_these_sources_first.find(source) != std::end(in_route_these_sources_first);
+				const bool already_there = in_route_these_sources_first.find(source) != end(in_route_these_sources_first);
 				const bool has_fanout = !util::empty(result.unroutedPins().fanout(source));
 				if (!already_there && has_fanout) {
 					dout(DL::INFO) << "new failure on : " << source << '\n';
@@ -213,13 +213,13 @@ public:
 		auto track_width_range = boost::irange(1, dev.info().track_width+1); // +1 as last argument is a past-end
 		const auto SENTINEL = -1; // something note in the above range, specifically less than everything
 		using std::begin; using std::end;
-		std::binary_search(std::begin(track_width_range), std::end(track_width_range), SENTINEL, [&](const auto& rhs, const auto& lhs) {
+		std::binary_search(begin(track_width_range), end(track_width_range), SENTINEL, [&](const auto& rhs, const auto& lhs) {
 			auto dev_info_copy = this->dev.info();
 			dev_info_copy.track_width = std::max(rhs,lhs); // get the non-sentinel
 
 			const auto route_success = [&](){
 				const auto attempt_find_result = attempt_statuses.find(dev_info_copy.track_width);
-				if (attempt_find_result == std::end(attempt_statuses)) {
+				if (attempt_find_result == end(attempt_statuses)) {
 					const auto indent_scope = dout(DL::INFO).indentWithTitle([&](auto&& str) {
 						str << "Trying track width of " << dev_info_copy.track_width;
 					});

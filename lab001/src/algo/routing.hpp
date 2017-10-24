@@ -51,7 +51,7 @@ RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, NetOrder&& 
 			});
 
 			const auto& new_routing = algo::maze_route<device::RouteElementID>(used_by_this_net, sink_pin_re, fanout_gen, [&](auto&& reid) {
-				return (reid != sink_pin && reid != src_pin && reid.isPin()) || (used.find(reid) != std::end(used) && used_by_this_net.find(reid) == std::end(used_by_this_net));
+				return (reid != sink_pin && reid != src_pin && reid.isPin()) || (used.find(reid) != end(used) && used_by_this_net.find(reid) == end(used_by_this_net));
 			}, ntheads);
 
 			if (new_routing) {

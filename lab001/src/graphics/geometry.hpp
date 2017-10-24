@@ -242,8 +242,8 @@ auto project(Point<PRECISION> source, Point<PRECISION2> wall) {
 }
 template<typename PRECISION, typename POINT_LIST>
 auto& farthestPoint(Point<PRECISION> p, const POINT_LIST& test_points) {
-	auto farthestDistance = distancef(p, *std::begin(test_points));
-	auto farthest_point = &(*std::begin(test_points));
+	auto farthestDistance = distancef(p, *begin(test_points));
+	auto farthest_point = &(*begin(test_points));
 	for (auto& test_point : test_points) {
 		auto distance = distancef(p, test_point);
 		if (farthestDistance < distance) {
@@ -256,7 +256,7 @@ auto& farthestPoint(Point<PRECISION> p, const POINT_LIST& test_points) {
 template<typename PRECISION, typename PRECISION2, typename POINT_LIST>
 auto farthestFromLineWithSides(Point<PRECISION> p, Point<PRECISION2> q, POINT_LIST& test_points) {
 	auto line = delta(p, q);
-	std::array<decltype(*std::begin(test_points)),2> farthests;
+	std::array<decltype(*begin(test_points)),2> farthests;
 	std::array<decltype(magnitude(perpindictularDeltaVectorToLine(line, delta(p, test_points[0])))),2> farthestDistance;
 	for (auto& test_point : test_points) {
 		auto relativeToP = delta(p, test_point);

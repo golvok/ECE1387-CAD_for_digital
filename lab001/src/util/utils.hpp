@@ -26,7 +26,8 @@ template <typename T, typename V, typename... Rest> struct all_convertible<T, V,
 namespace util {
 	template<typename T>
 	void reverse(T& t) {
-		reverse(std::begin(t),std::end(t));
+		using std::begin; using std::end;
+		reverse(begin(t),end(t));
 	}
 
 	template<typename FUNC>
@@ -48,10 +49,10 @@ namespace util {
 	template<typename COLLECTION, typename VALUE>
 	auto skip_find(const COLLECTION& c, size_t num_to_skip, const VALUE& v) {
 		using std::begin; using std::end; using std::next;
-		auto curr = std::find(std::begin(c), std::end(c), v);
+		auto curr = std::find(begin(c), end(c), v);
 		for (size_t match_num = 2; (match_num-1) <= num_to_skip; ++match_num) {
-			curr = std::find(next(curr), std::end(c), v);
-			if (curr == std::end(c)) {
+			curr = std::find(next(curr), end(c), v);
+			if (curr == end(c)) {
 				break;
 			}
 		}
@@ -76,7 +77,8 @@ namespace util {
 
 	template<typename CONTAINER, typename PRED>
 	void remove_if_assoc(CONTAINER& c, PRED&& p) {
-		for(auto it = std::begin(c); it != std::end(c); ) {
+		using std::begin; using std::end;
+		for(auto it = begin(c); it != end(c); ) {
 			if (p(*it)) {
 				it = c.erase(it);
 			} else {
@@ -89,7 +91,7 @@ namespace util {
 	bool empty(CONTAINER&& c) {
 		using std::begin;
 		using std::end;
-		return std::begin(c) == std::end(c);
+		return begin(c) == end(c);
 	}
 }
 
@@ -253,8 +255,9 @@ void print_container(
 	const std::string& suffix_str = " }",
 	FUNC func = FUNC{}
 ) {
-	auto beg = std::begin(c);
-	auto en = std::end(c);
+	using std::begin; using std::end;
+	auto beg = begin(c);
+	auto en = end(c);
 
 	os << prefix_str;
 	if (beg != en) {
@@ -276,8 +279,9 @@ void print_assoc_container(
 	const std::string& suffix_str,
 	FUNC func = FUNC{}
 ) {
-	auto beg = std::begin(c);
-	auto en = std::end(c);
+	using std::begin; using std::end;
+	auto beg = begin(c);
+	auto en = end(c);
 
 	os << prefix_str;
 	if (beg != en) {
