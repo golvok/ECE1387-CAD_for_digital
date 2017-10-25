@@ -6,6 +6,7 @@ build/OBJ/**/*.so
 build/DEPS/**/*.d
 
 # Executables
+build/EXE/anaplace
 build/EXE/maize-router
 build/EXE/test-netlist
 
@@ -17,3 +18,4 @@ build/EXE/test-netlist
 test/runs/*
 *.xoj.bak
 *.autosave.xoj
+*.swp
