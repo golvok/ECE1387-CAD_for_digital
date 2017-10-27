@@ -19,3 +19,4 @@ test/runs/*
 *.xoj.bak
 *.autosave.xoj
 *.swp
+lab*-*.pdf
