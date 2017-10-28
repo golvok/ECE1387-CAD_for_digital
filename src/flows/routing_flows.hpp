@@ -1,5 +1,5 @@
-#ifndef FLOWS__FLOWS_H
-#define FLOWS__FLOWS_H
+#ifndef FLOWS__PLACEMENT_FLOWS_H
+#define FLOWS__PLACEMENT_FLOWS_H
 
 #include <device/connectors.hpp>
 #include <device/device.hpp>
@@ -28,4 +28,4 @@ void route_as_is(
 
 } // end namespace flow
 
-#endif // FLOWS__FLOWS_H
+#endif // FLOWS__PLACEMENT_FLOWS_H
