@@ -37,19 +37,27 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 		("debug",    "Turn on the most common debugging options")
 	;
 	DebugLevel::forEachLevel([&](DebugLevel::Level l) {
-		metaopts.add_options()(("DL::" + DebugLevel::getAsString(l)).c_str(), "");
+		metaopts.add_options()(("DL::" + DebugLevel::getAsString(l)).c_str(), "debug flag");
 	});
 
 	progopts.add_options()
-		("circuit", po::value(&m_programConfig.m_dataFileName), "The circuit to use")
+		("help,h", "print help message")
+		("circuit", po::value(&m_programConfig.m_dataFileName)->required(), "The circuit to use")
 		("num-threads", po::value(&m_programConfig.m_nThreads), "The maximum nuber of simultaneous threads to use")
 	;
 
 	po::options_description allopts;
-	allopts.add(metaopts).add(progopts);
+	allopts.add(progopts).add(metaopts);
 
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc_int, argv, allopts), vm);
+
+	// check for help flag before call to notify - don't care about required arguments in this case.
+	if (vm.count("help")) {
+		std::cerr << allopts << std::endl;
+		exit(0);
+	}
+
 	po::notify(vm);
 
 	if (vm.count("debug")) {
@@ -63,7 +71,6 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 			m_meta.levels_to_enable.insert(end(m_meta.levels_to_enable),begin(levels_in_chain),end(levels_in_chain));
 		}
 	});
-
 }
 
 ParsedArguments parse(int arc_int, char const** argv) {
