@@ -1,27 +1,17 @@
 #ifndef DEVICE__DEVICE_H
 #define DEVICE__DEVICE_H
 
+#include <device/common_ids.hpp>
 #include <graphics/geometry.hpp>
 #include <util/bit_tools.hpp>
-#include <util/id.hpp>
 #include <util/generator.hpp>
 #include <util/print_printable.hpp>
 
-#include <cstdint>
 #include <ostream>
 
 #include <boost/operators.hpp>
 
 namespace device {
-
-struct XIDTag { static const std::uint16_t DEFAULT_VALUE = 0x8000; };
-struct YIDTag { static const std::uint16_t DEFAULT_VALUE = 0x8000; };
-struct BlockPinIDTag { static const std::uint16_t DEFAULT_VALUE = 0x8000; };
-using XID = util::ID<std::int16_t, XIDTag>;
-using YID = util::ID<std::int16_t, YIDTag>;
-using BlockPinID = util::ID<std::int16_t, BlockPinIDTag>;
-
-using XYIDPair = std::pair<XID,YID>;
 
 struct BlockIDTag { static const std::uint32_t DEFAULT_VALUE = 0x80008000; };
 class BlockID : public util::ID <std::uint32_t, BlockIDTag>, public util::print_printable {
