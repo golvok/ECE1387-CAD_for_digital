@@ -21,7 +21,8 @@ namespace DebugLevel {
 	 * If adding a level make sure to update the various functions in this namespace.
 	 */
 	enum Level : uint {
-		INFO,  // probably always going to have this on?
+		LEVEL_START = 0,
+		INFO = LEVEL_START,  // probably always going to have this on?
 		WARN,  // same as ^ ?
 		ERROR, // always on
 
@@ -59,6 +60,13 @@ namespace DebugLevel {
 
 	std::pair<Level,bool> getFromString(std::string str);
 	std::string getAsString(Level l);
+
+	template<typename Func>
+	void forEachLevel(Func&& f) {
+		for (uint i = Level::LEVEL_START; i < Level::LEVEL_COUNT; ++i) {
+			f(Level(i));
+		}
+	}
 
 }
 

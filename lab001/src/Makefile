@@ -69,6 +69,7 @@ LIBRARY_LINK_FLAGS += \
 	$(shell pkg-config --libs x11) \
 	$(shell pkg-config --libs xft) \
 	-lboost_system \
+	-lboost_program_options \
 	-lpthread
 
 ifeq ($(USE_BOOST_COMPAT),yes)
