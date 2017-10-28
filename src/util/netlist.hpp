@@ -22,6 +22,13 @@ public:
 		, m_roots()
 	{ }
 
+	void addLoneNode(const NODE_ID& source) {
+		auto source_location_and_wasnt_there = connections.insert({source, {}});
+		if (source_location_and_wasnt_there.second) {
+			m_roots.insert(source);
+		}
+	}
+
 	void addConnection(const NODE_ID& source, const NODE_ID& sink) {
 		auto source_location_and_wasnt_there = connections.insert({source, {}});
 		source_location_and_wasnt_there.first->second.emplace(sink);
@@ -34,7 +41,7 @@ public:
 			const auto num_erased = m_roots.erase(sink);
 			if (IS_FOREST && num_erased == 0) {
 				std::stringstream err_str;
-				err_str << "attempt to add connection " << source << " -> " << sink << " that will short two trees together: \n";
+				err_str << "adding connection " << source << " -> " << sink << " shorted two trees together: \n";
 				for (const auto& id : connections) {
 					err_str << id.first << " -> ";
 					for (const auto& fanout : id.second) {
@@ -74,19 +81,43 @@ public:
 	template<typename VisitorState, typename Visitor>
 	auto for_all_descendants(NODE_ID start, VisitorState&& initial_state, Visitor&& visitor) const {
 		std::list<std::pair<NODE_ID, VisitorState>> to_visit;
+		std::unordered_set<NODE_ID> visited;
 		to_visit.emplace_back(start, initial_state);
 
 		while (!to_visit.empty()) {
 			const auto& curr_and_state = to_visit.front();
 
-			auto new_state = visitor(curr_and_state.first, curr_and_state.second);
+			if (IS_FOREST || visited.insert(curr_and_state.first).second == true) {
 
-			for (const auto& node : fanout(curr_and_state.first)) {
-				to_visit.emplace_back(node, new_state);
+				auto new_state = visitor(curr_and_state.first, curr_and_state.second);
+
+				for (const auto& node : fanout(curr_and_state.first)) {
+					to_visit.emplace_back(node, new_state);
+				}
 			}
 
 			to_visit.pop_front();
 		}
+	}
+
+	template<typename VisitorState, typename Visitor>
+	auto for_all_descendant_edges(NODE_ID start, VisitorState&& initial_state, Visitor&& visitor) const {
+		struct State {
+			NODE_ID parent;
+			VisitorState visitor_state;
+		};
+		struct Params {
+			NODE_ID curr;
+			NODE_ID parent;
+		};
+
+		for_all_descendants(start, State{start, initial_state}, [&](const NODE_ID& node, const State& state) {
+			if (node != start) {
+				return State{node, visitor(Params{node, state.parent}, state.visitor_state)};
+			} else {
+				return State{node, state.visitor_state};
+			}
+		});
 	}
 private:
 	ConnectionStorage connections;

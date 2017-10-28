@@ -1,7 +1,9 @@
 #ifndef PARSING__ROUTING_INPUT_PARSER_H
 #define PARSING__ROUTING_INPUT_PARSER_H
 
+#include <device/common_ids.hpp>
 #include <util/netlist.hpp>
+#include <graphics/geometry.hpp>
 
 #include <iosfwd>
 
@@ -13,6 +15,18 @@ namespace anaplace {
 namespace input {
 
 struct ParseResult {
+	      auto& netlist()       { return m_netlist; }
+	const auto& netlist() const { return m_netlist; }
+
+	      auto& netlistAsParsed()       { return m_netlist_as_parsed; }
+	const auto& netlistAsParsed() const { return m_netlist_as_parsed; }
+
+	      auto& fixedBlockLocations()       { return m_fixed_block_locations; }
+	const auto& fixedBlockLocations() const { return m_fixed_block_locations; }
+
+	util::Netlist<device::AtomID, false> m_netlist;
+	util::Netlist<device::AtomID, false> m_netlist_as_parsed;
+	std::unordered_map<device::AtomID, geom::Point<double>> m_fixed_block_locations;
 };
 
 /**

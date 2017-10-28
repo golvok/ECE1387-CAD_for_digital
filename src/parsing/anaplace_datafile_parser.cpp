@@ -65,16 +65,6 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 		parse_results
 	);
 
-	for (const auto& block : boost::get<0>(parse_results)) {
-		dout(DL::INFO) << "b# = " << boost::get<0>(block) << '\n';
-		for (const auto& netID : boost::get<1>(block)) {
-			dout(DL::INFO) << "\t -> " << netID << '\n';
-		}
-	}
-	for (const auto& static_block : boost::get<2>(parse_results)) {
-		dout(DL::INFO) << "sb: #" << boost::get<0>(static_block) << " x" << boost::get<1>(static_block) << " y" << boost::get<2>(static_block) << '\n';
-	}
-
 	using std::begin;
 	using std::end;
 
@@ -93,7 +83,61 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 		return err_stream.str();
 	}
 
-	return ParseResult{};
+	std::unordered_map<int, device::AtomID> netid_to_src;
+	util::Netlist<device::AtomID, false> input_graph;
+	util::Netlist<device::AtomID, false> netlist_orig;
+	std::unordered_map<device::AtomID, geom::Point<double>> fixed_block_locations;
+	std::uint32_t highest_atom_id_value = 0;
+
+	auto try_add_block = [&](int netID, const device::AtomID& atomID) {
+		highest_atom_id_value = std::max(atomID.getValue(), highest_atom_id_value);
+		const auto src_find_results = netid_to_src.find(netID);
+		if (src_find_results == end(netid_to_src)) {
+			netid_to_src.emplace(netID, atomID);
+			input_graph.addLoneNode(atomID);
+			netlist_orig.addLoneNode(atomID);
+		} else {
+			input_graph.addConnection(src_find_results->second, atomID);
+			netlist_orig.addConnection(src_find_results->second, atomID);
+			input_graph.addConnection(atomID, src_find_results->second);
+		}
+	};
+
+	for (const auto& block : boost::get<0>(parse_results)) {
+		const auto atomID = util::make_id<device::AtomID>(boost::get<0>(block));
+		for (const auto& netID : boost::get<1>(block)) {
+			dout(DL::INFO) << "\t -> " << netID << '\n';
+			try_add_block(netID, atomID);
+		}
+	}
+
+	device::AtomID last_static_atom = util::make_id<device::AtomID>();
+	for (const auto& static_block : boost::get<2>(parse_results)) {
+		const auto atomID = util::make_id<device::AtomID>(highest_atom_id_value + 1);
+		last_static_atom = atomID;
+		try_add_block(boost::get<0>(static_block), atomID);
+		fixed_block_locations.emplace(
+			atomID,
+			geom::make_point(
+				boost::get<1>(static_block),
+				boost::get<2>(static_block)
+			)
+		);
+	}
+
+	util::Netlist<device::AtomID, false> netlist;
+
+	struct State {};
+	const auto start = last_static_atom;
+	netlist.addLoneNode(start);
+	input_graph.for_all_descendant_edges(start, State{},
+		[&](const auto& atoms, const State& s) {
+			netlist.addConnection(atoms.parent, atoms.curr);
+			return s;
+		}
+	);
+
+	return ParseResult{netlist, netlist_orig, fixed_block_locations};
 }
 
 }

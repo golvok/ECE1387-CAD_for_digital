@@ -71,5 +71,23 @@ void do_optional_input_data_dump(const std::string& data_file_name, const input:
 
 	const auto indent = dout(DL::DATA_READ1).indentWithTitle("Input Data Dump");
 	dout(DL::DATA_READ1) << "using input file: " << data_file_name << '\n';
-	(void)pr;
+
+	auto dump_netlist = [](const auto& netlist) {
+		dout(DL::DATA_READ1) << "roots:";
+		util::print_container(netlist.roots(), dout(DL::DATA_READ1));
+		dout(DL::DATA_READ1) << '\n';
+		for (const auto& node : netlist.all_ids()) {
+			dout(DL::DATA_READ1) << node << "->";
+			for (const auto& fanout_node : netlist.fanout(node)) {
+				dout(DL::DATA_READ1) << fanout_node << ", ";
+			}
+			dout(DL::DATA_READ1) << '\n';
+		}
+	};
+
+	{const auto indent = dout(DL::DATA_READ1).indentWithTitle("As-Parsed Netlist");
+	dump_netlist(pr.netlistAsParsed());}
+
+	{const auto indent = dout(DL::DATA_READ1).indentWithTitle("Main Netlist");
+	dump_netlist(pr.netlist());}
 }
