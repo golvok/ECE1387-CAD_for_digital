@@ -57,6 +57,9 @@ int program_main(const ProgramConfig& config) {
 		},
 		[&](const input::ParseResult& pr) {
 			do_optional_input_data_dump(config.dataFileName(), pr);
+			const auto& device_desc = flows::placement::make_default_device_description(pr.netlist());
+
+			flows::placement::simple_clique_solve(pr.netlist(), pr.fixedBlockLocations(), device_desc);
 		}
 	);
 	apply_visitor(visitor, parse_result);

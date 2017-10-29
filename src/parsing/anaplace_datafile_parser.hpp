@@ -1,7 +1,7 @@
 #ifndef PARSING__ROUTING_INPUT_PARSER_H
 #define PARSING__ROUTING_INPUT_PARSER_H
 
-#include <device/common_ids.hpp>
+#include <device/placement_ids.hpp>
 #include <util/netlist.hpp>
 #include <graphics/geometry.hpp>
 
@@ -26,7 +26,7 @@ struct ParseResult {
 
 	util::Netlist<device::AtomID, false> m_netlist;
 	util::Netlist<device::AtomID, false> m_netlist_as_parsed;
-	std::unordered_map<device::AtomID, geom::Point<double>> m_fixed_block_locations;
+	std::unordered_map<device::AtomID, device::BlockID> m_fixed_block_locations;
 };
 
 /**

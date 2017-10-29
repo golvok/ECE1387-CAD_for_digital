@@ -124,16 +124,16 @@ endif
 
 GRAPHICS_OBJECTS = \
 	$(OBJ_DIR)graphics/fontcache.o \
+	$(OBJ_DIR)graphics/fpga_graphics_data.o \
 	$(OBJ_DIR)graphics/graphics.o \
-	$(OBJ_DIR)graphics/graphics_wrapper.o \
 	$(OBJ_DIR)graphics/graphics_state.o \
 	$(OBJ_DIR)graphics/graphics_types.o \
+	$(OBJ_DIR)graphics/graphics_wrapper.o \
 	$(OBJ_DIR)graphics/Surface.o \
 	$(OBJ_DIR)graphics/SurfaceImpl.o \
 
 # add more dependencies here:
 $(EXE_DIR)maize-router: \
-	$(OBJ_DIR)routing_main.o \
 	$(OBJ_DIR)algo/maze_router.o \
 	$(OBJ_DIR)algo/routing.o \
 	$(OBJ_DIR)flows/routing_flows.o \
@@ -141,15 +141,16 @@ $(EXE_DIR)maize-router: \
 	$(OBJ_DIR)graphics/fpga_graphics_data.o \
 	$(OBJ_DIR)parsing/routing_cmdargs_parser.o \
 	$(OBJ_DIR)parsing/routing_input_parser.o \
+	$(OBJ_DIR)routing_main.o \
 	$(OBJ_DIR)util/logging.o \
 	$(OBJ_DIR)util/thread_utils.o \
 	$(GRAPHICS_OBJECTS)
 
 $(EXE_DIR)anaplace: \
 	$(OBJ_DIR)anaplace_main.o \
+	$(OBJ_DIR)flows/placement_flows.o \
 	$(OBJ_DIR)parsing/anaplace_cmdargs_parser.o \
 	$(OBJ_DIR)parsing/anaplace_datafile_parser.o \
-	$(OBJ_DIR)graphics/fpga_graphics_data.o \
 	$(OBJ_DIR)util/logging.o \
 	$(OBJ_DIR)util/thread_utils.o \
 	$(GRAPHICS_OBJECTS)
