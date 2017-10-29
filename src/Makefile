@@ -83,7 +83,9 @@ else
 endif
 
 INCLUDE_FLAGS += \
-	-I .
+	-I . \
+	-I ../SuiteSparse/include \
+
 
 GRAPHICS_INCL_FLAGS += $(shell pkg-config --cflags cairo)
 
@@ -159,7 +161,13 @@ $(EXE_DIR)anaplace: \
 	$(OBJ_DIR)util/thread_utils.o \
 	$(OBJ_DIR)util/umfpack_interface.o \
 	$(GRAPHICS_OBJECTS) \
-	umfpack
+	umfpack \
+
+$(EXE_DIR)anaplace: \
+	LDFLAGS += 	-L../SuiteSparse/lib \
+	-lumfpack \
+	-lamd \
+	-lsuitesparseconfig \
 
 
 $(EXE_DIR)test-netlist: \
@@ -222,9 +230,9 @@ clean:
 else
 clean: $(BUILD_DIR:%=delete_%_dir)
 endif
-	$(MAKE) clean -C $(SUITESPARSE_DIR)UMFPACK/Lib $(SUITSPARSE_LIBRARY_CONFIG)
-	$(MAKE) clean -C $(SUITESPARSE_DIR)AMD/Lib $(SUITSPARSE_LIBRARY_CONFIG)
-	$(MAKE) clean -C $(SUITESPARSE_DIR)SuiteSparse_config $(SUITSPARSE_CONFIG_CONFIG)
+	$(MAKE) purge -C $(SUITESPARSE_DIR)UMFPACK/Lib $(SUITSPARSE_LIBRARY_CONFIG)
+	$(MAKE) purge -C $(SUITESPARSE_DIR)AMD/Lib $(SUITSPARSE_LIBRARY_CONFIG)
+	$(MAKE) purge -C $(SUITESPARSE_DIR)SuiteSparse_config $(SUITSPARSE_CONFIG_CONFIG)
 	rm -rf $(SUITESPARSE_DIR)lib
 	rm -rf $(SUITESPARSE_DIR)share
 	rm -f umfpack

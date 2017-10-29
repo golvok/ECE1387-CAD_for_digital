@@ -1,5 +1,7 @@
 #include "placement_flows.hpp"
 
+#include <util/umfpack_interface.hpp>
+
 namespace flows {
 namespace placement {
 
@@ -17,6 +19,7 @@ void simple_clique_solve(
 	(void)netlist;
 	(void)fixed_block_locations;
 	(void)device;
+	solve();
 }
 
 }
