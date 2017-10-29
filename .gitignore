@@ -20,3 +20,13 @@ test/runs/*
 *.autosave.xoj
 *.swp
 lab*-*.pdf
+
+#suitesparse
+SuiteSparse/**/*.o
+SuiteSparse/**/*.a
+SuiteSparse/**/*.so*
+SuiteSparse/share/*
+SuiteSparse/lib/*
+src/ss_amd
+src/ss_config
+src/umfpack

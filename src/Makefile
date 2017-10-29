@@ -159,6 +159,7 @@ $(EXE_DIR)anaplace: \
 	$(OBJ_DIR)util/thread_utils.o \
 	$(OBJ_DIR)util/umfpack_interface.o \
 	$(GRAPHICS_OBJECTS) \
+	umfpack
 
 
 $(EXE_DIR)test-netlist: \
@@ -166,13 +167,16 @@ $(EXE_DIR)test-netlist: \
 
 
 umfpack: ss_amd ss_config
-	$(MAKE) library -C $(SUITESPARSE_DIR)UMFPACK UMFPACK_CONFIG="-DNCHOLMOD -DNBLAS" $(SUITSPARSE_LIBRARY_CONFIG)
+	$(MAKE) library -C $(SUITESPARSE_DIR)UMFPACK/Lib UMFPACK_CONFIG="-DNCHOLMOD -DNBLAS" $(SUITSPARSE_LIBRARY_CONFIG)
+	touch "$@"
 
 ss_amd: ss_config
-	$(MAKE) library -C $(SUITESPARSE_DIR)AMD $(SUITSPARSE_LIBRARY_CONFIG)
+	$(MAKE) library -C $(SUITESPARSE_DIR)AMD/Lib $(SUITSPARSE_LIBRARY_CONFIG)
+	touch "$@"
 
 ss_config:
 	$(MAKE) library -C $(SUITESPARSE_DIR)SuiteSparse_config $(SUITSPARSE_CONFIG_CONFIG)
+	touch "$@"
 
 
 # define extra flags for particular object files
@@ -218,9 +222,14 @@ clean:
 else
 clean: $(BUILD_DIR:%=delete_%_dir)
 endif
-	$(MAKE) clean -C $(SUITESPARSE_DIR)/UMFPACK $(SUITSPARSE_LIBRARY_CONFIG)
-	$(MAKE) clean -C $(SUITESPARSE_DIR)/AMD $(SUITSPARSE_LIBRARY_CONFIG)
-	$(MAKE) clean -C $(SUITESPARSE_DIR)/SuiteSparse_config $(SUITSPARSE_CONFIG_CONFIG)
+	$(MAKE) clean -C $(SUITESPARSE_DIR)UMFPACK/Lib $(SUITSPARSE_LIBRARY_CONFIG)
+	$(MAKE) clean -C $(SUITESPARSE_DIR)AMD/Lib $(SUITSPARSE_LIBRARY_CONFIG)
+	$(MAKE) clean -C $(SUITESPARSE_DIR)SuiteSparse_config $(SUITSPARSE_CONFIG_CONFIG)
+	rm -rf $(SUITESPARSE_DIR)lib
+	rm -rf $(SUITESPARSE_DIR)share
+	rm -f umfpack
+	rm -f ss_config
+	rm -f ss_amd
 
 
 $(patsubst %, delete_%_dir, $(BUILD_DIR)    ): $$(patsubst %, delete_%_dir, $(BUILD_SUBDIRS))
