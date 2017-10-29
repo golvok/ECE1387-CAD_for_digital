@@ -36,6 +36,10 @@ DEPS_DIR = $(BUILD_DIR)DEPS/
 
 BUILD_SUBDIRS = $(EXE_DIR) $(OBJ_DIR) $(DEPS_DIR)
 
+SUITSPARSE_LIBRARY_CONFIG = BLAS= SUITESPARSE=../..
+SUITSPARSE_CONFIG_CONFIG = BLAS= SUITESPARSE=..
+SUITESPARSE_DIR = ../SuiteSparse/
+
 # CXX = clang++
 # CXX = g++
 
@@ -144,7 +148,7 @@ $(EXE_DIR)maize-router: \
 	$(OBJ_DIR)routing_main.o \
 	$(OBJ_DIR)util/logging.o \
 	$(OBJ_DIR)util/thread_utils.o \
-	$(GRAPHICS_OBJECTS)
+	$(GRAPHICS_OBJECTS) \
 
 $(EXE_DIR)anaplace: \
 	$(OBJ_DIR)anaplace_main.o \
@@ -153,11 +157,22 @@ $(EXE_DIR)anaplace: \
 	$(OBJ_DIR)parsing/anaplace_datafile_parser.o \
 	$(OBJ_DIR)util/logging.o \
 	$(OBJ_DIR)util/thread_utils.o \
-	$(GRAPHICS_OBJECTS)
+	$(OBJ_DIR)util/umfpack_interface.o \
+	$(GRAPHICS_OBJECTS) \
 
 
 $(EXE_DIR)test-netlist: \
 	$(OBJ_DIR)util/tests/netlist_test.o \
+
+
+umfpack: ss_amd ss_config
+	$(MAKE) library -C $(SUITESPARSE_DIR)UMFPACK UMFPACK_CONFIG="-DNCHOLMOD -DNBLAS" $(SUITSPARSE_LIBRARY_CONFIG)
+
+ss_amd: ss_config
+	$(MAKE) library -C $(SUITESPARSE_DIR)AMD $(SUITSPARSE_LIBRARY_CONFIG)
+
+ss_config:
+	$(MAKE) library -C $(SUITESPARSE_DIR)SuiteSparse_config $(SUITSPARSE_CONFIG_CONFIG)
 
 
 # define extra flags for particular object files
@@ -189,7 +204,7 @@ $(OBJ_DIR)%.o: %.cpp | build_info $(OBJ_DIR)$$(dir %) $(DEPS_DIR)$$(dir %)
 
 # compile *.o's into an executable
 $(EXE_DIR)%: | build_info $(EXE_DIR)
-	'$(CXX)' $^ -o '$@' $(LDFLAGS)
+	'$(CXX)' $(filter %.o,$^) -o '$@' $(LDFLAGS)
 
 $(patsubst %, run_%, $(EXES)): $$(patsubst run_%, %, $$(@))
 	@( $^ && echo "SUCCESS: $^" ) || echo "FAIL: $^"
@@ -203,6 +218,9 @@ clean:
 else
 clean: $(BUILD_DIR:%=delete_%_dir)
 endif
+	$(MAKE) clean -C $(SUITESPARSE_DIR)/UMFPACK $(SUITSPARSE_LIBRARY_CONFIG)
+	$(MAKE) clean -C $(SUITESPARSE_DIR)/AMD $(SUITSPARSE_LIBRARY_CONFIG)
+	$(MAKE) clean -C $(SUITESPARSE_DIR)/SuiteSparse_config $(SUITSPARSE_CONFIG_CONFIG)
 
 
 $(patsubst %, delete_%_dir, $(BUILD_DIR)    ): $$(patsubst %, delete_%_dir, $(BUILD_SUBDIRS))
