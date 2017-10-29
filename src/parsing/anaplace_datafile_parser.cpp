@@ -104,7 +104,6 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 	for (const auto& block : boost::get<0>(parse_results)) {
 		const auto atomID = util::make_id<device::AtomID>(boost::get<0>(block));
 		for (const auto& netID : boost::get<1>(block)) {
-			dout(DL::INFO) << "\t -> " << netID << '\n';
 			try_add_block(netID, atomID);
 		}
 	}
