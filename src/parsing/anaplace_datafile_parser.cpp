@@ -58,7 +58,7 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 		>> +(
 			x3::uint_ >> x3::float_ >> x3::float_ >> x3::eol
 		)
-		>> x3::omit[x3::int_]
+		>> -x3::omit[x3::int_]
 		>> x3::omit[*chars::space]
 		>> x3::eoi,
 		chars::blank,
