@@ -52,7 +52,7 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 	const auto it_end = end(is_as_string);
 	const bool is_match = x3::phrase_parse( it, it_end,
 		+(
-			x3::uint_ >> +x3::uint_ >> x3::omit[x3::int_] >> x3::eol
+			x3::uint_ >> -x3::lit("->") >> +x3::uint_ >> -x3::omit[x3::int_] >> x3::eol
 		)
 		>> x3::int_ >> x3::eol
 		>> +(
