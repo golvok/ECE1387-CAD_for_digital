@@ -100,7 +100,7 @@ std::vector<device::BlockID> solve(
 						const auto location_lookup = fixed_block_locations.find(connected_atom);
 						if (location_lookup == end(fixed_block_locations)) {
 							// if movable
-							col[movable_atom_row[connected_atom]] = -weight_from_net;
+							col[movable_atom_row[connected_atom]] += -weight_from_net;
 						} else {
 							// if not movable
 							right_hand_side.x.back() += weight_from_net * location_lookup->second.getX().getValue();
