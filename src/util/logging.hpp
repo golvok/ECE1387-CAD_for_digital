@@ -29,11 +29,16 @@ namespace DebugLevel {
 		ROUTE_D1, // Passenger Routing debug
 		ROUTE_D2, // Passenger Routing debug level 2
 		ROUTE_D3, // Passenger Routing debug level 3
-		ROUTE_D4, // Passenger Routing lowest level debug
 
 		PIN_BY_PIN_STEP, // Stepping though the results of routing each pin
 		MAZE_ROUTE_STEP, // Stepping though the algorithm
 		ROUTE_TIME, // route time measurement
+		ROUTE_D4, // Passenger Routing lowest level debug
+
+		APL_D1, // Analytic PLacement debug
+		APL_D2, // Analytic PLacement debug level 2
+		APL_D3, // Analytic PLacement debug level 3
+		APL_D4, // Analytic PLacement lowest level debug
 
 		DATA_READ1, // reading of data
 
