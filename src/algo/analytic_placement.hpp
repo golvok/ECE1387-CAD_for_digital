@@ -128,20 +128,37 @@ std::vector<device::BlockID> solve(
 		}
 	}
 
-	for (int irow = 0; irow < (int)movable_atom_row.size(); ++irow) {
-		dout(DL::INFO) << std::find_if(begin(movable_atom_row), end(movable_atom_row), [&](const auto& elem) {
-			return elem.second == irow;
-		})->first << "\t|";
-		for (int icol = 0; icol < (int)movable_atom_row.size(); ++icol) {
-			const auto lookup = weight_matrix_columns[icol].find(irow);
-			if (lookup == end(weight_matrix_columns[icol])) {
-				dout(DL::INFO) << 0.0 << '\t';
-			} else {
-				dout(DL::INFO) << lookup->second << '\t';
+	if (dout(DL::APL_D2).enabled()) {
+		{const auto indent = dout(DL::APL_D2).indentWithTitle("Matrix & RHS For Solving");
+		for (int irow = 0; irow < (int)movable_atom_row.size(); ++irow) {
+			dout(DL::APL_D2) << std::find_if(begin(movable_atom_row), end(movable_atom_row), [&](const auto& elem) {
+				return elem.second == irow;
+			})->first << "\t|";
+			for (int icol = 0; icol < (int)movable_atom_row.size(); ++icol) {
+				const auto lookup = weight_matrix_columns[icol].find(irow);
+				if (lookup == end(weight_matrix_columns[icol])) {
+					dout(DL::APL_D2) << 0.0 << '\t';
+				} else {
+					dout(DL::APL_D2) << lookup->second << '\t';
+				}
+			}
+			dout(DL::APL_D2) << "| x_" << irow << "\t| = | " << right_hand_side.x[irow]
+			           << "\t\t| y_" << irow << "\t| = | " << right_hand_side.y[irow] << '\n';
+		}}
+		{const auto indent = dout(DL::APL_D2).indentWithTitle("Data for UMFPACK");
+			{const auto indent = dout(DL::APL_D2).indentWithTitle("Column Starts");
+				util::print_container(col_starts, dout(DL::APL_D2));
+				dout(DL::APL_D2) << '\n';
+			}
+			{const auto indent = dout(DL::APL_D2).indentWithTitle("Row Numbers");
+				util::print_container(rows_numbers, dout(DL::APL_D2));
+				dout(DL::APL_D2) << '\n';
+			}
+			{const auto indent = dout(DL::APL_D2).indentWithTitle("Values");
+				util::print_container(values, dout(DL::APL_D2));
+				dout(DL::APL_D2) << '\n';
 			}
 		}
-		dout(DL::INFO) << "| x_" << irow << "\t| = | " << right_hand_side.x[irow]
-		           << "\t\t| y_" << irow << "\t| = | " << right_hand_side.y[irow] << '\n';
 	}
 
 	return {};
