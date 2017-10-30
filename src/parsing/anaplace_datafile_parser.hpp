@@ -6,6 +6,7 @@
 #include <graphics/geometry.hpp>
 
 #include <iosfwd>
+#include <vector>
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
@@ -15,17 +16,13 @@ namespace anaplace {
 namespace input {
 
 struct ParseResult {
-	      auto& netlist()       { return m_netlist; }
-	const auto& netlist() const { return m_netlist; }
-
-	      auto& netlistAsParsed()       { return m_netlist_as_parsed; }
-	const auto& netlistAsParsed() const { return m_netlist_as_parsed; }
+	      auto& netMembers()       { return m_net_members; }
+	const auto& netMembers() const { return m_net_members; }
 
 	      auto& fixedBlockLocations()       { return m_fixed_block_locations; }
 	const auto& fixedBlockLocations() const { return m_fixed_block_locations; }
 
-	util::Netlist<device::AtomID, false> m_netlist;
-	util::Netlist<device::AtomID, false> m_netlist_as_parsed;
+	std::vector<std::vector<device::AtomID>> m_net_members;
 	std::unordered_map<device::AtomID, device::BlockID> m_fixed_block_locations;
 };
 

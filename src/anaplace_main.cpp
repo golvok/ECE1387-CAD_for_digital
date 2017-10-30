@@ -57,9 +57,9 @@ int program_main(const ProgramConfig& config) {
 		},
 		[&](const input::ParseResult& pr) {
 			do_optional_input_data_dump(config.dataFileName(), pr);
-			const auto& device_desc = flows::placement::make_default_device_description(pr.netlist());
+			const auto& device_desc = flows::placement::make_default_device_description(pr.netMembers());
 
-			flows::placement::simple_clique_solve(pr.netlist(), pr.fixedBlockLocations(), device_desc);
+			flows::placement::simple_clique_solve(pr.netMembers(), pr.fixedBlockLocations(), device_desc);
 		}
 	);
 	apply_visitor(visitor, parse_result);
@@ -75,24 +75,27 @@ void do_optional_input_data_dump(const std::string& data_file_name, const input:
 	const auto indent = dout(DL::DATA_READ1).indentWithTitle("Input Data Dump");
 	dout(DL::DATA_READ1) << "using input file: " << data_file_name << '\n';
 
-	auto dump_netlist = [](const auto& netlist) {
-		dout(DL::DATA_READ1) << "roots:";
-		util::print_container(netlist.roots(), dout(DL::DATA_READ1));
-		dout(DL::DATA_READ1) << '\n';
-		for (const auto& node : netlist.all_ids()) {
-			dout(DL::DATA_READ1) << node << "->";
-			for (const auto& fanout_node : netlist.fanout(node)) {
-				dout(DL::DATA_READ1) << fanout_node << ", ";
-			}
-			dout(DL::DATA_READ1) << '\n';
+	// TODO move to netlist.hpp
+	// auto dump_netlist = [](const auto& netlist) {
+	// 	dout(DL::DATA_READ1) << "roots:";
+	// 	util::print_container(netlist.roots(), dout(DL::DATA_READ1));
+	// 	dout(DL::DATA_READ1) << '\n';
+	// 	for (const auto& node : netlist.all_ids()) {
+	// 		dout(DL::DATA_READ1) << node << "->";
+	// 		for (const auto& fanout_node : netlist.fanout(node)) {
+	// 			dout(DL::DATA_READ1) << fanout_node << ", ";
+	// 		}
+	// 		dout(DL::DATA_READ1) << '\n';
+	// 	}
+	// };
+
+	{const auto indent = dout(DL::DATA_READ1).indentWithTitle("Net Groupings");
+	for (const auto& net_member_list : pr.netMembers()) {
+		for (const auto& atom : net_member_list) {
+			dout(DL::DATA_READ1) << atom << ' ';
 		}
-	};
-
-	{const auto indent = dout(DL::DATA_READ1).indentWithTitle("As-Parsed Netlist");
-	dump_netlist(pr.netlistAsParsed());}
-
-	{const auto indent = dout(DL::DATA_READ1).indentWithTitle("Main Netlist");
-	dump_netlist(pr.netlist());}
+		dout(DL::DATA_READ1) << '\n';
+	}}
 
 	{const auto indent = dout(DL::DATA_READ1).indentWithTitle("Fixed Blocks");
 	util::print_assoc_container(pr.fixedBlockLocations(), dout(DL::DATA_READ1), "\n", "", "");

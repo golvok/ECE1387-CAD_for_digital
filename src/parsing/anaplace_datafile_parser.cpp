@@ -83,12 +83,17 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 		return err_stream.str();
 	}
 
-	std::unordered_map<int, std::vector<device::AtomID>> net_members;
+	std::unordered_map<int, std::vector<device::AtomID>> members_by_net;
 	for (const auto& block : boost::get<0>(parse_results)) {
 		const auto atomID = util::make_id<device::AtomID>(boost::get<0>(block));
 		for (const auto& netID : boost::get<1>(block)) {
-			net_members[netID].push_back(atomID);
+			members_by_net[netID].push_back(atomID);
 		}
+	}
+
+	std::vector<std::vector<device::AtomID>> net_members;
+	for (auto& net_and_members : members_by_net) {
+		net_members.emplace_back(std::move(net_and_members.second));
 	}
 
 	std::unordered_map<device::AtomID, device::BlockID> fixed_block_locations;
@@ -103,98 +108,7 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 		);
 	}
 
-	std::vector<std::vector<device::AtomID>*> net_member_lists;
-	for (auto& net_and_members : net_members) {
-		std::partition(begin(net_and_members.second), end(net_and_members.second),
-			[&](const auto& elem) {
-				return fixed_block_locations.find(elem) != end(fixed_block_locations);
-			}
-		);
-		net_member_lists.push_back(&net_and_members.second);
-	}
-
-	std::sort(begin(net_member_lists), end(net_member_lists),
-		[&](auto& lhs, auto& rhs) {
-			return std::forward_as_tuple(fixed_block_locations.find(lhs->front()) == end(fixed_block_locations), lhs->size())
-				< std::forward_as_tuple(fixed_block_locations.find(rhs->front()) == end(fixed_block_locations), rhs->size());
-		}
-	);
-
-	for (const auto& net_member_list : net_member_lists) {
-		for (const auto& atom : *net_member_list) {
-			dout(DL::INFO) << atom << ' ';
-		}
-		dout(DL::INFO) << '\n';
-	}
-
-	struct State {
-		using ChoiceVectorPtrIt = decltype(begin(net_member_lists));
-		using ChoiceIter = decltype(begin(**begin(net_member_lists)));
-		ChoiceIter choice;
-		ChoiceVectorPtrIt choice_list;
-	};
-
-	std::vector<State> choice_stack;
-	std::unordered_map<device::AtomID, decltype(*begin(net_member_lists))> net_choices;
-
-	choice_stack.emplace_back(State{
-		begin(**begin(net_member_lists)),
-		begin(net_member_lists)
-	});
-
-
-	size_t record = 0;
-	while (true) {
-		if (net_choices.size() + 10 < record) {
-			record = net_choices.size();
-			dout(DL::INFO) << "significant backtrack\n";
-		}
-		if (net_choices.size() > record) {
-			record = net_choices.size();
-			dout(DL::INFO) << "now at: " << record << '/' << net_members.size() << '\n';
-		}
-		if (net_choices.size() == net_members.size()) {
-			break;
-		}
-
-		const auto& curr = choice_stack.back();
-		const auto unused_atom_lookup = std::find_if(curr.choice, end(**curr.choice_list),
-			[&](const auto& atom) {
-				return net_choices.find(atom) == end(net_choices);
-			}
-		);
-
-		if (unused_atom_lookup == end(**curr.choice_list)) {
-			// previous choince was bad. revert.
-			choice_stack.pop_back();
-			if (choice_stack.empty()) {
-				return "couldn't convert netlist";
-			} else {
-				net_choices.erase(*choice_stack.back().choice);
-				std::advance(choice_stack.back().choice, 1);
-			}
-		} else {
-			choice_stack.back().choice = unused_atom_lookup;
-			net_choices.emplace(*curr.choice, *curr.choice_list);
-			// dout(DL::INFO) << *curr.choice << '\n';
-			auto next_choice_list = std::next(curr.choice_list);
-			choice_stack.emplace_back(State{
-				begin(**next_choice_list),
-				next_choice_list
-			});
-		}
-	}
-
-	util::Netlist<device::AtomID, false> netlist;
-	for (const auto& choice_and_net_members : net_choices) {
-		for (const auto& atom : *choice_and_net_members.second) {
-			if (atom != choice_and_net_members.first) {
-				netlist.addConnection(choice_and_net_members.first, atom);
-			}
-		}
-	}
-
-	return ParseResult{netlist, netlist, fixed_block_locations};
+	return ParseResult{net_members, fixed_block_locations};
 }
 
 }
