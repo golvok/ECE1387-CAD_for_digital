@@ -4,12 +4,16 @@
 #include <device/placement_device.hpp>
 #include <util/logging.hpp>
 #include <util/netlist.hpp>
+#include <util/umfpack_interface.hpp>
 
 #include <unordered_set>
 #include <unordered_map>
+#include <map>
 #include <vector>
 
-std::vector<device::BlockID> solve(
+namespace apl {
+
+std::vector<geom::Point<double>> exact_solution(
 	const std::vector<std::vector<device::AtomID>>& net_members,
 	const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
 	const device::PlacementDevice& device
@@ -75,7 +79,7 @@ std::vector<device::BlockID> solve(
 	// };
 
 	using Weight = double;
-	std::vector<std::unordered_map<int, Weight>> weight_matrix_columns;
+	std::vector<std::map<int, Weight>> weight_matrix_columns;
 	struct {
 		std::vector<Weight> x{};
 		std::vector<Weight> y{};
@@ -118,7 +122,7 @@ std::vector<device::BlockID> solve(
 	std::vector<int> col_starts;
 	std::vector<int> rows_numbers;
 	std::vector<Weight> values;
-	int col_start;
+	int col_start = 0;
 	for (const auto& col : weight_matrix_columns) {
 		col_starts.push_back(col_start);
 		for (const auto& row_and_value : col) {
@@ -127,6 +131,7 @@ std::vector<device::BlockID> solve(
 			col_start += 1;
 		}
 	}
+	col_starts.push_back(col_start); // need to tell it the end
 
 	if (dout(DL::APL_D2).enabled()) {
 		{const auto indent = dout(DL::APL_D2).indentWithTitle("Matrix & RHS For Solving");
@@ -158,10 +163,30 @@ std::vector<device::BlockID> solve(
 				util::print_container(values, dout(DL::APL_D2));
 				dout(DL::APL_D2) << '\n';
 			}
+			{const auto indent = dout(DL::APL_D2).indentWithTitle("RHS X Values");
+				util::print_container(right_hand_side.x, dout(DL::APL_D2));
+				dout(DL::APL_D2) << '\n';
+			}
+			{const auto indent = dout(DL::APL_D2).indentWithTitle("RHS Y Values");
+				util::print_container(right_hand_side.y, dout(DL::APL_D2));
+				dout(DL::APL_D2) << '\n';
+			}
 		}
 	}
 
-	return {};
+	auto x_result = umfpack_solve_square((int)movable_atom_row.size(), col_starts, rows_numbers, values, right_hand_side.x);
+	auto y_result = umfpack_solve_square((int)movable_atom_row.size(), col_starts, rows_numbers, values, right_hand_side.y);
+
+	std::vector<geom::Point<double>> result;
+	for (int i = 0; i < (int)x_result.size(); ++i) {
+		result.emplace_back(
+			x_result[i], y_result[i]
+		);
+	}
+
+	return result;
 }
+
+} // end namespace apl
 
 #endif // ALGO__ANALYTIC_PLACEMENT

@@ -18,15 +18,20 @@ void simple_clique_solve(
 	const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
 	const device::PlacementDevice& device
 ) {
-	(void)net_members;
-	(void)fixed_block_locations;
-	(void)device;
+	const auto indent = dout(DL::INFO).indentWithTitle("Simple Clique Solve Flow");
 	
-	solve(
+	const auto& result = apl::exact_solution(
 		net_members,
 		fixed_block_locations,
 		device
 	);
+
+	if (dout(DL::APL_D1).enabled()) {
+		{const auto indent = dout(DL::APL_D1).indentWithTitle("Solution");
+			util::print_container(result, dout(DL::APL_D1));
+			dout(DL::APL_D1) << '\n';
+		}
+	}
 }
 
 }
