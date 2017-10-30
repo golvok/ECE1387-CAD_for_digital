@@ -11,17 +11,67 @@
 
 namespace graphics {
 
-class FPGAGraphicsData;
+class FPGAGraphicsDataStateScope;
 
-class FPGAGraphicsDataState {
+namespace detail {
+
+	class FPGAGraphicsDataState_Routing {
+		using Netlist = util::Netlist<device::RouteElementID>;
+	public:
+		FPGAGraphicsDataState_Routing()
+			: device(nullptr)
+			, paths()
+			, netlist()
+			, extra_colours_to_draw()
+		{ }
+
+		template<typename Device>
+		FPGAGraphicsDataState_Routing(
+			Device const* device,
+			const std::vector<std::vector<device::RouteElementID>>& paths,
+			const Netlist& netlist,
+			std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw
+		)
+			: device(device)
+			, paths(paths)
+			, netlist(netlist)
+			, extra_colours_to_draw(std::move(extra_colours_to_draw))
+		{ }
+
+		FPGAGraphicsDataState_Routing(const FPGAGraphicsDataState_Routing&) = default;
+		FPGAGraphicsDataState_Routing(FPGAGraphicsDataState_Routing&&) = default;
+
+		FPGAGraphicsDataState_Routing& operator=(const FPGAGraphicsDataState_Routing&) = default;
+		FPGAGraphicsDataState_Routing& operator=(FPGAGraphicsDataState_Routing&&) = default;
+
+		      auto& getPaths()       { return paths; }
+		const auto& getPaths() const { return paths; }
+
+		      auto& getNetlist()       { return netlist; }
+		const auto& getNetlist() const { return netlist; }
+
+		      auto& getDevice()       { return device; }
+		const auto& getDevice() const { return device; }
+
+		      auto& getExtraColours()       { return extra_colours_to_draw; }
+		const auto& getExtraColours() const { return extra_colours_to_draw; }
+
+	private:
+		template <typename... Ts> using variant_with_nullptr = boost::variant<std::nullptr_t, Ts...>;
+		util::substitute_into<variant_with_nullptr, util::add_pointer_to_const_t, ALL_DEVICES_COMMA_SEP> device;
+		std::vector<std::vector<device::RouteElementID>> paths;
+		Netlist netlist;
+		std::unordered_map<device::RouteElementID, graphics::t_color> extra_colours_to_draw;
+	};
+
+}
+
+class FPGAGraphicsDataState : public detail::FPGAGraphicsDataState_Routing {
 	using Netlist = util::Netlist<device::RouteElementID>;
 public:
 	FPGAGraphicsDataState()
-		: enabled(true)
-		, device(nullptr)
-		, paths()
-		, netlist()
-		, extra_colours_to_draw()
+		: FPGAGraphicsDataState_Routing()
+		, enabled(true)
 	{ }
 
 	template<typename Device>
@@ -31,11 +81,13 @@ public:
 		const Netlist& netlist = {},
 		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw = {}
 	)
-		: enabled(true)
-		, device(device)
-		, paths(paths)
-		, netlist(netlist)
-		, extra_colours_to_draw(std::move(extra_colours_to_draw))
+		: FPGAGraphicsDataState_Routing(
+			device,
+			paths,
+			netlist,
+			std::move(extra_colours_to_draw)
+		)
+		, enabled(true)
 	{ }
 
 	FPGAGraphicsDataState(const FPGAGraphicsDataState&) = default;
@@ -44,29 +96,12 @@ public:
 	FPGAGraphicsDataState& operator=(const FPGAGraphicsDataState&) = default;
 	FPGAGraphicsDataState& operator=(FPGAGraphicsDataState&&) = default;
 
-	      auto& getPaths()       { return paths; }
-	const auto& getPaths() const { return paths; }
-
-	      auto& getNetlist()       { return netlist; }
-	const auto& getNetlist() const { return netlist; }
-
-	      auto& getDevice()       { return device; }
-	const auto& getDevice() const { return device; }
-
-	      auto& getExtraColours()       { return extra_colours_to_draw; }
-	const auto& getExtraColours() const { return extra_colours_to_draw; }
-
 	bool isEnabled() { return enabled; }
 
 private:
 	friend class FPGAGraphicsDataStateScope;
 
 	bool enabled;
-	template <typename... Ts> using variant_with_nullptr = boost::variant<std::nullptr_t, Ts...>;
-	util::substitute_into<variant_with_nullptr, util::add_pointer_to_const_t, ALL_DEVICES_COMMA_SEP> device;
-	std::vector<std::vector<device::RouteElementID>> paths;
-	Netlist netlist;
-	std::unordered_map<device::RouteElementID, graphics::t_color> extra_colours_to_draw;
 };
 
 class FPGAGraphicsDataStateScope {
