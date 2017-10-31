@@ -30,7 +30,7 @@ RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, NetOrder&& 
 	RouteAllResult<Netlist> result;
 	std::unordered_set<device::RouteElementID> used;
 
-	const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, true);
+	const auto gfx_state_keeper = graphics::get().fpga().pushRoutingState(&fanout_gen, true);
 	bool encountered_failing_pin = false;
 
 	for (const auto& src_pin : net_order) {
@@ -66,7 +66,7 @@ RouteAllResult<Netlist> route_all(const Netlist& pin_to_pin_netlist, NetOrder&& 
 				}
 
 				if (dout(DL::PIN_BY_PIN_STEP).enabled()) {
-					const auto gfx_state_keeper = graphics::get().fpga().pushState(&fanout_gen, {*new_routing}, true);
+					const auto gfx_state_keeper = graphics::get().fpga().pushRoutingState(&fanout_gen, {*new_routing}, true);
 					graphics::get().waitForPress();
 				}
 			} else {

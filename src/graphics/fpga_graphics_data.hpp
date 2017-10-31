@@ -66,9 +66,12 @@ namespace detail {
 
 }
 
-class FPGAGraphicsDataState : public detail::FPGAGraphicsDataState_Routing {
+struct FPGAGraphicsDataState : public detail::FPGAGraphicsDataState_Routing {
 	using Netlist = util::Netlist<device::RouteElementID>;
-public:
+
+	struct routing_state_tag {};
+	struct placement_state_tag {};
+
 	FPGAGraphicsDataState()
 		: FPGAGraphicsDataState_Routing()
 		, enabled(true)
@@ -76,10 +79,11 @@ public:
 
 	template<typename Device>
 	FPGAGraphicsDataState(
+		routing_state_tag,
 		Device const* device,
-		const std::vector<std::vector<device::RouteElementID>>& paths = {},
-		const Netlist& netlist = {},
-		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw = {}
+		const std::vector<std::vector<device::RouteElementID>>& paths,
+		const Netlist& netlist,
+		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw
 	)
 		: FPGAGraphicsDataState_Routing(
 			device,
@@ -155,69 +159,69 @@ public:
 	FPGAGraphicsData& operator=(FPGAGraphicsData&&) = default;
 
 	template<typename Device>
-	FPGAGraphicsDataStateScope pushState(
+	FPGAGraphicsDataStateScope pushRoutingState(
 		Device const* device,
 		const std::vector<std::vector<device::RouteElementID>>& paths,
 		const util::Netlist<device::RouteElementID>& netlist,
 		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw,
 		bool reset_view = false
 	) {
-		return pushState_base(device, paths, netlist, std::move(extra_colours_to_draw), reset_view);
+		return pushRoutingState_base(device, paths, netlist, std::move(extra_colours_to_draw), reset_view);
 	}
 
 	template<typename Device>
-	FPGAGraphicsDataStateScope pushState(
+	FPGAGraphicsDataStateScope pushRoutingState(
 		Device const* device,
 		bool reset_view = false
 	) {
-		return pushState_base(device, {}, {}, {}, reset_view);
+		return pushRoutingState_base(device, {}, {}, {}, reset_view);
 	}
 
 	template<typename Device>
-	FPGAGraphicsDataStateScope pushState(
+	FPGAGraphicsDataStateScope pushRoutingState(
 		Device const* device,
 		const std::vector<std::vector<device::RouteElementID>>& paths,
 		bool reset_view = false
 	) {
-		return pushState_base(device, paths, {}, {}, reset_view);
+		return pushRoutingState_base(device, paths, {}, {}, reset_view);
 	}
 
 	template<typename Device>
-	FPGAGraphicsDataStateScope pushState(
+	FPGAGraphicsDataStateScope pushRoutingState(
 		Device const* device,
 		const std::vector<std::vector<device::RouteElementID>>& paths,
 		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw,
 		bool reset_view = false
 	) {
-		return pushState_base(device, paths, {}, extra_colours_to_draw, reset_view);
+		return pushRoutingState_base(device, paths, {}, extra_colours_to_draw, reset_view);
 	}
 
 	template<typename Device>
-	FPGAGraphicsDataStateScope pushState(
+	FPGAGraphicsDataStateScope pushRoutingState(
 		Device const* device,
 		const util::Netlist<device::RouteElementID>& netlist,
 		bool reset_view = false
 	) {
-		return pushState_base(device, {}, netlist, {}, reset_view);
+		return pushRoutingState_base(device, {}, netlist, {}, reset_view);
 	}
 
 	template<typename Device>
-	FPGAGraphicsDataStateScope pushState(
+	FPGAGraphicsDataStateScope pushRoutingState(
 		Device const* device,
 		const util::Netlist<device::RouteElementID>& netlist,
 		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw,
 		bool reset_view = false
 	) {
-		return pushState_base(device, {}, netlist, extra_colours_to_draw, reset_view);
+		return pushRoutingState_base(device, {}, netlist, extra_colours_to_draw, reset_view);
 	}
 
 	template<typename Device>
-	FPGAGraphicsDataStateScope pushState(
+	FPGAGraphicsDataStateScope pushRoutingState(
 		Device const* device,
 		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw,
 		bool reset_view = false
 	) {
-		return pushState_base(device, {}, {}, std::move(extra_colours_to_draw), reset_view);
+		return pushRoutingState_base(device, {}, {}, std::move(extra_colours_to_draw), reset_view);
 	}
 
 private:
@@ -225,14 +229,14 @@ private:
 	template<typename> friend class detail::pushState_instantiator;
 
 	template<typename Device>
-	FPGAGraphicsDataStateScope pushState_base(
+	FPGAGraphicsDataStateScope pushRoutingState_base(
 		Device const* device = nullptr,
 		const std::vector<std::vector<device::RouteElementID>>& paths = {},
 		const util::Netlist<device::RouteElementID>& netlist = {},
 		std::unordered_map<device::RouteElementID, graphics::t_color>&& extra_colours_to_draw = {},
 		bool reset_view = false
 	) {
-		state_stack.push_back(std::make_unique<FPGAGraphicsDataState>(device, paths, netlist, std::move(extra_colours_to_draw)));
+		state_stack.push_back(std::make_unique<FPGAGraphicsDataState>(FPGAGraphicsDataState::routing_state_tag{}, device, paths, netlist, std::move(extra_colours_to_draw)));
 		do_graphics_refresh(reset_view, device->info().bounds);
 		return FPGAGraphicsDataStateScope(state_stack.back().get());
 	}

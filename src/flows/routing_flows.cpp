@@ -65,7 +65,7 @@ public:
 				dout(DL::INFO) << '\t' << fanout << '\n';
 			}
 
-			const auto gfx_state_keeper = graphics::get().fpga().pushState(&dev, std::move(colours), do_view_reset);
+			const auto gfx_state_keeper = graphics::get().fpga().pushRoutingState(&dev, std::move(colours), do_view_reset);
 			do_view_reset = false;
 			graphics::get().waitForPress();
 		}
@@ -121,7 +121,7 @@ public:
 		}
 
 		if (present_graphics) {
-			const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushState(&dev, result.netlist());
+			const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushRoutingState(&dev, result.netlist());
 			graphics::get().waitForPress();
 		}
 
@@ -177,12 +177,12 @@ public:
 
 
 			if (result.unroutedPins().empty()) {
-				const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushState(&dev, result.netlist());
+				const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushRoutingState(&dev, result.netlist());
 				graphics::get().waitForPress();
 				return true;
 			} else if (!added_something) {
 				dout(DL::INFO) << "Failed to route the same nets. Giving up.\n";
-				const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushState(&dev, result.netlist());
+				const auto gfx_state_keeper_final_routes = graphics::get().fpga().pushRoutingState(&dev, result.netlist());
 				graphics::get().waitForPress();
 				return false;
 			}
