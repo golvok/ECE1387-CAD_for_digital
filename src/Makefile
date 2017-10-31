@@ -167,7 +167,7 @@ $(EXE_DIR)anaplace: \
 	$(LIBSS_UMFPACK) \
 
 $(EXE_DIR)anaplace: \
-	LDFLAGS += 	-L$(SUITESPARSE_DIR)lib \
+	LDFLAGS += -L$(SUITESPARSE_DIR)lib \
 	-lumfpack \
 	-lamd \
 	-lsuitesparseconfig \
