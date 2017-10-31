@@ -48,7 +48,7 @@ public:
 		initialized = true;
 		// XInitThreads();
 
-		gui_thread = std::thread([&](){
+		gui_thread = std::thread([&]() noexcept {
 			// std::string title;
 			// for (int i = 0; i < argc; ++i) {
 			// 	title += argv[i];
@@ -60,19 +60,19 @@ public:
 
 			while (!close_requested) {
 				graphics::event_loop(
-					[this](float x, float y, graphics::t_event_buttonPressed button_info){
+					[this](float x, float y, graphics::t_event_buttonPressed button_info) noexcept {
 						// mousebutton
 						(void)x; (void)y; (void)button_info;
 					},
-					[this](float x, float y) {
+					[this](float x, float y) noexcept {
 						// mousemove
 						(void)x; (void)y;
 					},
-					[this](char key_pressed, int keysym) {
+					[this](char key_pressed, int keysym) noexcept {
 						// keypress
 						(void)key_pressed; (void)keysym;
 					},
-					[this](){
+					[this]() noexcept {
 						// drawscreen
 						graphics_interface->fpga().drawAll();
 					}
