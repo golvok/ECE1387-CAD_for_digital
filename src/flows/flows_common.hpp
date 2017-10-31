@@ -3,7 +3,7 @@
 
 namespace flows {
 
-template<typename Device>
+template<typename Device, typename FixedBlockLocations = int>
 class FlowBase {
 public:
 	FlowBase(const FlowBase&) = default;
@@ -13,7 +13,20 @@ public:
 		const Device& dev,
 		int nThreads
 	)
+		: FlowBase(
+			dev,
+			{},
+			nThreads
+		)
+	{ }
+
+	FlowBase(
+		const Device& dev,
+		const FixedBlockLocations& fixed_block_locations,
+		int nThreads
+	)
 		: dev(dev)
+		, fixed_block_locations(fixed_block_locations)
 		, nThreads(nThreads)
 	{ }
 
@@ -25,6 +38,7 @@ public:
 	}
 
 	const Device& dev;
+	const FixedBlockLocations& fixed_block_locations;
 	const int nThreads;
 };
 
