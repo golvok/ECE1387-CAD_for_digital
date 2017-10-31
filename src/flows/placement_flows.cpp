@@ -103,49 +103,79 @@ struct CliqueAndSpreadFLow : public FlowBase<Device, FixedBlockLocations> {
 				return geom::make_point(x_order[x_order.size()/2]->second.x(), y_order[y_order.size()/2]->second.y());
 			}();
 
-			std::array<std::pair<AtomID, geom::Point<double>>, 4> anchor_ids_and_locs{{
-				{ atom_id_gen.gen_id(), (current_bb.get_center() + geom::Point<double>(current_bb.min_point())     )/2.0 },
-				{ atom_id_gen.gen_id(), (current_bb.get_center() + geom::Point<double>(current_bb.maxxminy_point()))/2.0 },
-				{ atom_id_gen.gen_id(), (current_bb.get_center() + geom::Point<double>(current_bb.minxmaxy_point()))/2.0 },
-				{ atom_id_gen.gen_id(), (current_bb.get_center() + geom::Point<double>(current_bb.max_point())     )/2.0 },
-			}};
+			auto assignments = assign_to_quadrants(
+				current_bb,
+				centroid,
+				current_result,
+				atom_id_gen
+			);
 
-			{ const auto indent = dout(DL::APL_D1).indentWithTitle("Quadrant Centroids");
-			for (const auto& id_and_loc : anchor_ids_and_locs) {
-				dout(DL::APL_D1) << id_and_loc.first << " @ " << id_and_loc.second << '\n';
-				current_fixed_block_locations[id_and_loc.first] = util::make_id<device::BlockID>(
-					util::make_id<device::XID>((short)id_and_loc.second.x()),
-					util::make_id<device::YID>((short)id_and_loc.second.y())
-				);
-			}}
+			for (const auto new_net : assignments.new_nets) {
+				dout(DL::INFO) << new_net[0] << " -> " << new_net[1] << '\n';
+			}
 
-			auto quadrant_for = [&](const auto& point) {
-				if (point.x() < centroid.x()) {
-					if (point.y() < centroid.y()) {
-						return anchor_ids_and_locs[0];
-					} else {
-						return anchor_ids_and_locs[1];
-					}
+			std::move(begin(assignments.new_nets), end(assignments.new_nets), std::back_inserter(current_net_members));
+			std::move(begin(assignments.new_fixed_blocks), end(assignments.new_fixed_blocks), std::inserter(current_fixed_block_locations, end(current_fixed_block_locations)));
+		}
+	}
+
+	template<typename AtomRange, typename AtomIDGen>
+	static auto assign_to_quadrants(
+		geom::BoundBox<double> working_bounds,
+		geom::Point<double> centroid,
+		AtomRange&& moveable_atom_locations,
+		AtomIDGen&& atom_id_gen
+	) {
+		using AtomID = device::AtomID;
+
+		std::array<std::pair<AtomID, geom::Point<double>>, 4> anchor_ids_and_locs{{
+			{ atom_id_gen.gen_id(), (working_bounds.get_center() + geom::Point<double>(working_bounds.max_point())     )/2.0 },
+			{ atom_id_gen.gen_id(), (working_bounds.get_center() + geom::Point<double>(working_bounds.minxmaxy_point()))/2.0 },
+			{ atom_id_gen.gen_id(), (working_bounds.get_center() + geom::Point<double>(working_bounds.min_point())     )/2.0 },
+			{ atom_id_gen.gen_id(), (working_bounds.get_center() + geom::Point<double>(working_bounds.maxxminy_point()))/2.0 },
+		}};
+
+		auto quadrant_for = [&](const auto& point) {
+			if (point.x() < centroid.x()) {
+				if (point.y() < centroid.y()) {
+					return anchor_ids_and_locs[2];
 				} else {
-					if (point.y() < centroid.y()) {
-						return anchor_ids_and_locs[2];
-					} else {
-						return anchor_ids_and_locs[3];
-					}
+					return anchor_ids_and_locs[1];
 				}
-			};
-
-			for (const auto& net : net_members) {
-				for (const auto& atom : net) {
-					if (current_fixed_block_locations.find(atom) == end(current_fixed_block_locations)) {
-						const auto& anchor_id = quadrant_for(current_result.at(atom)).first;
-
-						std::vector<AtomID> list = {atom, anchor_id};
-						current_net_members.emplace_back(std::move(list));
-					}
+			} else {
+				if (point.y() < centroid.y()) {
+					return anchor_ids_and_locs[3];
+				} else {
+					return anchor_ids_and_locs[0];
 				}
 			}
+		};
+
+		struct Result {
+			std::vector<std::vector<AtomID>> new_nets{};
+			std::vector<std::pair<AtomID,device::BlockID>> new_fixed_blocks{};
+		} result;
+
+		{ const auto indent = dout(DL::APL_D1).indentWithTitle("Quadrant Centroids");
+		for (const auto& id_and_loc : anchor_ids_and_locs) {
+			dout(DL::APL_D1) << id_and_loc.first << " @ " << id_and_loc.second << '\n';
+			result.new_fixed_blocks.emplace_back(
+				id_and_loc.first,
+				util::make_id<device::BlockID>(
+					util::make_id<device::XID>((short)id_and_loc.second.x()),
+					util::make_id<device::YID>((short)id_and_loc.second.y())
+				)
+			);
+		}}
+
+		for (const auto& atom_and_loc : moveable_atom_locations) {
+			const auto& anchor_id = quadrant_for(atom_and_loc.second).first;
+
+			std::vector<AtomID> list = {atom_and_loc.first, anchor_id};
+			result.new_nets.emplace_back(std::move(list));
 		}
+
+		return result;
 	}
 };
 
