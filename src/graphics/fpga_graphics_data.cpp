@@ -5,28 +5,17 @@
 #include <util/lambda_compose.hpp>
 #include <util/logging.hpp>
 
-namespace graphics {
-
 namespace {
-	template<typename T>
-	bool is_contained_in_a_path(device::RouteElementID reid, const T& paths) {
-		for (const auto& path : paths) {
-			if (std::find(begin(path), end(path), reid) != end(path)) {
-				return true;
-			}
+
+template<typename T>
+bool is_contained_in_a_path(device::RouteElementID reid, const T& paths) {
+	for (const auto& path : paths) {
+		if (std::find(begin(path), end(path), reid) != end(path)) {
+			return true;
 		}
-		return false;
 	}
+	return false;
 }
-
-void FPGAGraphicsData::do_graphics_refresh(bool reset_view, const geom::BoundBox<float>& fpga_bb) {
-	if (reset_view) {
-		const float margin = 3.0f;
-		graphics::set_visible_world(fpga_bb.minx()-margin, fpga_bb.miny()-margin, fpga_bb.maxx()+margin, fpga_bb.maxy()+margin);
-	}
-	graphics::refresh_graphics();
-}
-
 
 template<typename X, typename Y>
 auto bounds_for_xy(X x, Y y) {
@@ -83,7 +72,7 @@ auto channel_location(Dir dir) {
 }
 
 template<typename Device>
-static std::pair<graphics::t_point, graphics::t_point> calculateWireLocation(const device::RouteElementID& reid, Device&& device) {
+std::pair<graphics::t_point, graphics::t_point> calculateWireLocation(const device::RouteElementID& reid, Device&& device) {
 	const auto xy_loc = geom::make_point(
 		reid.getX().getValue(),
 		reid.getY().getValue()
@@ -111,7 +100,7 @@ static std::pair<graphics::t_point, graphics::t_point> calculateWireLocation(con
 		const auto wire_dir = device.wire_direction(reid);
 		const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), channel_location(wire_dir));
 
-		const auto sides = [&]() -> std::pair<std::pair<t_point, t_point>, std::pair<t_point, t_point>> {
+		const auto sides = [&]() -> std::pair<std::pair<graphics::t_point, graphics::t_point>, std::pair<graphics::t_point, graphics::t_point>> {
 			using device::BlockSide;
 			switch (wire_dir) {
 				case decltype(wire_dir)::HORIZONTAL:
@@ -130,22 +119,8 @@ static std::pair<graphics::t_point, graphics::t_point> calculateWireLocation(con
 }
 
 template<typename Device>
-static void drawDevice(Device* device, const FPGAGraphicsDataState& data) {
-	if (device) {
-		drawDevice(*device, data);
-	}
-}
-
-template<typename Device>
-static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
-
-	graphics::setlinestyle(SOLID);
-	graphics::setcolor(0,0,0);
-
-	std::vector<device::RouteElementID> reIDs_to_draw;
-	std::unordered_set<device::RouteElementID> already_drawn;
-	std::unordered_map<device::RouteElementID, graphics::t_color> colour_overrides;
-
+auto drawBlocks(Device&& device) {
+	std::unordered_map<decltype(*begin(device.blocks())), graphics::t_bound_box> block_locations;
 	for (const auto& block : device.blocks()) {
 		const auto xy_loc = geom::make_point(
 			block.getX().getValue(),
@@ -154,18 +129,36 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 
 		const auto grid_square_bounds = bounds_for_xy(xy_loc.x(), xy_loc.y());
 		const auto block_bounds = block_bounds_within(grid_square_bounds);
+		block_locations.emplace(block, block_bounds);
 
 		graphics::drawrect(block_bounds);
 		graphics::settextrotation(0);
-		graphics::setfontsize(6);
+		graphics::setfontsize(8);
 		graphics::drawtext_in(block_bounds, util::stringify_through_stream(geom::make_point(block.getX().getValue(), block.getY().getValue())));
+	}
 
+	return block_locations;
+}
+
+template<typename Device>
+void drawDevice(Device&& device, const graphics::FPGAGraphicsDataState& data) {
+
+	graphics::setlinestyle(graphics::SOLID);
+	graphics::setcolor(0,0,0);
+
+	std::vector<device::RouteElementID> reIDs_to_draw;
+	std::unordered_set<device::RouteElementID> already_drawn;
+	std::unordered_map<device::RouteElementID, graphics::t_color> colour_overrides;
+
+	drawBlocks(device);
+
+	for (const auto& block : device.blocks()) {
 		for (const auto& pin_re : device.fanout(block)) {
 			reIDs_to_draw.push_back(pin_re);
 		}
 	}
 
-	const auto& drawWire = [&](const auto& curr, boost::optional<t_color> colour = boost::none) {
+	const auto& drawWire = [&](const auto& curr, boost::optional<graphics::t_color> colour = boost::none) {
 		const auto wire_loc = calculateWireLocation(curr, device);
 		const auto angle = geom::inclination(geom::make_point(wire_loc.first.x, wire_loc.first.y), geom::make_point(wire_loc.second.x, wire_loc.second.y));
 
@@ -233,7 +226,7 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 
 	{ int net_number = 0;
 	for (const auto& root_id : data.getNetlist().roots()) {
-		const auto net_colour = t_color(0x00, (uint_fast8_t)(0x66 + (net_number*0x07) % (0xFF-0x66)), (uint_fast8_t)(0x66 + (net_number*0x05) % (0xCC-0x66)));
+		const auto net_colour = graphics::t_color(0x00, (uint_fast8_t)(0x66 + (net_number*0x07) % (0xFF-0x66)), (uint_fast8_t)(0x66 + (net_number*0x05) % (0xCC-0x66)));
 		struct IterState {
 			device::RouteElementID parent = util::make_id<device::RouteElementID>();
 			std::pair<graphics::t_point, graphics::t_point> parent_loc = {};
@@ -252,7 +245,7 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 
 	for (const auto& path : data.getPaths()) {
 		boost::optional<std::pair<device::RouteElementID, std::pair<graphics::t_point, graphics::t_point>>> prev_loc;
-		const auto path_colour = t_color(0x00, 0x00, 0xFF);
+		const auto path_colour = graphics::t_color(0x00, 0x00, 0xFF);
 		for (const auto& id : path) {
 			auto wire_loc = drawWire(id, path_colour);
 			if (prev_loc) {
@@ -273,8 +266,27 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 
 }
 
-template<> void drawDevice(const std::nullptr_t&, const FPGAGraphicsDataState&) { }
-// template<> void drawDevice(std::nullptr_t&, const FPGAGraphicsDataState&) { }
+template<typename Device>
+void drawDevice(Device* device, const graphics::FPGAGraphicsDataState& data) {
+	if (device) {
+		drawDevice(*device, data);
+	}
+}
+
+template<> void drawDevice(const std::nullptr_t&, const graphics::FPGAGraphicsDataState&) { }
+// template<> void drawDevice(std::nullptr_t&, const graphics::FPGAGraphicsDataState&) { }
+
+} // end anon namespace
+
+namespace graphics {
+
+void FPGAGraphicsData::do_graphics_refresh(bool reset_view, const geom::BoundBox<float>& fpga_bb) {
+	if (reset_view) {
+		const float margin = 3.0f;
+		graphics::set_visible_world(fpga_bb.minx()-margin, fpga_bb.miny()-margin, fpga_bb.maxx()+margin, fpga_bb.maxy()+margin);
+	}
+	graphics::refresh_graphics();
+}
 
 void FPGAGraphicsData::drawAll() {
 	graphics::clearscreen();
