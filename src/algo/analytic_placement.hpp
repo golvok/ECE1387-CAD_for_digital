@@ -13,7 +13,7 @@
 
 namespace apl {
 
-std::vector<geom::Point<double>> exact_solution(
+std::unordered_map<device::AtomID, geom::Point<double>> exact_solution(
 	const std::vector<std::vector<device::AtomID>>& net_members,
 	const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
 	const device::PlacementDevice& device
@@ -177,12 +177,18 @@ std::vector<geom::Point<double>> exact_solution(
 	auto x_result = umfpack_solve_square((int)movable_atom_row.size(), col_starts, rows_numbers, values, right_hand_side.x);
 	auto y_result = umfpack_solve_square((int)movable_atom_row.size(), col_starts, rows_numbers, values, right_hand_side.y);
 
-	std::vector<geom::Point<double>> result;
-	for (int i = 0; i < (int)x_result.size(); ++i) {
-		result.emplace_back(
-			x_result[i], y_result[i]
-		);
-	}
+	std::unordered_map<device::AtomID, geom::Point<double>> result;
+
+	{int i = 0;
+	for (const device::AtomID& atom : atom_order) {
+		if (fixed_block_locations.find(atom) == end(fixed_block_locations)) {
+			result.emplace(
+				atom,
+				geom::make_point(x_result[i], y_result[i])
+			);
+			i += 1;
+		}
+	}}
 
 	return result;
 }

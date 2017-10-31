@@ -28,7 +28,7 @@ void simple_clique_solve(
 
 	if (dout(DL::APL_D1).enabled()) {
 		{const auto indent = dout(DL::APL_D1).indentWithTitle("Solution");
-			util::print_container(result, dout(DL::APL_D1));
+			util::print_assoc_container(result, dout(DL::APL_D1));
 			dout(DL::APL_D1) << '\n';
 		}
 	}
