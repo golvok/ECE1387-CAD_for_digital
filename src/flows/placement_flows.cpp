@@ -97,7 +97,7 @@ struct CliqueAndSpreadFLow : public FlowBase<Device, FixedBlockLocations> {
 					return lhs->second.x() < rhs->second.x();
 				});
 				std::sort(begin(y_order), end(y_order), [&](auto& lhs, auto& rhs) {
-					return lhs->second.y() < rhs->second.x();
+					return lhs->second.y() < rhs->second.y();
 				});
 
 				return geom::make_point(x_order[x_order.size()/2]->second.x(), y_order[y_order.size()/2]->second.y());
