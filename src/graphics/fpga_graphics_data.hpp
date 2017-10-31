@@ -3,6 +3,7 @@
 
 #include <device/connectors.hpp>
 #include <device/device.hpp>
+#include <device/placement_device.hpp>
 #include <graphics/graphics_types.hpp>
 #include <util/netlist.hpp>
 
@@ -64,9 +65,34 @@ namespace detail {
 		std::unordered_map<device::RouteElementID, graphics::t_color> extra_colours_to_draw;
 	};
 
+	struct FPGAGraphicsDataState_Placement {
+		FPGAGraphicsDataState_Placement()
+			: FPGAGraphicsDataState_Placement(
+				{},
+				{},
+				{}
+			)
+		{ }
+
+		FPGAGraphicsDataState_Placement(
+			const std::vector<std::vector<device::AtomID>>& net_members,
+			const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
+			const std::unordered_map<device::AtomID, geom::Point<double>>& moveable_block_locations
+		)
+			: net_members(net_members)
+			, fixed_block_locations(fixed_block_locations)
+			, moveable_block_locations(moveable_block_locations)
+		{ }
+
+	private:
+		std::vector<std::vector<device::AtomID>> net_members;
+		std::unordered_map<device::AtomID, device::BlockID> fixed_block_locations;
+		std::unordered_map<device::AtomID, geom::Point<double>> moveable_block_locations;
+	};
+
 }
 
-struct FPGAGraphicsDataState : public detail::FPGAGraphicsDataState_Routing {
+struct FPGAGraphicsDataState : public detail::FPGAGraphicsDataState_Routing, public detail::FPGAGraphicsDataState_Placement {
 	using Netlist = util::Netlist<device::RouteElementID>;
 
 	struct routing_state_tag {};
@@ -74,6 +100,7 @@ struct FPGAGraphicsDataState : public detail::FPGAGraphicsDataState_Routing {
 
 	FPGAGraphicsDataState()
 		: FPGAGraphicsDataState_Routing()
+		, FPGAGraphicsDataState_Placement()
 		, enabled(true)
 	{ }
 
@@ -90,6 +117,22 @@ struct FPGAGraphicsDataState : public detail::FPGAGraphicsDataState_Routing {
 			paths,
 			netlist,
 			std::move(extra_colours_to_draw)
+		)
+		, FPGAGraphicsDataState_Placement()
+		, enabled(true)
+	{ }
+
+	FPGAGraphicsDataState(
+		placement_state_tag,
+		const std::vector<std::vector<device::AtomID>>& net_members,
+		const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
+		const std::unordered_map<device::AtomID, geom::Point<double>>& moveable_block_locations
+	)
+		: FPGAGraphicsDataState_Routing()
+		, FPGAGraphicsDataState_Placement(
+			net_members,
+			fixed_block_locations,
+			moveable_block_locations
 		)
 		, enabled(true)
 	{ }
@@ -224,6 +267,15 @@ public:
 		return pushRoutingState_base(device, {}, {}, std::move(extra_colours_to_draw), reset_view);
 	}
 
+	FPGAGraphicsDataStateScope pushPlacingState(
+		const std::vector<std::vector<device::AtomID>>& net_members,
+		const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
+		const std::unordered_map<device::AtomID, geom::Point<double>>& moveable_block_locations,
+		bool reset_view = false
+	) {
+		return pushPlacingState_base(net_members, fixed_block_locations, moveable_block_locations, reset_view);
+	}
+
 private:
 	friend class Graphics;
 	template<typename> friend class detail::pushState_instantiator;
@@ -238,6 +290,22 @@ private:
 	) {
 		state_stack.push_back(std::make_unique<FPGAGraphicsDataState>(FPGAGraphicsDataState::routing_state_tag{}, device, paths, netlist, std::move(extra_colours_to_draw)));
 		do_graphics_refresh(reset_view, device->info().bounds);
+		return FPGAGraphicsDataStateScope(state_stack.back().get());
+	}
+
+	FPGAGraphicsDataStateScope pushPlacingState_base(
+		const std::vector<std::vector<device::AtomID>>& net_members = {},
+		const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations = {},
+		const std::unordered_map<device::AtomID, geom::Point<double>>& moveable_block_locations = {},
+		bool reset_view = false
+	) {
+		state_stack.push_back(std::make_unique<FPGAGraphicsDataState>(
+			FPGAGraphicsDataState::placement_state_tag{},
+			net_members,
+			fixed_block_locations,
+			moveable_block_locations
+		));
+		do_graphics_refresh(reset_view, geom::BoundBox<double>(0,0,1,1));
 		return FPGAGraphicsDataStateScope(state_stack.back().get());
 	}
 

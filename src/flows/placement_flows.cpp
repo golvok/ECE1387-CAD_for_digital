@@ -1,6 +1,7 @@
 #include "placement_flows.hpp"
 
 #include <algo/analytic_placement.hpp>
+#include <graphics/graphics_wrapper.hpp>
 
 namespace flows {
 namespace placement {
@@ -32,6 +33,14 @@ void simple_clique_solve(
 			dout(DL::APL_D1) << '\n';
 		}
 	}
+
+	graphics::get().fpga().pushPlacingState(
+		net_members,
+		fixed_block_locations,
+		result,
+		true
+	);
+	graphics::get().waitForPress();
 }
 
 }
