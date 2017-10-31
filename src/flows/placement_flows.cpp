@@ -70,7 +70,7 @@ void simple_clique_solve(
 	const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
 	const device::PlacementDevice& device
 ) {
-	SimpleCliqueSolveFlow<decltype(device), decltype(fixed_block_locations)>(
+	SimpleCliqueSolveFlow<std::decay_t<decltype(device)>, std::decay_t<decltype(fixed_block_locations)>>(
 		device,
 		fixed_block_locations,
 		1
