@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+
+import os
+
+cct_list = [
+	"cct1",
+	"cct2",
+	"cct3",
+	"cct4",
+];
+
+device_types = [
+	"wilton-precached",
+	"fc-precached",
+];
+
+device_arg_name = "--device-type-override"
+
+other_args = "--channel-width-override 10 --num-threads 16"
+
+for device in device_types:
+	os.system("run-individually ${0} -- ${1} ${2} ${3}" % (" ".join(cct_list)))
+
+print("cct1 & Fully-Connected & ")

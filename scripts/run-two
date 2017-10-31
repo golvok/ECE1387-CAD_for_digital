@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+NUM_ROUNDS=2;
+COMMON_ARGS="--data-file ../../data/cct4.txt --channel-width-override 40 --route-as-is"
+
+ARGS1="--device-type-override wilton-precached"
+OUTFILE1="wilton-precached"
+
+ARGS2="--device-type-override wilton"
+OUTFILE2="wilton"
+
+time $SHELL -ic 'for i in $(seq 1 '"$NUM_ROUNDS"'); do
+	time ../../build/EXE/maize-router '"$COMMON_ARGS"' '"$ARGS1"' > '"$OUTFILE1"'$i.out || exit;
+done';
+time $SHELL -ic 'for i in $(seq 1 '"$NUM_ROUNDS"'); do
+	time ../../build/EXE/maize-router '"$COMMON_ARGS"' '"$ARGS2"' > '"$OUTFILE2"'$i.out || exit;
+done';
