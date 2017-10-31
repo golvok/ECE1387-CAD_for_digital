@@ -20,6 +20,13 @@ void simple_clique_solve(
 	const device::PlacementDevice& device
 );
 
+void clique_and_spread(
+	const std::vector<std::vector<device::AtomID>>& net_members,
+	const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
+	const device::PlacementDevice& device,
+	int max_spreadings
+);
+
 }
 }
 

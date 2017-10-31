@@ -59,7 +59,9 @@ int program_main(const ProgramConfig& config) {
 			do_optional_input_data_dump(config.dataFileName(), pr);
 			const auto& device_desc = flows::placement::make_default_device_description(pr.netMembers());
 
-			flows::placement::simple_clique_solve(pr.netMembers(), pr.fixedBlockLocations(), device_desc);
+			// flows::placement::simple_clique_solve(pr.netMembers(), pr.fixedBlockLocations(), device_desc);
+
+			flows::placement::clique_and_spread(pr.netMembers(), pr.fixedBlockLocations(), device_desc, 4);
 		}
 	);
 	apply_visitor(visitor, parse_result);

@@ -37,6 +37,15 @@ public:
 		};
 	}
 
+	template<typename FixedBlockLocations_Param>
+	FlowBase<Device, FixedBlockLocations_Param> withFixedBlockLocations(const FixedBlockLocations_Param& newFBL) const {
+		return {
+			dev,
+			newFBL,
+			nThreads
+		};
+	}
+
 	const Device& dev;
 	const FixedBlockLocations& fixed_block_locations;
 	const int nThreads;
