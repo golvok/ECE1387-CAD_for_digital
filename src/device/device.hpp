@@ -156,10 +156,10 @@ using DeviceTypeID = util::ID<int, DeviceTypeIDTag>;
 
 struct DeviceInfo {
 	DeviceTypeID m_type;
-	geom::BoundBox<int> bounds{};
-	int track_width = -1;
-	int pins_per_block_side = -1;
-	int num_blocks_adjacent_to_channel = -1;
+	geom::BoundBox<int> bounds;
+	int track_width;
+	int pins_per_block_side ;
+	int num_blocks_adjacent_to_channel;
 
 	      auto& type()       { return m_type; }
 	const auto& type() const { return m_type; }
