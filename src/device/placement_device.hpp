@@ -9,12 +9,17 @@ namespace device {
 struct PlacementDevice {
 	using Bounds = geom::BoundBox<int>;
 
-	PlacementDevice(Bounds bounds)
-		: bounds(bounds)
+	PlacementDevice(Bounds device_bounds)
+		: device_bounds(device_bounds)
 	{ }
 
+	auto& info()       { return *this; }
+	auto& info() const { return *this; }
+	auto& bounds()       { return device_bounds; }
+	auto& bounds() const { return device_bounds; }
+
 private:
-	Bounds bounds;
+	Bounds device_bounds;
 };
 
 } // end namespace device
