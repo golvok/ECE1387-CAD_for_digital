@@ -1,6 +1,7 @@
 #include "routing_flows.hpp"
 
 #include <algo/routing.hpp>
+#include <flows/flows_common.hpp>
 #include <graphics/graphics_wrapper.hpp>
 #include <util/lambda_compose.hpp>
 #include <util/logging.hpp>
@@ -10,31 +11,6 @@
 #include <boost/range/irange.hpp>
 
 namespace flows {
-
-template<typename Device>
-class FlowBase {
-public:
-	FlowBase(const FlowBase&) = default;
-	FlowBase(FlowBase&&) = default;
-
-	FlowBase(
-		const Device& dev,
-		int nThreads
-	)
-		: dev(dev)
-		, nThreads(nThreads)
-	{ }
-
-	FlowBase withDevice(const Device& newDev) const {
-		return {
-			newDev,
-			nThreads
-		};
-	}
-
-	const Device& dev;
-	const int nThreads;
-};
 
 template<typename Device>
 class FanoutTestFlow : public FlowBase<Device> {
