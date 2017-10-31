@@ -13,22 +13,23 @@
 
 namespace apl {
 
+template<typename Weighter>
 std::unordered_map<device::AtomID, geom::Point<double>> exact_solution(
 	const std::vector<std::vector<device::AtomID>>& net_members,
 	const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
-	const device::PlacementDevice& device
+	const device::PlacementDevice& device,
+	Weighter&& weight_between_for_net
 ) {
 	struct NetIDTag { const int DEFAULT_VALUE = -1; };
 	using NetID = util::ID<int, NetIDTag>;
 
-	std::unordered_map<NetID, std::vector<device::AtomID>, util::MyHash<NetID>::type> net_members_lists;
+	std::unordered_map<NetID, std::vector<device::AtomID>, typename util::MyHash<NetID>::type> net_members_lists;
 	std::unordered_map<device::AtomID, std::vector<NetID>> nets_of;
 	// vector (movable atom) movable_atoms;
 	std::unordered_map<device::AtomID, int> movable_atom_row;
 	std::vector<device::AtomID> atom_order;
 
 	(void) device;
-
 
 	{
 		std::unordered_set<device::AtomID> seen_before;
@@ -51,33 +52,6 @@ std::unordered_map<device::AtomID, geom::Point<double>> exact_solution(
 		}
 	}
 
-	// struct Element {
-	// 	int row;
-	// 	double value;
-
-	// 	bool operator<(const Element& rhs) {
-	// 		return row < rhs.row;
-	// 	}
-	// };
-
-	const auto weight_between_for_net = [&](const device::AtomID& a1, const device::AtomID& a2, const auto& net) {
-		(void)a1;
-		(void)a2;
-		(void)net;
-		return 1;
-		// return 2.0/net_members_lists[net].size();
-	};
-
-	// const auto total_weight_between = [&](const device::AtomID& a1, const device::AtomID& a2) {
-	// 	const auto& a1_nets = nets_of.find(a1)->second;
-	// 	return std::accumulate(begin(a1_nets), end(a1_nets), 0, [&](auto partial_sum, const auto& net) {
-	// 		const auto& net_members = net_members_lists.find(net)->second;
-	// 		if (net_members.find(a2) != end(net_members)) {
-	// 			return partial_sum + weight_between_for_net(a1, a2, net);
-	// 		}
-	// 	});
-	// };
-
 	using Weight = double;
 	std::vector<std::map<int, Weight>> weight_matrix_columns;
 	struct {
@@ -99,7 +73,7 @@ std::unordered_map<device::AtomID, geom::Point<double>> exact_solution(
 		for (const auto& net : nets_of[atom]) {
 			for (const device::AtomID& connected_atom : net_members_lists[net]) {
 				if (connected_atom != atom) {
-					const auto weight_from_net = weight_between_for_net(atom, connected_atom, net);
+					const auto weight_from_net = weight_between_for_net(atom, connected_atom, net_members_lists[net].size());
 					if (weight_from_net != 0) {
 						const auto location_lookup = fixed_block_locations.find(connected_atom);
 						if (location_lookup == end(fixed_block_locations)) {

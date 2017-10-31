@@ -29,7 +29,11 @@ struct SimpleCliqueSolveFlow : public FlowBase<Device, FixedBlockLocations> {
 		const auto& result = apl::exact_solution(
 			net_members,
 			fixed_block_locations,
-			dev
+			dev,
+			[&](const device::AtomID& a1, const device::AtomID& a2, const auto& net_size) {
+				(void)a1; (void)a2;
+				return 2.0/(double)net_size;
+			}
 		);
 
 		if (dout(DL::APL_D1).enabled()) {
