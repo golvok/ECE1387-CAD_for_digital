@@ -55,6 +55,8 @@ void event_loop(std::function<void(float x, float y, t_event_buttonPressed butto
         std::function<void(char key_pressed, int keysym)> act_on_keypress,
         std::function<void()> drawscreen);
 
+void simulate_proceed();
+
 /* Opens up the graphics; the window will have the UTF-8 string window_name
  * in its title bar and have the specified background colour.
  */

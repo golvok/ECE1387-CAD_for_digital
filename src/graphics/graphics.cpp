@@ -1561,6 +1561,7 @@ void event_loop(
     if (gl_state.disable_event_loop)  // Avoids hanging the automarker when students call the event_loop
         return;
     
+    gl_state.ProceedPressed = false;
 #ifdef X11
     x11_event_loop(act_on_mousebutton, act_on_mousemove, act_on_keypress, drawscreen);
 #else /* Win32 */
@@ -1576,7 +1577,6 @@ void event_loop(
     win32_mousemove_ptr = act_on_mousemove;
     win32_keypress_ptr = act_on_keypress;
     win32_drawscreen_ptr = drawscreen;
-    gl_state.ProceedPressed = false;
     win32_state.InEventLoop = true;
 
     win32_invalidate_screen();
@@ -1616,6 +1616,11 @@ void event_loop(
     }
     win32_state.InEventLoop = false;
 #endif
+}
+
+void simulate_proceed() {
+	gl_state.ProceedPressed = true;
+	refresh_graphics();
 }
 
 void
@@ -3728,13 +3733,16 @@ x11_event_loop(
 #define ON 0
 
     x11_turn_on_off(ON);
-    while (true) {
+    while (!gl_state.ProceedPressed) {
 
         XSync(x11_state.display, false);
         XNextEvent(x11_state.display, &report);
 #ifdef VERBOSE
         cout << "Got an event of type: " << report.type << endl; 
 #endif 
+        if (gl_state.ProceedPressed) { // check after getting an event too
+            break;
+        }
 
         if (x11_drop_redundant_panning (report, last_skipped_button_press_button))
             continue;  // Drop this event
@@ -3814,8 +3822,7 @@ x11_event_loop(
                         if (*button_state.button[bnum].fcn.target<t_button::CallbackType*>() == proceed) {
                             x11_turn_on_off(OFF);
                             flushinput();
-                            return; /* Rather clumsy way of returning *
-						* control to the simulator       */
+                            gl_state.ProceedPressed = true;
                         }
                     }
                 }

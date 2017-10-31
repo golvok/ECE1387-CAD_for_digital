@@ -92,6 +92,7 @@ public:
 
 	void close() {
 		close_requested = true;
+		graphics::simulate_proceed();
 	}
 
 	void join() {		
