@@ -33,7 +33,7 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 	po::options_description progopts("Program Options");
 
 	metaopts.add_options()
-		("graphics", "Enable graphics")
+		("graphics", po::bool_switch(&m_meta.graphics_enabled), "Enable graphics")
 		("debug",    "Turn on the most common debugging options")
 	;
 	DebugLevel::forEachLevel([&](DebugLevel::Level l) {
