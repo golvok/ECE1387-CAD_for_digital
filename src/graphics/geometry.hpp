@@ -358,6 +358,8 @@ public:
 	point_type& min_point() { return minpoint; }
 	point_type& max_point() { return maxpoint; }
 
+	point_type minxmaxy_point() { return {minx(), maxy()}; }
+	point_type maxxminy_point() { return {maxx(), miny()}; }
 	/**
 	 * Calculate and return the center
 	 */
