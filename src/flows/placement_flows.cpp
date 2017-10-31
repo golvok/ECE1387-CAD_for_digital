@@ -55,11 +55,14 @@ struct SimpleCliqueSolveFlow : public FlowBase<Device, FixedBlockLocations> {
 } // end anon namespace
 
 device::PlacementDevice make_default_device_description(const std::vector<std::vector<device::AtomID>>& net_members) {
-	// const auto block_conut = std::distance(begin(netlist.all_ids()), end(netlist.all_ids()));
-	// const auto width = static_cast<int>(std::lround(std::ceil(std::sqrt(block_conut))));
-	// return device::PlacementDevice(device::PlacementDevice::Bounds(0, 0, width, width));
-	(void)net_members;
-	return device::PlacementDevice(device::PlacementDevice::Bounds(0, 0, 4, 4));
+	std::unordered_set<device::AtomID> unique_atoms;
+	for (const auto& net : net_members) {
+		for (const auto& atom : net) {
+			unique_atoms.insert(atom);
+		}
+	}
+	const auto width = static_cast<int>(std::lround(std::ceil(std::sqrt(unique_atoms.size()))));
+	return device::PlacementDevice(device::PlacementDevice::Bounds(0, 0, width, width));
 }
 
 void simple_clique_solve(
