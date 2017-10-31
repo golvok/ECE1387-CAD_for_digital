@@ -84,6 +84,15 @@ namespace detail {
 			, moveable_block_locations(moveable_block_locations)
 		{ }
 
+		const auto& netMembers() const { return net_members; }
+		      auto& netMembers()       { return net_members; }
+
+		const auto& fixedBlockLocations() const { return fixed_block_locations; }
+		      auto& fixedBlockLocations()       { return fixed_block_locations; }
+
+		const auto& moveableBlockLocations() const { return moveable_block_locations; }
+		      auto& moveableBlockLocations()       { return moveable_block_locations; }
+
 	private:
 		std::vector<std::vector<device::AtomID>> net_members;
 		std::unordered_map<device::AtomID, device::BlockID> fixed_block_locations;

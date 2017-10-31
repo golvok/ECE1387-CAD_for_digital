@@ -34,7 +34,7 @@ void simple_clique_solve(
 		}
 	}
 
-	graphics::get().fpga().pushPlacingState(
+	const auto graphics_keeper = graphics::get().fpga().pushPlacingState(
 		net_members,
 		fixed_block_locations,
 		result,

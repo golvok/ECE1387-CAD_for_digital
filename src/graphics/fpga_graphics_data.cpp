@@ -276,6 +276,38 @@ void drawDevice(Device* device, const graphics::FPGAGraphicsDataState& data) {
 template<> void drawDevice(const std::nullptr_t&, const graphics::FPGAGraphicsDataState&) { }
 // template<> void drawDevice(std::nullptr_t&, const graphics::FPGAGraphicsDataState&) { }
 
+void drawPlacementData(const graphics::detail::FPGAGraphicsDataState_Placement& data) {
+
+	graphics::setcolor(0,0,0);
+	const auto block_bounds = drawBlocks(device::Device<device::WiltonConnector>(device::DeviceInfo{
+		device::DeviceType::Wilton,
+		geom::BoundBox<int>(0,0,10,10),
+		10,
+		1,
+		2,
+	}));
+
+	for (const auto& id_and_block : data.fixedBlockLocations()) {
+		const auto& id = id_and_block.first;
+		const auto& block = id_and_block.second;
+
+		graphics::setcolor(0xFF,0,0);
+		graphics::setfontsize(10);
+		graphics::drawtext_in(block_bounds.at(block) + graphics::t_point(0.0f, -0.1f), util::stringify_through_stream(id));
+	}
+
+	for (const auto& id_and_point : data.moveableBlockLocations()) {
+		const auto& id = id_and_point.first;
+		const auto& raw_point = id_and_point.second;
+		const graphics::t_point point((float)raw_point.x() + 0.75f, (float)raw_point.y() + 0.75f);
+
+		graphics::setcolor(0x00, 0xFF, 0x00);
+		graphics::fillarc(point.x, point.y, 0.1f, 0, 360);
+		graphics::setcolor(0x00, 0x00, 0x00);
+		graphics::drawtext(point.x, point.y, util::stringify_through_stream(id));
+	}
+}
+
 } // end anon namespace
 
 namespace graphics {
@@ -296,6 +328,8 @@ void FPGAGraphicsData::drawAll() {
 	boost::apply_visitor(util::compose_withbase<boost::static_visitor<void>>([&](auto&& device) {
 		drawDevice(device, data);
 	}), data.getDevice());
+
+	drawPlacementData(data);
 }
 
 } // end namespace graphics
