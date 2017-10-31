@@ -11,10 +11,7 @@ namespace {
 
 template<typename Device, typename FixedBlockLocations>
 struct SimpleCliqueSolveFlow : public FlowBase<Device, FixedBlockLocations> {
-	using FlowBase<Device, FixedBlockLocations>::FlowBase;
-	using FlowBase<Device, FixedBlockLocations>::dev;
-	using FlowBase<Device, FixedBlockLocations>::nThreads;
-	using FlowBase<Device, FixedBlockLocations>::fixed_block_locations;
+	DECLARE_USING_FLOBASE_MEMBERS(Device, FixedBlockLocations)
 
 	SimpleCliqueSolveFlow(const SimpleCliqueSolveFlow&) = default;
 	SimpleCliqueSolveFlow(SimpleCliqueSolveFlow&&) = default;
