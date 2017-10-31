@@ -39,6 +39,9 @@ BUILD_SUBDIRS = $(EXE_DIR) $(OBJ_DIR) $(DEPS_DIR)
 SUITSPARSE_LIBRARY_CONFIG = BLAS= SUITESPARSE=../..
 SUITSPARSE_CONFIG_CONFIG = BLAS= SUITESPARSE=..
 SUITESPARSE_DIR = ../SuiteSparse/
+LIBSS_UMFPACK = $(SUITESPARSE_DIR)lib/libumfpack.so
+LIBSS_AMD = $(SUITESPARSE_DIR)lib/libamd.so
+LIBSS_CONFIG = $(SUITESPARSE_DIR)lib/libsuitesparseconfig.so
 
 # CXX = clang++
 # CXX = g++
@@ -84,7 +87,7 @@ endif
 
 INCLUDE_FLAGS += \
 	-I . \
-	-I ../SuiteSparse/include \
+	-I $(SUITESPARSE_DIR)include \
 
 
 GRAPHICS_INCL_FLAGS += $(shell pkg-config --cflags cairo)
@@ -161,10 +164,10 @@ $(EXE_DIR)anaplace: \
 	$(OBJ_DIR)util/thread_utils.o \
 	$(OBJ_DIR)util/umfpack_interface.o \
 	$(GRAPHICS_OBJECTS) \
-	umfpack \
+	$(LIBSS_UMFPACK) \
 
 $(EXE_DIR)anaplace: \
-	LDFLAGS += 	-L../SuiteSparse/lib \
+	LDFLAGS += 	-L$(SUITESPARSE_DIR)lib \
 	-lumfpack \
 	-lamd \
 	-lsuitesparseconfig \
@@ -174,17 +177,14 @@ $(EXE_DIR)test-netlist: \
 	$(OBJ_DIR)util/tests/netlist_test.o \
 
 
-umfpack: ss_amd ss_config
+$(LIBSS_UMFPACK): $(LIBSS_AMD) $(LIBSS_CONFIG)
 	$(MAKE) library -C $(SUITESPARSE_DIR)UMFPACK/Lib UMFPACK_CONFIG="-DNCHOLMOD -DNBLAS" $(SUITSPARSE_LIBRARY_CONFIG)
-	touch "$@"
 
-ss_amd: ss_config
+$(LIBSS_AMD): $(LIBSS_CONFIG)
 	$(MAKE) library -C $(SUITESPARSE_DIR)AMD/Lib $(SUITSPARSE_LIBRARY_CONFIG)
-	touch "$@"
 
-ss_config:
+$(LIBSS_CONFIG):
 	$(MAKE) library -C $(SUITESPARSE_DIR)SuiteSparse_config $(SUITSPARSE_CONFIG_CONFIG)
-	touch "$@"
 
 
 # define extra flags for particular object files
@@ -235,9 +235,6 @@ endif
 	$(MAKE) purge -C $(SUITESPARSE_DIR)SuiteSparse_config $(SUITSPARSE_CONFIG_CONFIG)
 	rm -rf $(SUITESPARSE_DIR)lib
 	rm -rf $(SUITESPARSE_DIR)share
-	rm -f umfpack
-	rm -f ss_config
-	rm -f ss_amd
 
 
 $(patsubst %, delete_%_dir, $(BUILD_DIR)    ): $$(patsubst %, delete_%_dir, $(BUILD_SUBDIRS))
