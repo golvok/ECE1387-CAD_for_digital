@@ -287,6 +287,16 @@ void drawPlacementData(const graphics::detail::FPGAGraphicsDataState_Placement& 
 		2,
 	}));
 
+	auto location_of = [&](const auto& atom) -> graphics::t_point {
+		const auto fixed_block_lookup = data.fixedBlockLocations().find(atom);
+		if (fixed_block_lookup == end(data.fixedBlockLocations())) {
+			const auto& raw_point = data.moveableBlockLocations().at(atom);
+			return {(float)raw_point.x() + 0.75f, (float)raw_point.y() + 0.75f};
+		} else {
+			return block_bounds.at(fixed_block_lookup->second).get_center();
+		}
+	};
+
 	for (const auto& id_and_block : data.fixedBlockLocations()) {
 		const auto& id = id_and_block.first;
 		const auto& block = id_and_block.second;
@@ -298,13 +308,26 @@ void drawPlacementData(const graphics::detail::FPGAGraphicsDataState_Placement& 
 
 	for (const auto& id_and_point : data.moveableBlockLocations()) {
 		const auto& id = id_and_point.first;
-		const auto& raw_point = id_and_point.second;
-		const graphics::t_point point((float)raw_point.x() + 0.75f, (float)raw_point.y() + 0.75f);
+		const auto point = location_of(id);
 
 		graphics::setcolor(0x00, 0xFF, 0x00);
 		graphics::fillarc(point.x, point.y, 0.1f, 0, 360);
 		graphics::setcolor(0x00, 0x00, 0x00);
 		graphics::drawtext(point.x, point.y, util::stringify_through_stream(id));
+	}
+
+	graphics::setcolor(0x00, 0x00, 0x00);
+	for (const auto& net : data.netMembers()) {
+		for (const auto& atom : net) {
+			for (const auto& atom2 : net) {
+				if (atom != atom2) {
+					const auto p = location_of(atom);
+					const auto p2 = location_of(atom2);
+
+					drawline(p, p2);
+				}
+			}
+		}
 	}
 }
 
