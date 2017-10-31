@@ -94,7 +94,7 @@ static std::pair<graphics::t_point, graphics::t_point> calculateWireLocation(con
 
 	if (reid.isPin()) {
 		const auto as_pin = reid.asPin();
-		const auto pin_side = device->get_block_pin_side(as_pin);
+		const auto pin_side = device.get_block_pin_side(as_pin);
 		const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), pin_side);
 
 		const auto block_side = block_bounds.get_side(pin_side);
@@ -107,8 +107,8 @@ static std::pair<graphics::t_point, graphics::t_point> calculateWireLocation(con
 		const auto p2 = interpolate(block_point, 0.9f, channel_point);
 
 		return {p1, p2};
-	} else { // if (device->is_channel(reid)) {
-		const auto wire_dir = device->wire_direction(reid);
+	} else { // if (device.is_channel(reid)) {
+		const auto wire_dir = device.wire_direction(reid);
 		const auto channel_bounds = channel_bounds_for_block_at(xy_loc.x(), xy_loc.y(), channel_location(wire_dir));
 
 		const auto sides = [&]() -> std::pair<std::pair<t_point, t_point>, std::pair<t_point, t_point>> {
@@ -122,7 +122,7 @@ static std::pair<graphics::t_point, graphics::t_point> calculateWireLocation(con
 			}
 		}();
 
-		const auto channel_pos = ((float)device->index_in_channel(reid) + 0.5f) / (float)device->info().track_width;
+		const auto channel_pos = ((float)device.index_in_channel(reid) + 0.5f) / (float)device.info().track_width;
 		const auto p1 = interpolate(sides.first.first, channel_pos, sides.first.second);
 		const auto p2 = interpolate(sides.second.second, channel_pos, sides.second.first);
 		return {p1, p2};
@@ -130,8 +130,14 @@ static std::pair<graphics::t_point, graphics::t_point> calculateWireLocation(con
 }
 
 template<typename Device>
+static void drawDevice(Device* device, const FPGAGraphicsDataState& data) {
+	if (device) {
+		drawDevice(*device, data);
+	}
+}
+
+template<typename Device>
 static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
-	if (!device) return;
 
 	graphics::setlinestyle(SOLID);
 	graphics::setcolor(0,0,0);
@@ -140,7 +146,7 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 	std::unordered_set<device::RouteElementID> already_drawn;
 	std::unordered_map<device::RouteElementID, graphics::t_color> colour_overrides;
 
-	for (const auto& block : device->blocks()) {
+	for (const auto& block : device.blocks()) {
 		const auto xy_loc = geom::make_point(
 			block.getX().getValue(),
 			block.getY().getValue()
@@ -154,7 +160,7 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 		graphics::setfontsize(6);
 		graphics::drawtext_in(block_bounds, util::stringify_through_stream(geom::make_point(block.getX().getValue(), block.getY().getValue())));
 
-		for (const auto& pin_re : device->fanout(block)) {
+		for (const auto& pin_re : device.fanout(block)) {
 			reIDs_to_draw.push_back(pin_re);
 		}
 	}
@@ -259,7 +265,7 @@ static void drawDevice(Device&& device, const FPGAGraphicsDataState& data) {
 	}
 
 
-	util::GraphAlgo<device::RouteElementID>().breadthFirstVisit(*device, reIDs_to_draw, [&](const auto& curr) {
+	util::GraphAlgo<device::RouteElementID>().breadthFirstVisit(device, reIDs_to_draw, [&](const auto& curr) {
 		if (already_drawn.find(curr) == end(already_drawn)) {
 			drawWire(curr);
 		}
