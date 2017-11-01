@@ -178,6 +178,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 		);
 		using AtomID = device::AtomID;
 
+		std::unordered_map<AtomID, int> anchor_generation;
 		auto current_anchor_locations = anchor_locations; // copy
 		auto current_net_members = net_members; // copy
 		auto current_bb = dev.info().bounds(); // copy
@@ -194,11 +195,16 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				.flow_main(
 					current_net_members,
 					[&] (const device::AtomID& a1, const device::AtomID& a2, const auto& net_size) {
-						if (
-							(current_anchor_locations.find(a1) != end(current_anchor_locations) && this->fixed_block_locations.find(a1) == end(fixed_block_locations))
-							|| (current_anchor_locations.find(a2) != end(current_anchor_locations) && this->fixed_block_locations.find(a2) == end(fixed_block_locations))
-						) {
-							return 5.0;
+						boost::optional<AtomID> anchor;
+						if (current_anchor_locations.find(a1) != end(current_anchor_locations) && this->fixed_block_locations.find(a1) == end(fixed_block_locations)) {
+							anchor = a1;
+						} else if (current_anchor_locations.find(a2) != end(current_anchor_locations) && this->fixed_block_locations.find(a2) == end(fixed_block_locations)) {
+							anchor = a2;
+						}
+
+						if (anchor) {
+							const auto& agen = anchor_generation.at(anchor.get());
+							return 10.0 * std::pow(1.5, agen) * std::pow(2, agen - num_spreadings);
 						} else {
 							return 2.0/(double)net_size;
 						}
@@ -272,6 +278,10 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				current_anchor_locations.emplace(
 					anchor_info.id,
 					anchor_info.anchor_location
+				);
+				anchor_generation.emplace(
+					anchor_info.id,
+					num_spreadings
 				);
 			}}
 
