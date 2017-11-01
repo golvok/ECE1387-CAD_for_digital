@@ -70,6 +70,7 @@ namespace detail {
 			: FPGAGraphicsDataState_Placement(
 				{},
 				{},
+				{},
 				{}
 			)
 		{ }
@@ -77,10 +78,12 @@ namespace detail {
 		FPGAGraphicsDataState_Placement(
 			const std::vector<std::vector<device::AtomID>>& net_members,
 			const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
+			const std::unordered_map<device::AtomID, geom::Point<double>>& nonmoveable_block_locations,
 			const std::unordered_map<device::AtomID, geom::Point<double>>& moveable_block_locations
 		)
 			: net_members(net_members)
 			, fixed_block_locations(fixed_block_locations)
+			, nonmoveable_block_locations(nonmoveable_block_locations)
 			, moveable_block_locations(moveable_block_locations)
 		{ }
 
@@ -90,12 +93,16 @@ namespace detail {
 		const auto& fixedBlockLocations() const { return fixed_block_locations; }
 		      auto& fixedBlockLocations()       { return fixed_block_locations; }
 
+		const auto& nonmoveableBlockLocations() const { return nonmoveable_block_locations; }
+		      auto& nonmoveableBlockLocations()       { return nonmoveable_block_locations; }
+
 		const auto& moveableBlockLocations() const { return moveable_block_locations; }
 		      auto& moveableBlockLocations()       { return moveable_block_locations; }
 
 	private:
 		std::vector<std::vector<device::AtomID>> net_members;
 		std::unordered_map<device::AtomID, device::BlockID> fixed_block_locations;
+		std::unordered_map<device::AtomID, geom::Point<double>> nonmoveable_block_locations;
 		std::unordered_map<device::AtomID, geom::Point<double>> moveable_block_locations;
 	};
 
@@ -135,12 +142,14 @@ struct FPGAGraphicsDataState : public detail::FPGAGraphicsDataState_Routing, pub
 		placement_state_tag,
 		const std::vector<std::vector<device::AtomID>>& net_members,
 		const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
+		const std::unordered_map<device::AtomID, geom::Point<double>>& nonmoveable_block_locations,
 		const std::unordered_map<device::AtomID, geom::Point<double>>& moveable_block_locations
 	)
 		: FPGAGraphicsDataState_Routing()
 		, FPGAGraphicsDataState_Placement(
 			net_members,
 			fixed_block_locations,
+			nonmoveable_block_locations,
 			moveable_block_locations
 		)
 		, enabled(true)
@@ -279,10 +288,11 @@ public:
 	FPGAGraphicsDataStateScope pushPlacingState(
 		const std::vector<std::vector<device::AtomID>>& net_members,
 		const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
+		const std::unordered_map<device::AtomID, geom::Point<double>>& nonmoveable_block_locations,
 		const std::unordered_map<device::AtomID, geom::Point<double>>& moveable_block_locations,
 		bool reset_view = false
 	) {
-		return pushPlacingState_base(net_members, fixed_block_locations, moveable_block_locations, reset_view);
+		return pushPlacingState_base(net_members, fixed_block_locations, nonmoveable_block_locations, moveable_block_locations, reset_view);
 	}
 
 private:
@@ -305,6 +315,7 @@ private:
 	FPGAGraphicsDataStateScope pushPlacingState_base(
 		const std::vector<std::vector<device::AtomID>>& net_members = {},
 		const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations = {},
+		const std::unordered_map<device::AtomID, geom::Point<double>>& nonmoveable_block_locations = {},
 		const std::unordered_map<device::AtomID, geom::Point<double>>& moveable_block_locations = {},
 		bool reset_view = false
 	) {
@@ -312,6 +323,7 @@ private:
 			FPGAGraphicsDataState::placement_state_tag{},
 			net_members,
 			fixed_block_locations,
+			nonmoveable_block_locations,
 			moveable_block_locations
 		));
 		do_graphics_refresh(reset_view, geom::BoundBox<double>(0,0,1,1));

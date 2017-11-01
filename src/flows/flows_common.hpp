@@ -4,23 +4,23 @@
 namespace flows {
 
 template<typename Device, typename FixedBlockLocations = int>
-class FlowBase {
+class FlowBaseCommonData {
 public:
-	FlowBase(const FlowBase&) = default;
-	FlowBase(FlowBase&&) = default;
+	FlowBaseCommonData(const FlowBaseCommonData&) = default;
+	FlowBaseCommonData(FlowBaseCommonData&&) = default;
 
-	FlowBase(
+	FlowBaseCommonData(
 		const Device& dev,
 		int nThreads
 	)
-		: FlowBase(
+		: FlowBaseCommonData(
 			dev,
 			{},
 			nThreads
 		)
 	{ }
 
-	FlowBase(
+	FlowBaseCommonData(
 		const Device& dev,
 		const FixedBlockLocations& fixed_block_locations,
 		int nThreads
@@ -30,34 +30,53 @@ public:
 		, nThreads(nThreads)
 	{ }
 
-	FlowBase withDevice(const Device& newDev) const {
+	const Device& dev;
+	const FixedBlockLocations& fixed_block_locations;
+	const int nThreads;
+};
+
+template<typename Self, typename Device, typename FixedBlockLocations = int>
+struct FlowBase : FlowBaseCommonData<Device, FixedBlockLocations> {
+	FlowBase(const FlowBase&) = default;
+	FlowBase(FlowBase&&) = default;
+
+	FlowBase(const FlowBaseCommonData<Device, FixedBlockLocations>& fbcd) : FlowBaseCommonData<Device, FixedBlockLocations>(fbcd) { }
+	FlowBase(FlowBaseCommonData<Device, FixedBlockLocations>&& fbcd) : FlowBaseCommonData<Device, FixedBlockLocations>(std::move(fbcd)) { }
+	
+	using FlowBaseCommonData<Device, FixedBlockLocations>::FlowBaseCommonData;
+	using FlowBaseCommonData<Device, FixedBlockLocations>::dev;
+	using FlowBaseCommonData<Device, FixedBlockLocations>::fixed_block_locations;
+	using FlowBaseCommonData<Device, FixedBlockLocations>::nThreads;
+
+	Self withDevice(const Device& newDev) const {
 		return {
 			newDev,
 			nThreads
 		};
 	}
 
-	template<typename FixedBlockLocations_Param>
-	FlowBase<Device, FixedBlockLocations_Param> withFixedBlockLocations(const FixedBlockLocations_Param& newFBL) const {
+	Self withFixedBlockLocations(const FixedBlockLocations& newFBL) const {
 		return {
 			dev,
 			newFBL,
 			nThreads
 		};
 	}
-
-	const Device& dev;
-	const FixedBlockLocations& fixed_block_locations;
-	const int nThreads;
 };
 
-#define DECLARE_USING_FLOBASE_MEMBERS(dev_tparam, fbl_tparam) \
-	using FlowBase<dev_tparam, fbl_tparam>::FlowBase; \
-	using FlowBase<dev_tparam, fbl_tparam>::dev; \
-	using FlowBase<dev_tparam, fbl_tparam>::nThreads; \
-	using FlowBase<dev_tparam, fbl_tparam>::fixed_block_locations; \
-	using FlowBase<dev_tparam, fbl_tparam>::withDevice; \
-	using FlowBase<dev_tparam, fbl_tparam>::withFixedBlockLocations; \
+#define DECLARE_USING_FLOWBASE_MEMBERS_JUST_MEMBERS(...) \
+	using __VA_ARGS__::FlowBase; \
+	using __VA_ARGS__::dev; \
+	using __VA_ARGS__::nThreads; \
+	using __VA_ARGS__::fixed_block_locations; \
+
+
+#define DECLARE_USING_FLOWBASE_MEMBERS(Self, ...) \
+	using __VA_ARGS__::withDevice; \
+	using __VA_ARGS__::withFixedBlockLocations; \
+	DECLARE_USING_FLOWBASE_MEMBERS_JUST_MEMBERS(__VA_ARGS__) \
+	Self(const __VA_ARGS__& fb) : __VA_ARGS__(fb) { } \
+	Self(const __VA_ARGS__&& fb) : __VA_ARGS__(std::move(fb)) { } \
 
 
 } // end namespace flows

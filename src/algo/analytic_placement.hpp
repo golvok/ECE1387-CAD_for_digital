@@ -16,7 +16,7 @@ namespace apl {
 template<typename Weighter>
 std::unordered_map<device::AtomID, geom::Point<double>> exact_solution(
 	const std::vector<std::vector<device::AtomID>>& net_members,
-	const std::unordered_map<device::AtomID, device::BlockID>& fixed_block_locations,
+	const std::unordered_map<device::AtomID, geom::Point<double>>& fixed_block_locations,
 	const device::PlacementDevice& device,
 	Weighter&& weight_between_for_net
 ) {
@@ -81,8 +81,8 @@ std::unordered_map<device::AtomID, geom::Point<double>> exact_solution(
 							col[movable_atom_row[connected_atom]] += -weight_from_net;
 						} else {
 							// if not movable
-							right_hand_side.x.back() += weight_from_net * location_lookup->second.getX().getValue();
-							right_hand_side.y.back() += weight_from_net * location_lookup->second.getY().getValue();
+							right_hand_side.x.back() += weight_from_net * location_lookup->second.x();
+							right_hand_side.y.back() += weight_from_net * location_lookup->second.y();
 						}
 						sum += weight_from_net;
 					}

@@ -13,15 +13,12 @@
 namespace flows {
 
 template<typename Device>
-class FanoutTestFlow : public FlowBase<Device> {
+class FanoutTestFlow : public FlowBase<FanoutTestFlow<Device>, Device> {
 public:
-	using FlowBase<Device>::FlowBase;
-	using FlowBase<Device>::dev;
-	using FlowBase<Device>::nThreads;
+	DECLARE_USING_FLOWBASE_MEMBERS(FanoutTestFlow, FlowBase<FanoutTestFlow, Device>)
+
 	FanoutTestFlow(const FanoutTestFlow&) = default;
 	FanoutTestFlow(FanoutTestFlow&&) = default;
-	FanoutTestFlow(FlowBase<Device>&& fb) : FlowBase<Device>(std::move(fb)) { }
-	FanoutTestFlow(const FlowBase<Device>& fb) : FlowBase<Device>(fb) { }
 
 	void flow_main() const {
 		bool do_view_reset = true;
@@ -49,15 +46,12 @@ public:
 };
 
 template<typename Device>
-class RouteAsIsFlow : public FlowBase<Device> {
+class RouteAsIsFlow : public FlowBase<RouteAsIsFlow<Device>, Device> {
 public:
-	using FlowBase<Device>::FlowBase;
-	using FlowBase<Device>::dev;
-	using FlowBase<Device>::nThreads;
+	DECLARE_USING_FLOWBASE_MEMBERS(RouteAsIsFlow, FlowBase<RouteAsIsFlow, Device>)
+
 	RouteAsIsFlow(const RouteAsIsFlow&) = default;
 	RouteAsIsFlow(RouteAsIsFlow&&) = default;
-	RouteAsIsFlow(FlowBase<Device>&& fb) : FlowBase<Device>(std::move(fb)) { }
-	RouteAsIsFlow(const FlowBase<Device>& fb) : FlowBase<Device>(fb) { }
 
 	template<typename RouteTheseSourcesFirst = std::vector<device::PinGID>>
 	auto flow_main(const util::Netlist<device::PinGID>& pin_to_pin_netlist, const RouteTheseSourcesFirst& route_these_sources_first = {}, bool present_graphics = true) const {
@@ -106,15 +100,12 @@ public:
 };
 
 template<typename Device>
-class RouteWithRetryFlow : public FlowBase<Device> {
+class RouteWithRetryFlow : public FlowBase<RouteWithRetryFlow<Device>, Device> {
 public:
-	using FlowBase<Device>::FlowBase;
-	using FlowBase<Device>::dev;
-	using FlowBase<Device>::nThreads;
+	DECLARE_USING_FLOWBASE_MEMBERS(RouteWithRetryFlow, FlowBase<RouteWithRetryFlow, Device>)
+
 	RouteWithRetryFlow(const RouteWithRetryFlow&) = default;
 	RouteWithRetryFlow(RouteWithRetryFlow&&) = default;
-	RouteWithRetryFlow(FlowBase<Device>&& fb) : FlowBase<Device>(std::move(fb)) { }
-	RouteWithRetryFlow(const FlowBase<Device>& fb) : FlowBase<Device>(fb) { }
 
 	template<typename PinOrder>
 	bool flow_main(
@@ -167,15 +158,12 @@ public:
 };
 
 template<typename Device>
-class TrackWidthExplorationFlow : public FlowBase<Device> {
+class TrackWidthExplorationFlow : public FlowBase<TrackWidthExplorationFlow<Device>, Device> {
 public:
-	using FlowBase<Device>::FlowBase;
-	using FlowBase<Device>::dev;
-	using FlowBase<Device>::nThreads;
+	DECLARE_USING_FLOWBASE_MEMBERS(TrackWidthExplorationFlow, FlowBase<TrackWidthExplorationFlow, Device>)
+
 	TrackWidthExplorationFlow(const TrackWidthExplorationFlow&) = default;
 	TrackWidthExplorationFlow(TrackWidthExplorationFlow&&) = default;
-	TrackWidthExplorationFlow(FlowBase<Device>&& fb) : FlowBase<Device>(std::move(fb)) { }
-	TrackWidthExplorationFlow(const FlowBase<Device>& fb) : FlowBase<Device>(fb) { }
 
 	void flow_main(
 		const util::Netlist<device::PinGID>& pin_to_pin_netlist,
@@ -205,7 +193,7 @@ public:
 					dout(DL::INFO) << "done creating new device\n";
 					indent.endIndent();
 
-					const auto route_success = RouteWithRetryFlow<Device>(this->withDevice(modified_dev)).flow_main(pin_to_pin_netlist, base_pin_order);
+					const auto route_success = RouteWithRetryFlow<Device>(*this).withDevice(modified_dev).flow_main(pin_to_pin_netlist, base_pin_order);
 					// const auto route_success = RouteAsIsFlow<Device>(modified_dev).flow_main(pin_to_pin_netlist).unroutedPins().empty();
 
 					if (route_success) {

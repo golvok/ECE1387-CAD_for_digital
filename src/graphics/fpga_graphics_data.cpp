@@ -290,7 +290,14 @@ void drawPlacementData(const graphics::detail::FPGAGraphicsDataState_Placement& 
 	auto location_of = [&](const auto& atom) -> graphics::t_point {
 		const auto fixed_block_lookup = data.fixedBlockLocations().find(atom);
 		if (fixed_block_lookup == end(data.fixedBlockLocations())) {
-			const auto& raw_point = data.moveableBlockLocations().at(atom);
+			const auto& raw_point = [&]() {
+				const auto nonmovable_lookup = data.nonmoveableBlockLocations().find(atom);
+				if (nonmovable_lookup == end(data.nonmoveableBlockLocations())) {
+					return data.moveableBlockLocations().at(atom);
+				} else {
+					return nonmovable_lookup->second;
+				}
+			}();
 			return {(float)raw_point.x() + 0.75f, (float)raw_point.y() + 0.75f};
 		} else {
 			return block_bounds.at(fixed_block_lookup->second).get_center();

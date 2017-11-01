@@ -11,14 +11,107 @@ namespace placement {
 
 namespace {
 
+template<typename Points, typename BlockLocations>
+Points convert_to_points(const BlockLocations& bl) {
+	Points result;
+	std::transform(begin(bl), end(bl), std::inserter(result, end(result)),
+		[](auto&& id_and_block) {
+			return std::make_pair(
+				id_and_block.first,
+				geom::make_point<double>(
+					(double)id_and_block.second.getX().getValue(),
+					(double)id_and_block.second.getY().getValue()
+				)
+			);
+		}
+	);
+	return result;
+}
+
+
+template<typename Self, typename Device, typename FixedBlockLocations, typename AnchorLocations = std::unordered_map<device::AtomID, geom::Point<double>>>
+struct APLFlowBase : public FlowBase<APLFlowBase<Self, Device, FixedBlockLocations, AnchorLocations>, Device, FixedBlockLocations> {
+	using FlowBaseBaseClass = FlowBase<APLFlowBase, Device, FixedBlockLocations>;
+	DECLARE_USING_FLOWBASE_MEMBERS_JUST_MEMBERS(FlowBaseBaseClass)
+
+
+	template<typename ArgSelf>
+	APLFlowBase(const APLFlowBase<ArgSelf, Device, FixedBlockLocations, AnchorLocations>& src)
+		: FlowBaseBaseClass(src)
+		, anchor_locations(src.anchor_locations)
+	{ }
+
+	template<typename ArgSelf>
+	APLFlowBase(APLFlowBase<ArgSelf, Device, FixedBlockLocations, AnchorLocations>&& src)
+		: FlowBaseBaseClass(src)
+		, anchor_locations(src.anchor_locations)
+	{ }
+
+	APLFlowBase(
+		const FlowBaseBaseClass& fb,
+		const AnchorLocations& anchor_locations
+	)
+		: FlowBaseBaseClass(fb)
+		, anchor_locations(anchor_locations)
+	{ }
+
+	APLFlowBase(
+		const Device& dev,
+		const FixedBlockLocations& fixed_block_locations,
+		const AnchorLocations& anchor_locations,
+		int nThreads
+	)
+		: FlowBaseBaseClass(
+			dev,
+			fixed_block_locations,
+			nThreads
+		)
+		, anchor_locations(anchor_locations)
+	{ }
+
+	Self withDevice(const Device& newDev) const {
+		return {
+			newDev,
+			fixed_block_locations,
+			anchor_locations,
+			nThreads
+		};
+	}
+
+	Self withFixedBlockLocations(const FixedBlockLocations& newFBL) const {
+		return {
+			dev,
+			newFBL,
+			anchor_locations,
+			nThreads
+		};
+	}
+
+	Self withAnchorLocations(const AnchorLocations& newALoc) const {
+		return {
+			dev,
+			fixed_block_locations,
+			newALoc,
+			nThreads
+		};
+	}
+
+	const AnchorLocations& anchor_locations;
+};
+
+#define DECLARE_USING_APLFLOWBASE_MEMBERS(...) \
+	using __VA_ARGS__::APLFlowBase; \
+	using __VA_ARGS__::anchor_locations; \
+
+
+
 template<typename Device, typename FixedBlockLocations>
-struct SimpleCliqueSolveFlow : public FlowBase<Device, FixedBlockLocations> {
-	DECLARE_USING_FLOBASE_MEMBERS(Device, FixedBlockLocations)
+struct SimpleCliqueSolveFlow : public APLFlowBase<SimpleCliqueSolveFlow<Device, FixedBlockLocations>, Device, FixedBlockLocations> {
+	DECLARE_USING_FLOWBASE_MEMBERS(SimpleCliqueSolveFlow, APLFlowBase<SimpleCliqueSolveFlow, Device, FixedBlockLocations>)
+	DECLARE_USING_APLFLOWBASE_MEMBERS(APLFlowBase<SimpleCliqueSolveFlow, Device, FixedBlockLocations>)
 
 	SimpleCliqueSolveFlow(const SimpleCliqueSolveFlow&) = default;
 	SimpleCliqueSolveFlow(SimpleCliqueSolveFlow&&) = default;
-	SimpleCliqueSolveFlow(FlowBase<Device, FixedBlockLocations>&& fb) : FlowBase<Device, FixedBlockLocations>(std::move(fb)) { }
-	SimpleCliqueSolveFlow(const FlowBase<Device, FixedBlockLocations>& fb) : FlowBase<Device, FixedBlockLocations>(fb) { }
 
 	auto flow_main(
 		const std::vector<std::vector<device::AtomID>>& net_members
@@ -27,7 +120,7 @@ struct SimpleCliqueSolveFlow : public FlowBase<Device, FixedBlockLocations> {
 
 		const auto& result = apl::exact_solution(
 			net_members,
-			fixed_block_locations,
+			anchor_locations,
 			dev,
 			[&](const device::AtomID& a1, const device::AtomID& a2, const auto& net_size) {
 				(void)a1; (void)a2;
@@ -45,6 +138,7 @@ struct SimpleCliqueSolveFlow : public FlowBase<Device, FixedBlockLocations> {
 		const auto graphics_keeper = graphics::get().fpga().pushPlacingState(
 			net_members,
 			fixed_block_locations,
+			anchor_locations,
 			result,
 			true
 		);
@@ -55,13 +149,12 @@ struct SimpleCliqueSolveFlow : public FlowBase<Device, FixedBlockLocations> {
 };
 
 template<typename Device, typename FixedBlockLocations>
-struct CliqueAndSpreadFLow : public FlowBase<Device, FixedBlockLocations> {
-	DECLARE_USING_FLOBASE_MEMBERS(Device, FixedBlockLocations)
+struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, FixedBlockLocations>, Device, FixedBlockLocations> {
+	DECLARE_USING_FLOWBASE_MEMBERS(CliqueAndSpreadFLow, APLFlowBase<CliqueAndSpreadFLow, Device, FixedBlockLocations>)
+	DECLARE_USING_APLFLOWBASE_MEMBERS(APLFlowBase<CliqueAndSpreadFLow, Device, FixedBlockLocations>)
 
 	CliqueAndSpreadFLow(const CliqueAndSpreadFLow&) = default;
 	CliqueAndSpreadFLow(CliqueAndSpreadFLow&&) = default;
-	CliqueAndSpreadFLow(FlowBase<Device, FixedBlockLocations>&& fb) : FlowBase<Device, FixedBlockLocations>(std::move(fb)) { }
-	CliqueAndSpreadFLow(const FlowBase<Device, FixedBlockLocations>& fb) : FlowBase<Device, FixedBlockLocations>(fb) { }
 
 	template<typename ShouldStop>
 	auto flow_main(
@@ -71,7 +164,7 @@ struct CliqueAndSpreadFLow : public FlowBase<Device, FixedBlockLocations> {
 		const auto indent = dout(DL::INFO).indentWithTitle("Clique And Spread Flow");
 		using AtomID = device::AtomID;
 
-		auto current_fixed_block_locations = fixed_block_locations; // copy
+		auto current_anchor_locations = anchor_locations; // copy
 		auto current_net_members = net_members; // copy
 		auto current_bb = dev.info().bounds(); // copy
 
@@ -82,9 +175,9 @@ struct CliqueAndSpreadFLow : public FlowBase<Device, FixedBlockLocations> {
 				break;
 			}
 
-			const auto current_result = SimpleCliqueSolveFlow<Device, FixedBlockLocations>(
-					withFixedBlockLocations(current_fixed_block_locations)
-				).flow_main(current_net_members);
+			const auto current_result = SimpleCliqueSolveFlow<Device, FixedBlockLocations>(*this)
+				.withAnchorLocations(current_anchor_locations)
+				.flow_main(current_net_members);
 
 			const auto centroid = [&]() {
 				std::vector<decltype(begin(current_result))> x_order;
@@ -110,12 +203,19 @@ struct CliqueAndSpreadFLow : public FlowBase<Device, FixedBlockLocations> {
 				atom_id_gen
 			);
 
+			{const auto indent = dout(DL::INFO).indentWithTitle("New Assignments");
 			for (const auto new_net : assignments.new_nets) {
 				dout(DL::INFO) << new_net[0] << " -> " << new_net[1] << '\n';
-			}
+			}}
+
+			{ const auto indent = dout(DL::APL_D1).indentWithTitle("New Anchors");
+			for (const auto id_and_loc : assignments.new_anchor_locations) {
+				dout(DL::APL_D1) << id_and_loc.first << " @ " << id_and_loc.second << '\n';
+			}}
+
 
 			std::move(begin(assignments.new_nets), end(assignments.new_nets), std::back_inserter(current_net_members));
-			std::move(begin(assignments.new_fixed_blocks), end(assignments.new_fixed_blocks), std::inserter(current_fixed_block_locations, end(current_fixed_block_locations)));
+			std::move(begin(assignments.new_anchor_locations), end(assignments.new_anchor_locations), std::inserter(current_anchor_locations, end(current_anchor_locations)));
 		}
 	}
 
@@ -153,20 +253,10 @@ struct CliqueAndSpreadFLow : public FlowBase<Device, FixedBlockLocations> {
 
 		struct Result {
 			std::vector<std::vector<AtomID>> new_nets{};
-			std::vector<std::pair<AtomID,device::BlockID>> new_fixed_blocks{};
+			std::vector<std::pair<AtomID, geom::Point<double>>> new_anchor_locations{};
 		} result;
 
-		{ const auto indent = dout(DL::APL_D1).indentWithTitle("Quadrant Centroids");
-		for (const auto& id_and_loc : anchor_ids_and_locs) {
-			dout(DL::APL_D1) << id_and_loc.first << " @ " << id_and_loc.second << '\n';
-			result.new_fixed_blocks.emplace_back(
-				id_and_loc.first,
-				util::make_id<device::BlockID>(
-					util::make_id<device::XID>((short)id_and_loc.second.x()),
-					util::make_id<device::YID>((short)id_and_loc.second.y())
-				)
-			);
-		}}
+		std::copy(begin(anchor_ids_and_locs), end(anchor_ids_and_locs), std::back_inserter(result.new_anchor_locations));
 
 		for (const auto& atom_and_loc : moveable_atom_locations) {
 			const auto& anchor_id = quadrant_for(atom_and_loc.second).first;
@@ -200,6 +290,7 @@ void simple_clique_solve(
 	SimpleCliqueSolveFlow<std::decay_t<decltype(device)>, std::decay_t<decltype(fixed_block_locations)>>(
 		device,
 		fixed_block_locations,
+		convert_to_points<std::unordered_map<device::AtomID, geom::Point<double>>>(fixed_block_locations),
 		1
 	).flow_main(
 		net_members
@@ -215,6 +306,7 @@ void clique_and_spread(
 	CliqueAndSpreadFLow<std::decay_t<decltype(device)>, std::decay_t<decltype(fixed_block_locations)>>(
 		device,
 		fixed_block_locations,
+		convert_to_points<std::unordered_map<device::AtomID, geom::Point<double>>>(fixed_block_locations),
 		1
 	).flow_main(
 		net_members,
