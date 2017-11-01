@@ -147,7 +147,7 @@ struct SimpleCliqueSolveFlow : public APLFlowBase<SimpleCliqueSolveFlow<Device, 
 			fixed_block_locations,
 			anchor_locations,
 			result,
-			true
+			false
 		);
 		graphics::get().waitForPress();
 
@@ -169,6 +169,13 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 		ShouldStop&& should_stop
 	) const {
 		const auto indent = dout(DL::INFO).indentWithTitle("Clique And Spread Flow");
+		const auto graphics_keeper = graphics::get().fpga().pushPlacingState(
+			{},
+			fixed_block_locations,
+			{},
+			{},
+			true
+		);
 		using AtomID = device::AtomID;
 
 		auto current_anchor_locations = anchor_locations; // copy
