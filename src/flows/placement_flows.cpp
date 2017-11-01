@@ -113,8 +113,18 @@ struct SimpleCliqueSolveFlow : public APLFlowBase<SimpleCliqueSolveFlow<Device, 
 	SimpleCliqueSolveFlow(const SimpleCliqueSolveFlow&) = default;
 	SimpleCliqueSolveFlow(SimpleCliqueSolveFlow&&) = default;
 
+	struct SimpleCliqueWeighter {
+		template<typename T>
+		auto operator() (const device::AtomID& a1, const device::AtomID& a2, const T& net_size) {
+			(void)a1; (void)a2;
+			return 2.0/(double)net_size;
+		}
+	};
+
+	template<typename Weighter = SimpleCliqueWeighter>
 	auto flow_main(
-		const std::vector<std::vector<device::AtomID>>& net_members
+		const std::vector<std::vector<device::AtomID>>& net_members,
+		Weighter weighter = Weighter()
 	) const {
 		const auto indent = dout(DL::INFO).indentWithTitle("Simple Clique Solve Flow");
 
@@ -122,10 +132,7 @@ struct SimpleCliqueSolveFlow : public APLFlowBase<SimpleCliqueSolveFlow<Device, 
 			net_members,
 			anchor_locations,
 			dev,
-			[&](const device::AtomID& a1, const device::AtomID& a2, const auto& net_size) {
-				(void)a1; (void)a2;
-				return 2.0/(double)net_size;
-			}
+			weighter
 		);
 
 		if (dout(DL::APL_D2).enabled()) {
