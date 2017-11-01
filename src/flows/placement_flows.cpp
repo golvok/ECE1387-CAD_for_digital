@@ -179,7 +179,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				.withAnchorLocations(current_anchor_locations)
 				.flow_main(current_net_members);
 
-			const auto centroid = [&]() {
+			const auto anchor_infos = [&]() {
 				std::vector<decltype(begin(current_result))> x_order;
 				for (auto it = begin(current_result); it != end(current_result); ++it) {
 					x_order.push_back(it);
@@ -193,73 +193,85 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 					return lhs->second.y() < rhs->second.y();
 				});
 
-				return geom::make_point(x_order[x_order.size()/2]->second.x(), y_order[y_order.size()/2]->second.y());
+				int current_num_divisions = 1 << (num_spreadings+1);
+
+				std::vector<std::vector<geom::Point<double>>> boundary_intersections(current_num_divisions + 1);
+				for (int i = 0; i <= current_num_divisions; ++i) {
+					for (int j = 0; j <= current_num_divisions; ++j) {
+						boundary_intersections.at(i).push_back(geom::make_point(
+							x_order[(i*(x_order.size()-1))/current_num_divisions]->second.x(),
+							y_order[(j*(y_order.size()-1))/current_num_divisions]->second.y()
+						));
+					}
+				}
+
+				struct AnchorInfo {
+					geom::Point<double> corresp_centroid;
+					AtomID id;
+					geom::Point<double> anchor_location;
+				};
+
+				std::vector<AnchorInfo> result;
+				for (int i = 0; i < current_num_divisions; ++i) {
+					for (int j = 0; j < current_num_divisions; ++j) {
+						result.emplace_back(AnchorInfo{
+							geom::make_bound_box<double>(
+								boundary_intersections.at(i).at(j),
+								boundary_intersections.at(i+1).at(j+1)
+							).get_center(),
+							atom_id_gen.gen_id(),
+							geom::Point<double>(current_bb.min_point()) + geom::make_point(
+								(double)current_bb.get_width()  * ((double)i + 0.5)/(double)current_num_divisions,
+								(double)current_bb.get_height() * ((double)j + 0.5)/(double)current_num_divisions
+							)
+						});
+					}
+				}
+				return result;
 			}();
 
 			auto assignments = assign_to_quadrants(
-				current_bb,
-				centroid,
-				current_result,
-				atom_id_gen
+				anchor_infos,
+				current_result
 			);
 
 			{const auto indent = dout(DL::APL_D3).indentWithTitle("New Assignments");
 			for (const auto new_net : assignments.new_nets) {
-				dout(DL::APL_D2) << new_net[0] << " -> " << new_net[1] << '\n';
+				dout(DL::APL_D3) << new_net[0] << " -> " << new_net[1] << '\n';
 			}}
 
 			{ const auto indent = dout(DL::APL_D1).indentWithTitle("New Anchors");
-			for (const auto id_and_loc : assignments.new_anchor_locations) {
-				dout(DL::APL_D1) << id_and_loc.first << " @ " << id_and_loc.second << '\n';
+			for (const auto anchor_info : anchor_infos) {
+				dout(DL::APL_D1) << anchor_info.id << " @ " << anchor_info.anchor_location << " <- " << anchor_info.corresp_centroid << '\n';
+				current_anchor_locations.emplace(
+					anchor_info.id,
+					anchor_info.anchor_location
+				);
 			}}
 
-
 			std::move(begin(assignments.new_nets), end(assignments.new_nets), std::back_inserter(current_net_members));
-			std::move(begin(assignments.new_anchor_locations), end(assignments.new_anchor_locations), std::inserter(current_anchor_locations, end(current_anchor_locations)));
 		}
 	}
 
-	template<typename AtomRange, typename AtomIDGen>
+	template<typename AnchorInfos, typename AtomRange>
 	static auto assign_to_quadrants(
-		geom::BoundBox<double> working_bounds,
-		geom::Point<double> centroid,
-		AtomRange&& moveable_atom_locations,
-		AtomIDGen&& atom_id_gen
+		AnchorInfos&& anchor_info,
+		AtomRange&& moveable_atom_locations
 	) {
 		using AtomID = device::AtomID;
 
-		std::array<std::pair<AtomID, geom::Point<double>>, 4> anchor_ids_and_locs{{
-			{ atom_id_gen.gen_id(), (working_bounds.get_center() + geom::Point<double>(working_bounds.max_point())     )/2.0 },
-			{ atom_id_gen.gen_id(), (working_bounds.get_center() + geom::Point<double>(working_bounds.minxmaxy_point()))/2.0 },
-			{ atom_id_gen.gen_id(), (working_bounds.get_center() + geom::Point<double>(working_bounds.min_point())     )/2.0 },
-			{ atom_id_gen.gen_id(), (working_bounds.get_center() + geom::Point<double>(working_bounds.maxxminy_point()))/2.0 },
-		}};
-
-		auto quadrant_for = [&](const auto& point) {
-			if (point.x() < centroid.x()) {
-				if (point.y() < centroid.y()) {
-					return anchor_ids_and_locs[2];
-				} else {
-					return anchor_ids_and_locs[1];
-				}
-			} else {
-				if (point.y() < centroid.y()) {
-					return anchor_ids_and_locs[3];
-				} else {
-					return anchor_ids_and_locs[0];
-				}
-			}
+		auto anchor_for = [&](const auto& point) {
+			return std::min_element(begin(anchor_info), end(anchor_info), [&](const auto& lhs, const auto& rhs) {
+				return distanceSquared(lhs.corresp_centroid, point) < distanceSquared(rhs.corresp_centroid, point);
+			})->id;
 		};
 
 		struct Result {
 			std::vector<std::vector<AtomID>> new_nets{};
-			std::vector<std::pair<AtomID, geom::Point<double>>> new_anchor_locations{};
 		} result;
 
-		std::copy(begin(anchor_ids_and_locs), end(anchor_ids_and_locs), std::back_inserter(result.new_anchor_locations));
-
 		for (const auto& atom_and_loc : moveable_atom_locations) {
-			const auto& anchor_id = quadrant_for(atom_and_loc.second).first;
+			const auto& anchor_id = anchor_for(atom_and_loc.second);
 
 			std::vector<AtomID> list = {atom_and_loc.first, anchor_id};
 			result.new_nets.emplace_back(std::move(list));
@@ -279,7 +291,7 @@ device::PlacementDevice make_default_device_description(const std::vector<std::v
 		}
 	}
 	const auto width = static_cast<int>(std::lround(std::ceil(std::sqrt(unique_atoms.size()))));
-	return device::PlacementDevice(device::PlacementDevice::Bounds(0, 0, width, width));
+	return device::PlacementDevice(device::PlacementDevice::Bounds(0, 0, width-1, width-1));
 }
 
 void simple_clique_solve(

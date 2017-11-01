@@ -204,6 +204,10 @@ auto add(Point<PRECISION> p1, Point<PRECISION2> p2) {
 	return make_point(p1.x() + p2.x(), p1.y() + p2.y());
 }
 template<typename PRECISION, typename PRECISION2>
+auto distanceSquared(Point<PRECISION> p1, Point<PRECISION2> p2) {
+	return pow(deltaX(p1, p2), 2) + pow(deltaY(p1, p2), 2);
+}
+template<typename PRECISION, typename PRECISION2>
 auto distance(Point<PRECISION> p1, Point<PRECISION2> p2) {
 	return sqrt(pow(deltaX(p1, p2), 2) + pow(deltaY(p1, p2), 2));
 }
@@ -455,6 +459,11 @@ public:
 template<typename PRECISION1, typename PRECISION2>
 bool operator==(const BoundBox<PRECISION1>& b1, const BoundBox<PRECISION2>& b2) {
 	return b1.min_point() == b2.min_point() && b1.max_point() == b2.max_point();
+}
+
+template<typename PRECISION, typename... ARGS>
+auto make_bound_box(ARGS&&... args) {
+	return BoundBox<PRECISION>(std::forward<ARGS>(args)...);
 }
 
 } // end namespace geom
