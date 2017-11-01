@@ -128,7 +128,7 @@ struct SimpleCliqueSolveFlow : public APLFlowBase<SimpleCliqueSolveFlow<Device, 
 			}
 		);
 
-		if (dout(DL::APL_D1).enabled()) {
+		if (dout(DL::APL_D2).enabled()) {
 			{const auto indent = dout(DL::APL_D1).indentWithTitle("Solution");
 				util::print_assoc_container(result, dout(DL::APL_D1));
 				dout(DL::APL_D1) << '\n';
@@ -203,9 +203,9 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				atom_id_gen
 			);
 
-			{const auto indent = dout(DL::INFO).indentWithTitle("New Assignments");
+			{const auto indent = dout(DL::APL_D3).indentWithTitle("New Assignments");
 			for (const auto new_net : assignments.new_nets) {
-				dout(DL::INFO) << new_net[0] << " -> " << new_net[1] << '\n';
+				dout(DL::APL_D2) << new_net[0] << " -> " << new_net[1] << '\n';
 			}}
 
 			{ const auto indent = dout(DL::APL_D1).indentWithTitle("New Anchors");

@@ -107,43 +107,43 @@ std::unordered_map<device::AtomID, geom::Point<double>> exact_solution(
 	}
 	col_starts.push_back(col_start); // need to tell it the end
 
-	if (dout(DL::APL_D2).enabled()) {
-		{const auto indent = dout(DL::APL_D2).indentWithTitle("Matrix & RHS For Solving");
+	if (dout(DL::APL_D4).enabled()) {
+		{const auto indent = dout(DL::APL_D4).indentWithTitle("Matrix & RHS For Solving");
 		for (int irow = 0; irow < (int)movable_atom_row.size(); ++irow) {
-			dout(DL::APL_D2) << std::find_if(begin(movable_atom_row), end(movable_atom_row), [&](const auto& elem) {
+			dout(DL::APL_D4) << std::find_if(begin(movable_atom_row), end(movable_atom_row), [&](const auto& elem) {
 				return elem.second == irow;
 			})->first << "\t|";
 			for (int icol = 0; icol < (int)movable_atom_row.size(); ++icol) {
 				const auto lookup = weight_matrix_columns[icol].find(irow);
 				if (lookup == end(weight_matrix_columns[icol])) {
-					dout(DL::APL_D2) << 0.0 << '\t';
+					dout(DL::APL_D4) << 0.0 << '\t';
 				} else {
-					dout(DL::APL_D2) << lookup->second << '\t';
+					dout(DL::APL_D4) << lookup->second << '\t';
 				}
 			}
-			dout(DL::APL_D2) << "| x_" << irow << "\t| = | " << right_hand_side.x[irow]
+			dout(DL::APL_D4) << "| x_" << irow << "\t| = | " << right_hand_side.x[irow]
 			           << "\t\t| y_" << irow << "\t| = | " << right_hand_side.y[irow] << '\n';
 		}}
-		{const auto indent = dout(DL::APL_D2).indentWithTitle("Data for UMFPACK");
-			{const auto indent = dout(DL::APL_D2).indentWithTitle("Column Starts");
-				util::print_container(col_starts, dout(DL::APL_D2));
-				dout(DL::APL_D2) << '\n';
+		{const auto indent = dout(DL::APL_D4).indentWithTitle("Data for UMFPACK");
+			{const auto indent = dout(DL::APL_D4).indentWithTitle("Column Starts");
+				util::print_container(col_starts, dout(DL::APL_D4));
+				dout(DL::APL_D4) << '\n';
 			}
-			{const auto indent = dout(DL::APL_D2).indentWithTitle("Row Numbers");
-				util::print_container(rows_numbers, dout(DL::APL_D2));
-				dout(DL::APL_D2) << '\n';
+			{const auto indent = dout(DL::APL_D4).indentWithTitle("Row Numbers");
+				util::print_container(rows_numbers, dout(DL::APL_D4));
+				dout(DL::APL_D4) << '\n';
 			}
-			{const auto indent = dout(DL::APL_D2).indentWithTitle("Values");
-				util::print_container(values, dout(DL::APL_D2));
-				dout(DL::APL_D2) << '\n';
+			{const auto indent = dout(DL::APL_D4).indentWithTitle("Values");
+				util::print_container(values, dout(DL::APL_D4));
+				dout(DL::APL_D4) << '\n';
 			}
-			{const auto indent = dout(DL::APL_D2).indentWithTitle("RHS X Values");
-				util::print_container(right_hand_side.x, dout(DL::APL_D2));
-				dout(DL::APL_D2) << '\n';
+			{const auto indent = dout(DL::APL_D4).indentWithTitle("RHS X Values");
+				util::print_container(right_hand_side.x, dout(DL::APL_D4));
+				dout(DL::APL_D4) << '\n';
 			}
-			{const auto indent = dout(DL::APL_D2).indentWithTitle("RHS Y Values");
-				util::print_container(right_hand_side.y, dout(DL::APL_D2));
-				dout(DL::APL_D2) << '\n';
+			{const auto indent = dout(DL::APL_D4).indentWithTitle("RHS Y Values");
+				util::print_container(right_hand_side.y, dout(DL::APL_D4));
+				dout(DL::APL_D4) << '\n';
 			}
 		}
 	}
