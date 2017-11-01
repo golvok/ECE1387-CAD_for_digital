@@ -184,7 +184,19 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 
 			const auto current_result = SimpleCliqueSolveFlow<Device, FixedBlockLocations>(*this)
 				.withAnchorLocations(current_anchor_locations)
-				.flow_main(current_net_members);
+				.flow_main(
+					current_net_members,
+					[&] (const device::AtomID& a1, const device::AtomID& a2, const auto& net_size) {
+						if (
+							(current_anchor_locations.find(a1) != end(current_anchor_locations) && this->fixed_block_locations.find(a1) == end(fixed_block_locations))
+							|| (current_anchor_locations.find(a2) != end(current_anchor_locations) && this->fixed_block_locations.find(a2) == end(fixed_block_locations))
+						) {
+							return 5.0;
+						} else {
+							return 2.0/(double)net_size;
+						}
+					}
+				);
 
 			const auto anchor_infos = [&]() {
 				std::vector<decltype(begin(current_result))> x_order;
