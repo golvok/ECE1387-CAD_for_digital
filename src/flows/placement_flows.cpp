@@ -590,7 +590,7 @@ struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLoc
 
 			boost::optional<BlockPoint> best_point;
 			{
-				double best_point_metric;
+				double best_point_metric = std::numeric_limits<double>::max();
 
 				for (const auto& test_point : points) {
 					if (valid_and_empty(test_point)) {
