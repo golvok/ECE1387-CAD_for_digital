@@ -215,7 +215,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 
 						if (anchor) {
 							const auto& agen = anchor_generation.at(anchor.get());
-							return 10.0 * std::pow(1.5, agen) * std::pow(2, agen - num_spreadings);
+							return 10.0 * std::pow(1.05, 2*agen) * std::pow(2, agen - num_spreadings);
 						} else {
 							return 2.0/(double)net_size;
 						}
