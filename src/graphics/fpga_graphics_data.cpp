@@ -313,7 +313,7 @@ void drawPlacementData(const graphics::detail::FPGAGraphicsDataState_Placement& 
 		graphics::drawtext_in(block_bounds.at(block) + graphics::t_point(0.0f, -0.1f), util::stringify_through_stream(id));
 	}
 
-	if (LOD_screen_area_test(graphics::t_bound_box(0.0f, 0.0f, 0.1f, 0.1f), 5000.0f)) {
+	if (LOD_screen_area_test(graphics::t_bound_box(0.0f, 0.0f, 0.1f, 0.1f), 50.0f)) {
 		for (const auto& id_and_point : data.nonmoveableBlockLocations()) {
 			const auto& id = id_and_point.first;
 			const auto point = location_of(id);
