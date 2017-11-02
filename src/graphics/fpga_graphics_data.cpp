@@ -325,11 +325,18 @@ void drawPlacementData(const graphics::detail::FPGAGraphicsDataState_Placement& 
 		}
 	}
 
-	graphics::setcolor(0x00, 0x00, 0x00);
 	for (const auto& net : data.netMembers()) {
 		for (const auto& atom : net) {
 			for (const auto& atom2 : net) {
 				if (atom != atom2) {
+					if (
+						data.nonmoveableBlockLocations().find(atom) == end(data.nonmoveableBlockLocations())
+						&& data.nonmoveableBlockLocations().find(atom) == end(data.nonmoveableBlockLocations())
+					) {
+						graphics::setcolor(0x00, 0x00, 0x00);
+					} else {
+						graphics::setcolor(0x66, 0x66, 0x66);
+					}
 					const auto p = location_of(atom);
 					const auto p2 = location_of(atom2);
 					drawline(p, p2);
