@@ -394,7 +394,13 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 	) const {
 		using AtomID = device::AtomID;
 
-		int current_num_divisions = std::min(1 << (num_spreadings+1), dev.info().bounds().get_width() + 1);
+		int current_num_divisions = 1;
+		for (int i = 0; i <= num_spreadings; ++i) {
+			current_num_divisions *= 2;
+			if (current_num_divisions > 2 * (dev.info().bounds().get_width() + 1)) {
+				break;
+			}
+		}
 		const bool snap_to_grid = current_num_divisions == dev.info().bounds().get_width();
 
 		struct Division {
