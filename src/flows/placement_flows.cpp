@@ -396,7 +396,6 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 
 		int current_num_divisions = std::min(1 << (num_spreadings+1), dev.info().bounds().get_width() + 1);
 		const bool snap_to_grid = current_num_divisions == dev.info().bounds().get_width();
-		(void)snap_to_grid;
 
 		struct Division {
 			geom::BoundBox<double> bb;
@@ -416,21 +415,33 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 					next_divisions.emplace_back(div);
 				} else {
 					did_a_division = true;
+					// TODO if snapping, adjust proportions
 					auto centroid = compute_centroid_of_atoms_in(
 						moveable_atom_locations,
 						div.bb
 					);
 					if (centroid) {
-						for (const auto& subdiv_bb_and_index_offset : {
-							std::make_pair( geom::BoundBox<double>(*centroid, div.bb.max_point()), geom::Point<int>(1,1) ),
-							std::make_pair( geom::BoundBox<double>(*centroid, div.bb.minxmaxy_point()), geom::Point<int>(0,1) ),
-							std::make_pair( geom::BoundBox<double>(*centroid, div.bb.min_point()), geom::Point<int>(0,0) ),
-							std::make_pair( geom::BoundBox<double>(*centroid, div.bb.maxxminy_point()), geom::Point<int>(1,0) ),
+						auto snapped_centroid = *centroid;
+						// if (snap_to_grid) {
+						// 	snapped_centroid = geom::Point<int>(snapped_centroid);
+						// }
+						(void) snap_to_grid;
+						struct Subdiv{
+							geom::BoundBox<double> bb;
+							geom::Point<int> index_offset;
+							bool round_up;
+						};
+						for (const auto& subdiv : {
+							Subdiv{ {snapped_centroid, div.bb.max_point()     }, {1,1} , true  },
+							Subdiv{ {snapped_centroid, div.bb.minxmaxy_point()}, {0,1} , true },
+							Subdiv{ {snapped_centroid, div.bb.min_point()     }, {0,0} , false  },
+							Subdiv{ {snapped_centroid, div.bb.maxxminy_point()}, {1,0} , false },
 						}) {
+							int num_subdiv_adjustment = (div.num_subdiv % 2 != 0 && subdiv.round_up) ? 1 : 0;
 							next_divisions.emplace_back(Division{
-								subdiv_bb_and_index_offset.first,
-								div.num_subdiv/2,
-								div.index*2 + subdiv_bb_and_index_offset.second
+								subdiv.bb,
+								div.num_subdiv/2 + num_subdiv_adjustment,
+								div.index*2 + subdiv.index_offset
 							});
 						}
 					}
