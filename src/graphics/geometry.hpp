@@ -213,11 +213,11 @@ auto add(Point<PRECISION> p1, Point<PRECISION2> p2) {
 	return make_point(p1.x() + p2.x(), p1.y() + p2.y());
 }
 template<typename PRECISION, typename PRECISION2>
-auto distanceSquared(Point<PRECISION> p1, Point<PRECISION2> p2) {
+double distanceSquared(Point<PRECISION> p1, Point<PRECISION2> p2) {
 	return pow(deltaX(p1, p2), 2) + pow(deltaY(p1, p2), 2);
 }
 template<typename PRECISION, typename PRECISION2>
-auto distance(Point<PRECISION> p1, Point<PRECISION2> p2) {
+double distance(Point<PRECISION> p1, Point<PRECISION2> p2) {
 	return sqrt(pow(deltaX(p1, p2), 2) + pow(deltaY(p1, p2), 2));
 }
 template<typename PRECISION, typename PRECISION2>

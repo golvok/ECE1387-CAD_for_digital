@@ -30,3 +30,7 @@ SuiteSparse/**/*.a
 SuiteSparse/**/*.so*
 SuiteSparse/share/*
 SuiteSparse/lib/*
+
+SuiteSparse/*/Lib/*.o
+SuiteSparse/*/Lib/*.a
+SuiteSparse/*/Lib/*.so*

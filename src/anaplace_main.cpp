@@ -20,7 +20,7 @@ int program_main(const ProgramConfig& config);
 
 void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr);
 
-int main(int argc, char const** argv) {
+int main(int argc, char** argv) {
 
 	dout.setHighestTitleRank(7);
 

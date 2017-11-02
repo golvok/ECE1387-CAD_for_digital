@@ -30,7 +30,7 @@ struct MetaConfig {
 
 private:
 	friend struct ParsedArguments;
-	friend ParsedArguments parse(int arc_int, char const** argv);
+	friend ParsedArguments parse(int arc_int, char** argv);
 	
 	MetaConfig();
 
@@ -45,7 +45,7 @@ struct ProgramConfig {
 
 private:
 	friend struct ParsedArguments;
-	friend ParsedArguments parse(int arc_int, char const** argv);
+	friend ParsedArguments parse(int arc_int, char** argv);
 
 	ProgramConfig();
 
@@ -58,19 +58,19 @@ struct ParsedArguments {
 	const ProgramConfig& programConfig() const { return m_programConfig; }
 
 private:
-	friend ParsedArguments parse(int arc_int, char const** argv);
+	friend ParsedArguments parse(int arc_int, char** argv);
 
 	MetaConfig m_meta;
 	ProgramConfig m_programConfig;
 
-	ParsedArguments(int arc_int, char const** argv);
+	ParsedArguments(int arc_int, char** argv);
 };
 
 /**
  * call this function to parse and return a ParsedArguments object from the
  * arguments, which then can be queried about the various options.
  */ 
-ParsedArguments parse(int arc_int, char const** argv);
+ParsedArguments parse(int arc_int, char** argv);
 
 } // end namespace cmdargs
 

@@ -23,7 +23,7 @@ ProgramConfig::ProgramConfig()
 	, m_nThreads(2)
 { }
 
-ParsedArguments::ParsedArguments(int argc_int, char const** argv)
+ParsedArguments::ParsedArguments(int argc_int, char** argv)
 	: m_meta()
 	, m_programConfig()
 {
@@ -42,7 +42,7 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 
 	progopts.add_options()
 		("help,h", "print help message")
-		("circuit", po::value(&m_programConfig.m_dataFileName)->required(), "The circuit to use")
+		("circuit", po::value(&m_programConfig.m_dataFileName), "The circuit to use")
 		("num-threads", po::value(&m_programConfig.m_nThreads), "The maximum nuber of simultaneous threads to use")
 	;
 
@@ -60,6 +60,12 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 
 	po::notify(vm);
 
+	if (!vm.count("circuit")) {
+		util::print_and_throw<std::invalid_argument>([&](auto&& str) {
+			str << "`--curcuit <circuit>` is required";
+		});
+	}
+
 	if (vm.count("debug")) {
 		auto debug_levels = DebugLevel::getStandardDebug();
 		m_meta.levels_to_enable.insert(end(m_meta.levels_to_enable),begin(debug_levels),end(debug_levels));
@@ -73,7 +79,7 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 	});
 }
 
-ParsedArguments parse(int arc_int, char const** argv) {
+ParsedArguments parse(int arc_int, char** argv) {
 	return ParsedArguments(arc_int, argv);
 }
 
