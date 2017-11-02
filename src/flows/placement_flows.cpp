@@ -299,11 +299,11 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 			}
 
 			{const auto indent = dout(DL::INFO).indentWithTitle("Legalization Result");
-				util::print_assoc_container(legalization, dout(DL::INFO), "", "", "\n");
-				{const auto indent = dout(DL::INFO).indentWithTitle("Block Overusage");
+				util::print_assoc_container(legalization, dout(DL::APL_D1), "", "", "\n");
+				{const auto indent = dout(DL::APL_D2).indentWithTitle("Block Overusage");
 					for (const auto& block_and_usage : block_usage) {
 						if (block_and_usage.second > 1) {
-							dout(DL::INFO) << block_and_usage.first << " -> " << block_and_usage.second << '\n';
+							dout(DL::APL_D2) << block_and_usage.first << " -> " << block_and_usage.second << '\n';
 						}
 					}
 				}
