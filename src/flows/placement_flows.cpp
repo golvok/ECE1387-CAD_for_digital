@@ -310,7 +310,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				dout(DL::INFO) << "Atom-based overuse: " << overused_count << '/' << moveable_atom_locations.size() << " (" << 100.0*(double)overused_count/(double)moveable_atom_locations.size() << "%)\n";
 			}
 
-			auto assignments = assign_to_quadrants(
+			auto assignments = assign_to_anchors(
 				anchor_infos,
 				moveable_atom_locations
 			);
@@ -322,7 +322,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 
 			{ const auto indent = dout(DL::APL_D1).indentWithTitle("New Anchors");
 			for (const auto anchor_info : anchor_infos) {
-				dout(DL::APL_D1) << anchor_info.id << " @ " << anchor_info.anchor_location << " <- " << anchor_info.corresp_centroid << '\n';
+				dout(DL::APL_D1) << anchor_info.id << " @ " << anchor_info.anchor_location << " <- " << anchor_info.filter << '\n';
 				current_anchor_locations.emplace(
 					anchor_info.id,
 					anchor_info.anchor_location
@@ -348,18 +348,16 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 		}
 	}
 
-	template<typename MovableAtomLocations, typename Bounds, typename AtomIDGen>
-	auto compute_anchors(
-		MovableAtomLocations&& moveable_atom_locations,
-		int num_spreadings,
-		Bounds&& current_bb,
-		AtomIDGen&& atom_id_gen
-	) const {
-		using AtomID = device::AtomID;
-
+	template<typename MovableAtomLocations, typename Bounds>
+	static boost::optional<geom::Point<double>> compute_centroid_of_atoms_in(
+		const MovableAtomLocations& moveable_atom_locations,
+		const Bounds& bounds
+	) {
 		std::vector<decltype(begin(moveable_atom_locations))> x_order;
 		for (auto it = begin(moveable_atom_locations); it != end(moveable_atom_locations); ++it) {
-			x_order.push_back(it);
+			if (bounds.intersects(it->second)) {
+				x_order.push_back(it);
+			}
 		}
 		std::vector<decltype(begin(moveable_atom_locations))> y_order(x_order);
 
@@ -370,53 +368,112 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 			return lhs->second.y() < rhs->second.y();
 		});
 
-		int current_num_divisions = std::min(1 << (num_spreadings+1), dev.info().bounds().get_width() + 1);
+		if (x_order.size() == 0) {
+			return boost::none;
+		} else if (x_order.size() % 2 == 0) {
+			return geom::BoundBox<double>(
+				x_order[x_order.size()/2]->second.x(),
+				y_order[y_order.size()/2]->second.y(),
+				x_order[x_order.size()/2 + 1]->second.x(),
+				y_order[y_order.size()/2 + 1]->second.y()
+			).get_center();
+		} else {
+			return geom::Point<double>(
+				x_order[x_order.size()/2]->second.x(),
+				y_order[y_order.size()/2]->second.y()
+			);
+		}
+	}
 
-		std::vector<std::vector<geom::Point<double>>> boundary_intersections(current_num_divisions + 1);
-		for (int i = 0; i <= current_num_divisions; ++i) {
-			for (int j = 0; j <= current_num_divisions; ++j) {
-				boundary_intersections.at(i).push_back(geom::make_point(
-					x_order[(i*(x_order.size()-1))/current_num_divisions]->second.x(),
-					y_order[(j*(y_order.size()-1))/current_num_divisions]->second.y()
-				));
+	template<typename MovableAtomLocations, typename Bounds, typename AtomIDGen>
+	auto compute_anchors(
+		MovableAtomLocations&& moveable_atom_locations,
+		int num_spreadings,
+		Bounds&& current_bb,
+		AtomIDGen&& atom_id_gen
+	) const {
+		using AtomID = device::AtomID;
+
+		int current_num_divisions = std::min(1 << (num_spreadings+1), dev.info().bounds().get_width() + 1);
+		const bool snap_to_grid = current_num_divisions == dev.info().bounds().get_width();
+		(void)snap_to_grid;
+
+		struct Division {
+			geom::BoundBox<double> bb;
+			int num_subdiv;
+			geom::Point<int> index;
+		};
+
+		std::vector<Division> divisions{
+			Division{current_bb, current_num_divisions, {0,0}},
+		};
+
+		while (true) {
+			std::vector<Division> next_divisions;
+			bool did_a_division = false;
+			for (const auto& div : divisions) {
+				if (div.num_subdiv == 1) {
+					next_divisions.emplace_back(div);
+				} else {
+					did_a_division = true;
+					auto centroid = compute_centroid_of_atoms_in(
+						moveable_atom_locations,
+						div.bb
+					);
+					if (centroid) {
+						for (const auto& subdiv_bb_and_index_offset : {
+							std::make_pair( geom::BoundBox<double>(*centroid, div.bb.max_point()), geom::Point<int>(1,1) ),
+							std::make_pair( geom::BoundBox<double>(*centroid, div.bb.minxmaxy_point()), geom::Point<int>(0,1) ),
+							std::make_pair( geom::BoundBox<double>(*centroid, div.bb.min_point()), geom::Point<int>(0,0) ),
+							std::make_pair( geom::BoundBox<double>(*centroid, div.bb.maxxminy_point()), geom::Point<int>(1,0) ),
+						}) {
+							next_divisions.emplace_back(Division{
+								subdiv_bb_and_index_offset.first,
+								div.num_subdiv/2,
+								div.index*2 + subdiv_bb_and_index_offset.second
+							});
+						}
+					}
+				}
+			}
+			
+			if (!did_a_division) {
+				break;
+			} else {
+				divisions = std::move(next_divisions);
 			}
 		}
 
 		struct AnchorInfo {
-			geom::Point<double> corresp_centroid;
+			geom::BoundBox<double> filter;
 			AtomID id;
 			geom::Point<double> anchor_location;
 		};
 
 		std::vector<AnchorInfo> result;
-		for (int i = 0; i < current_num_divisions; ++i) {
-			for (int j = 0; j < current_num_divisions; ++j) {
-				result.emplace_back(AnchorInfo{
-					geom::make_bound_box<double>(
-						boundary_intersections.at(i).at(j),
-						boundary_intersections.at(i+1).at(j+1)
-					).get_center(),
-					atom_id_gen.gen_id(),
-					geom::Point<double>(current_bb.min_point()) + geom::make_point(
-						(double)current_bb.get_width()  * ((double)i + 0.5)/(double)current_num_divisions,
-						(double)current_bb.get_height() * ((double)j + 0.5)/(double)current_num_divisions
-					)
-				});
-			}
+		for (const auto& div : divisions) {
+			result.emplace_back(AnchorInfo{
+				div.bb,
+				atom_id_gen.gen_id(),
+				geom::Point<double>(current_bb.min_point()) + geom::make_point(
+					(double)current_bb.get_width()  * ((double)div.index.x() + 0.5)/(double)current_num_divisions,
+					(double)current_bb.get_height() * ((double)div.index.y() + 0.5)/(double)current_num_divisions
+				)
+			});
 		}
 		return result;
 	}
 
 	template<typename AnchorInfos, typename AtomRange>
-	static auto assign_to_quadrants(
+	static auto assign_to_anchors(
 		AnchorInfos&& anchor_info,
 		AtomRange&& moveable_atom_locations
 	) {
 		using AtomID = device::AtomID;
 
 		auto anchor_for = [&](const auto& point) {
-			return std::min_element(begin(anchor_info), end(anchor_info), [&](const auto& lhs, const auto& rhs) {
-				return distanceSquared(lhs.corresp_centroid, point) < distanceSquared(rhs.corresp_centroid, point);
+			return std::find_if(begin(anchor_info), end(anchor_info), [&](const auto& elem) {
+				return elem.filter.intersects(point);
 			})->id;
 		};
 
