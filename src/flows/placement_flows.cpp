@@ -199,7 +199,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				break;
 			}
 
-			const auto current_result = SimpleCliqueSolveFlow<Device, FixedBlockLocations>(*this)
+			const auto moveable_atom_locations = SimpleCliqueSolveFlow<Device, FixedBlockLocations>(*this)
 				.withAnchorLocations(current_anchor_locations)
 				.flow_main(
 					current_net_members,
@@ -222,11 +222,11 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				);
 
 			const auto anchor_infos = [&]() {
-				std::vector<decltype(begin(current_result))> x_order;
-				for (auto it = begin(current_result); it != end(current_result); ++it) {
+				std::vector<decltype(begin(moveable_atom_locations))> x_order;
+				for (auto it = begin(moveable_atom_locations); it != end(moveable_atom_locations); ++it) {
 					x_order.push_back(it);
 				}
-				std::vector<decltype(begin(current_result))> y_order(x_order);
+				std::vector<decltype(begin(moveable_atom_locations))> y_order(x_order);
 
 				std::sort(begin(x_order), end(x_order), [&](auto& lhs, auto& rhs) {
 					return lhs->second.x() < rhs->second.x();
@@ -273,7 +273,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 			}();
 
 			auto legalization = LegalizationFlow<Device, FixedBlockLocations>(*this).flow_main(
-				current_result
+				moveable_atom_locations
 			);
 
 			std::unordered_map<BlockID, int> usages;
@@ -292,12 +292,12 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				util::print_assoc_container(legalization, dout(DL::INFO), "", "", "\n");
 				{const auto indent = dout(DL::INFO).indentWithTitle("Block Usage");
 				util::print_assoc_container(usages, dout(DL::INFO), "", "", "\n");}
+				dout(DL::INFO) << "Atom-based overuse: " << overused_count << '/' << moveable_atom_locations.size() << '\n';
 			}
-			dout(DL::INFO) << "Atom-based overuse: " << overused_count << '/' << current_result.size() << '\n';
 
 			auto assignments = assign_to_quadrants(
 				anchor_infos,
-				current_result
+				moveable_atom_locations
 			);
 
 			{const auto indent = dout(DL::APL_D3).indentWithTitle("New Assignments");
