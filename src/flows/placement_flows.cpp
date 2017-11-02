@@ -29,7 +29,7 @@ Points convert_to_points(const BlockLocations& bl) {
 }
 
 template<typename MovableAtomLocations, typename FixedBlockLocations, typename NetMembers>
-double comput_hpbb_wirelength(
+double compute_hpbb_wirelength(
 	MovableAtomLocations&& moveable_atom_locations,
 	FixedBlockLocations&& fixed_block_locations,
 	NetMembers&& net_members
@@ -186,7 +186,7 @@ struct SimpleCliqueSolveFlow : public APLFlowBase<SimpleCliqueSolveFlow<Device, 
 			weighter
 		);
 
-		dout(DL::INFO) << "HPBB WireLength = " << comput_hpbb_wirelength(
+		dout(DL::INFO) << "HPBB WireLength = " << compute_hpbb_wirelength(
 			result,
 			fixed_block_locations,
 			net_members
@@ -307,7 +307,13 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 						}
 					}
 				}
+				std::unordered_map<AtomID, geom::Point<double>> legalization_atom_locations;
+				std::transform(begin(legalization), end(legalization), std::inserter(legalization_atom_locations, end(legalization_atom_locations)), [&](const auto& block_and_atom) {
+					return std::make_pair(block_and_atom.second, block_and_atom.first.template asPoint<geom::Point<double>>());
+				});
+				dout(DL::INFO) << "Legalized HPBB WireLength = " << compute_hpbb_wirelength(legalization_atom_locations, fixed_block_locations, net_members) << '\n';
 				dout(DL::INFO) << "Atom-based overuse: " << overused_count << '/' << moveable_atom_locations.size() << " (" << 100.0*(double)overused_count/(double)moveable_atom_locations.size() << "%)\n";
+
 			}
 
 			auto assignments = assign_to_anchors(
