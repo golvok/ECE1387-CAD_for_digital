@@ -28,6 +28,52 @@ Points convert_to_points(const BlockLocations& bl) {
 	return result;
 }
 
+template<typename MovableAtomLocations, typename FixedBlockLocations, typename NetMembers>
+double comput_hpbb_wirelength(
+	MovableAtomLocations&& moveable_atom_locations,
+	FixedBlockLocations&& fixed_block_locations,
+	NetMembers&& net_members
+) {
+	auto location_of = [&](const auto& atom) -> boost::optional<geom::Point<double>> {
+		const auto movable_result = moveable_atom_locations.find(atom);
+		if (movable_result != end(moveable_atom_locations)) {
+			return movable_result->second;
+		} else {
+			const auto fixed_block_lookup = fixed_block_locations.find(atom);
+			if (fixed_block_lookup != end(fixed_block_locations)) {
+				return fixed_block_lookup->second.template asPoint<geom::Point<double>>();
+			} else {
+				return boost::none;
+			}
+		}
+	};
+
+	double total = 0;
+
+	for (const auto& net : net_members) {
+		boost::optional<geom::BoundBox<double>> net_bounds;
+		for (const auto& atom : net) {
+			const auto& loc = location_of(atom);
+			if (loc) {
+				if (net_bounds) {
+					net_bounds->maxx() = std::max(net_bounds->maxx(), loc->x());
+					net_bounds->minx() = std::min(net_bounds->minx(), loc->x());
+					net_bounds->maxy() = std::max(net_bounds->maxy(), loc->y());
+					net_bounds->miny() = std::min(net_bounds->miny(), loc->y());
+				} else {
+					net_bounds = geom::BoundBox<double>(*loc, *loc);
+				}
+			}
+		}
+
+		if (net_bounds) {
+			total += net_bounds->get_width() + net_bounds->get_height();
+		}
+	}
+
+	return total;
+}
+
 // forward declations
 template<typename Device, typename FixedBlockLocations>
 struct LegalizationFlow;
@@ -138,6 +184,12 @@ struct SimpleCliqueSolveFlow : public APLFlowBase<SimpleCliqueSolveFlow<Device, 
 			anchor_locations,
 			dev,
 			weighter
+		);
+
+		dout(DL::INFO) << "HPBB WireLength = " << comput_hpbb_wirelength(
+			result,
+			fixed_block_locations,
+			net_members
 		);
 
 		if (dout(DL::APL_D2).enabled()) {
