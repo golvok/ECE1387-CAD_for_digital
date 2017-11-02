@@ -335,24 +335,23 @@ public:
 		, maxpoint(src.max_point())
 	{ }
 
-	BoundBox(PRECISION minx, PRECISION miny, PRECISION maxx, PRECISION maxy)
-		: minpoint(minx,miny)
-		, maxpoint(maxx,maxy)
+	BoundBox(PRECISION x1, PRECISION y1, PRECISION x2, PRECISION y2)
+		: minpoint(std::min(x1,x2), std::min(y1, y2))
+		, maxpoint(std::max(x1,x2), std::max(y1, y2))
 	{ }
 
 	template<typename THEIR_PRECISION, typename THEIR_PRECISION2>
-	BoundBox(const Point<THEIR_PRECISION>& minpoint, const Point<THEIR_PRECISION2>& maxpoint)
-		: minpoint(minpoint)
-		, maxpoint(maxpoint)
+	BoundBox(const Point<THEIR_PRECISION>& p1, const Point<THEIR_PRECISION2>& p2)
+		: BoundBox(p1.x(), p1.y(), p2.x(), p2.y())
 	{ }
 
 	template<typename THEIR_PRECISION, typename THEIR_PRECISION2, typename THEIR_PRECISION3>
 	BoundBox(const Point<THEIR_PRECISION>& minpoint, THEIR_PRECISION2 width, THEIR_PRECISION3 height)
-		: minpoint(minpoint)
-		, maxpoint(minpoint)
-	{
-		maxpoint.offset(width, height);
-	}
+		: BoundBox(
+			minpoint,
+			minpoint + geom::make_point(width, height)
+		)
+	{ }
 
 	/**
 	 * These return their respective edge/point's location
@@ -371,8 +370,8 @@ public:
 	point_type& min_point() { return minpoint; }
 	point_type& max_point() { return maxpoint; }
 
-	point_type minxmaxy_point() { return {minx(), maxy()}; }
-	point_type maxxminy_point() { return {maxx(), miny()}; }
+	point_type minxmaxy_point() const { return {minx(), maxy()}; }
+	point_type maxxminy_point() const { return {maxx(), miny()}; }
 	/**
 	 * Calculate and return the center
 	 */
@@ -464,6 +463,12 @@ public:
 		return *this;
 	}
 };
+
+template<typename PRECISION>
+std::ostream& operator<<(std::ostream& os, const BoundBox<PRECISION>& p) {
+	os << '{' << p.min_point() << ',' << p.max_point() << '}';
+	return os;
+}
 
 template<typename PRECISION1, typename PRECISION2>
 bool operator==(const BoundBox<PRECISION1>& b1, const BoundBox<PRECISION2>& b2) {
