@@ -52,6 +52,22 @@ public:
 	auto getX() const { return xFromValue(getValue()); }
 	auto getY() const { return yFromValue(getValue()); }
 
+	template<typename P>
+	auto asPoint() const {
+		return P(
+			getX().getValue(),
+			getY().getValue()
+		);
+	}
+
+	template<typename P>
+	static BlockID fromPoint(P&& p) {
+		return BlockID (
+			util::make_id<XID>((XID::IDType)p.x()),
+			util::make_id<YID>((YID::IDType)p.y())
+		);
+	}
+
 	template<typename STREAM>
 	void print(STREAM& os) const {
 		os << "{x" << getX().getValue() << ",y" << getY().getValue() << '}';
