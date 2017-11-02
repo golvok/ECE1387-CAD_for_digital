@@ -190,7 +190,9 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 		std::unordered_map<AtomID, int> anchor_generation;
 		auto current_anchor_locations = anchor_locations; // copy
 		auto current_net_members = net_members; // copy
-		auto current_bb = dev.info().bounds(); // copy
+		auto current_bb = geom::BoundBox<double>(dev.info().bounds());
+		current_bb.min_point() -= geom::make_point(0.5, 0.5);
+		current_bb.max_point() += geom::make_point(0.5, 0.5);
 
 		util::IDGenerator<AtomID> atom_id_gen(100000); // TODO have the file parser return something better
 
@@ -235,7 +237,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 					return lhs->second.y() < rhs->second.y();
 				});
 
-				int current_num_divisions = 1 << (num_spreadings+1);
+				int current_num_divisions = std::min(1 << (num_spreadings+1), dev.info().bounds().get_width() + 1);
 
 				std::vector<std::vector<geom::Point<double>>> boundary_intersections(current_num_divisions + 1);
 				for (int i = 0; i <= current_num_divisions; ++i) {
