@@ -372,10 +372,10 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 			return boost::none;
 		} else if (x_order.size() % 2 == 0) {
 			return geom::BoundBox<double>(
-				x_order[x_order.size()/2]->second.x(),
-				y_order[y_order.size()/2]->second.y(),
-				x_order[x_order.size()/2 + 1]->second.x(),
-				y_order[y_order.size()/2 + 1]->second.y()
+				x_order[x_order.size()/2 - 1]->second.x(),
+				y_order[y_order.size()/2 - 1]->second.y(),
+				x_order[x_order.size()/2 ]->second.x(),
+				y_order[y_order.size()/2 ]->second.y()
 			).get_center();
 		} else {
 			return geom::Point<double>(
