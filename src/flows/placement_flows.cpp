@@ -459,7 +459,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 					}
 				}
 			}
-			
+
 			if (!did_a_division) {
 				break;
 			} else {
@@ -566,8 +566,21 @@ struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLoc
 				&& this->dev.info().bounds().intersects(block_point);
 		};
 
+		auto distance_squared_to_centre = [&](const auto& loc) {
+			return distanceSquared(loc, this->dev.info().bounds().get_center());
+		};
+
 		auto metric = [&](const auto& atom, const auto& test_point) {
 			return distanceSquared(moveable_atom_locations.at(atom), test_point);
+			// (void)atom;
+			// return distance_squared_to_centre(geom::Point<double>(test_point));
+		};
+
+		auto compute_closest_block = [&](const auto& loc) {
+			return BlockPoint(geom::make_point(
+				std::lround(loc.x()),
+				std::lround(loc.y())
+			));
 		};
 
 		for (const auto& block_and_loc : fixed_block_locations) {
@@ -577,14 +590,9 @@ struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLoc
 		std::unordered_map<BlockID, std::map<double, AtomID>> atom_distance_to_closest_nonfixed_block;
 
 		for (const auto& atom_and_loc : moveable_atom_locations) {
-			auto bp = geom::make_point(
-				std::lround(atom_and_loc.second.x()),
-				std::lround(atom_and_loc.second.y())
-			);
-
+			const auto bp = compute_closest_block(atom_and_loc.second);
 			const auto dist = metric(atom_and_loc.first, geom::Point<double>(bp));
-
-			atom_distance_to_closest_nonfixed_block[BlockID::fromPoint(BlockPoint(bp))][dist] = atom_and_loc.first;
+			atom_distance_to_closest_nonfixed_block[BlockID::fromPoint(bp)][dist] = atom_and_loc.first;
 		}
 
 		for (const auto& block_and_dist_to_id : atom_distance_to_closest_nonfixed_block) {
@@ -594,7 +602,7 @@ struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLoc
 		}
 
 		auto best_block_for = [&](const auto& closest_block, const auto& atom) {
-			const auto points_temp = adjacent_points(closest_block.template asPoint<BlockPoint>());
+			const auto points_temp = adjacent_points(closest_block);
 			std::vector<BlockPoint> points;
 			for (const auto& p : points_temp) {
 				points.push_back(BlockPoint(p));
@@ -618,15 +626,24 @@ struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLoc
 			if (best_point) {
 				return BlockID::fromPoint(*best_point);
 			} else {
-				return closest_block; // overuse
+				return BlockID::fromPoint(closest_block); // overuse
 			}
 		};
 
-		for (const auto& block_and_dist_to_id : atom_distance_to_closest_nonfixed_block) {
-			for (const auto& dist_and_atom : block_and_dist_to_id.second) {
-				if (already_snapped.find(dist_and_atom.second) == end(already_snapped)) { // TODO do real tracking of alroady assigned atoms
-					add_snapping(best_block_for(block_and_dist_to_id.first, dist_and_atom.second), dist_and_atom.second);
-				}
+		std::vector<decltype(begin(moveable_atom_locations))> movable_atoms_sorted;
+		for (auto it = begin(moveable_atom_locations); it != end(moveable_atom_locations); ++it) {
+			movable_atoms_sorted.emplace_back(it);
+		}
+		std::sort(begin(movable_atoms_sorted), end(movable_atoms_sorted), [&](const auto& lhs, const auto& rhs) {
+			return distance_squared_to_centre(lhs->second)
+				< distance_squared_to_centre(rhs->second);
+		});
+
+		for (const auto& atom_and_loc_it : movable_atoms_sorted) {
+			const auto& atom = atom_and_loc_it->first;
+			const auto& loc = atom_and_loc_it->second;
+			if (already_snapped.find(atom) == end(already_snapped)) {
+				add_snapping(best_block_for(compute_closest_block(loc), atom), atom);
 			}
 		}
 
