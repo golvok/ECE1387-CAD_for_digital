@@ -120,7 +120,7 @@ std::pair<graphics::t_point, graphics::t_point> calculateWireLocation(const devi
 
 template<typename Device>
 auto drawBlocks(Device&& device) {
-	std::unordered_map<decltype(*begin(device.blocks())), graphics::t_bound_box> block_locations;
+	std::unordered_map<device::BlockID, graphics::t_bound_box> block_locations;
 	for (const auto& block : device.blocks()) {
 		const auto xy_loc = geom::make_point(
 			block.getX().getValue(),

@@ -1,6 +1,6 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
-if [ ! -d "src" ] || [ ! -f "src/Makefile" ] || [ ! -d "test" ]; then
+if [ ! -d "src" ] || [ ! -f "src/Makefile" ]; then
 	echo "please execute in the top level directory; where src/ and test/ are"
 	exit 1;
 fi

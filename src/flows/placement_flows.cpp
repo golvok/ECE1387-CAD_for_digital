@@ -207,9 +207,9 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 					current_net_members,
 					[&] (const device::AtomID& a1, const device::AtomID& a2, const auto& net_size) {
 						boost::optional<AtomID> anchor;
-						if (current_anchor_locations.find(a1) != end(current_anchor_locations) && this->fixed_block_locations.find(a1) == end(fixed_block_locations)) {
+						if (current_anchor_locations.find(a1) != end(current_anchor_locations) && this->fixed_block_locations.find(a1) == end(this->fixed_block_locations)) {
 							anchor = a1;
-						} else if (current_anchor_locations.find(a2) != end(current_anchor_locations) && this->fixed_block_locations.find(a2) == end(fixed_block_locations)) {
+						} else if (current_anchor_locations.find(a2) != end(current_anchor_locations) && this->fixed_block_locations.find(a2) == end(this->fixed_block_locations)) {
 							anchor = a2;
 						}
 
@@ -447,11 +447,15 @@ struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLoc
 		}
 
 		auto best_block_for = [&](const auto& closest_block, const auto& atom) {
-			const auto points = adjacent_points(closest_block.template asPoint<BlockPoint>());
+			const auto points_temp = adjacent_points(closest_block.template asPoint<BlockPoint>());
+			std::vector<BlockPoint> points;
+			for (const auto& p : points_temp) {
+				points.push_back(BlockPoint(p));
+			}
 
-			boost::optional<std::decay_t<decltype(*begin(points))>> best_point;
+			boost::optional<BlockPoint> best_point;
 			{
-				decltype(metric(atom, *best_point)) best_point_metric;
+				double best_point_metric;
 
 				for (const auto& test_point : points) {
 					if (valid_and_empty(test_point)) {
