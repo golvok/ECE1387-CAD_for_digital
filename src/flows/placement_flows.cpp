@@ -278,23 +278,28 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				moveable_atom_locations
 			);
 
-			std::unordered_map<BlockID, int> usages;
+			std::unordered_map<BlockID, int> block_usage;
 			for (const auto& block_and_atom : legalization) {
-				usages[block_and_atom.first] += 1;
+				block_usage[block_and_atom.first] += 1;
 			}
 
 			int overused_count = 0;
 			for (const auto& block_and_atom : legalization) {
-				if (usages.at(block_and_atom.first) > 1) {
+				if (block_usage.at(block_and_atom.first) > 1) {
 					overused_count += 1;
 				}
 			}
 
 			{const auto indent = dout(DL::INFO).indentWithTitle("Legalization Result");
 				util::print_assoc_container(legalization, dout(DL::INFO), "", "", "\n");
-				{const auto indent = dout(DL::INFO).indentWithTitle("Block Usage");
-				util::print_assoc_container(usages, dout(DL::INFO), "", "", "\n");}
-				dout(DL::INFO) << "Atom-based overuse: " << overused_count << '/' << moveable_atom_locations.size() << '\n';
+				{const auto indent = dout(DL::INFO).indentWithTitle("Block Overusage");
+					for (const auto& block_and_usage : block_usage) {
+						if (block_and_usage.second > 1) {
+							dout(DL::INFO) << block_and_usage.first << " -> " << block_and_usage.second << '\n';
+						}
+					}
+				}
+				dout(DL::INFO) << "Atom-based overuse: " << overused_count << '/' << moveable_atom_locations.size() << " (" << 100.0*(double)overused_count/(double)moveable_atom_locations.size() << "%)\n";
 			}
 
 			auto assignments = assign_to_quadrants(
