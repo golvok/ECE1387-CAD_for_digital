@@ -28,6 +28,10 @@ Points convert_to_points(const BlockLocations& bl) {
 	return result;
 }
 
+// forward declations
+template<typename Device, typename FixedBlockLocations>
+struct LegalizationFlow;
+
 
 template<typename Self, typename Device, typename FixedBlockLocations, typename AnchorLocations = std::unordered_map<device::AtomID, geom::Point<double>>>
 struct APLFlowBase : public FlowBase<APLFlowBase<Self, Device, FixedBlockLocations, AnchorLocations>, Device, FixedBlockLocations> {
@@ -177,6 +181,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 			true
 		);
 		using AtomID = device::AtomID;
+		using BlockID = device::BlockID;
 
 		std::unordered_map<AtomID, int> anchor_generation;
 		auto current_anchor_locations = anchor_locations; // copy
@@ -262,6 +267,29 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				return result;
 			}();
 
+			auto legalization = LegalizationFlow<Device, FixedBlockLocations>(*this).flow_main(
+				current_result
+			);
+
+			std::unordered_map<BlockID, int> usages;
+			for (const auto& block_and_atom : legalization) {
+				usages[block_and_atom.first] += 1;
+			}
+
+			int overused_count = 0;
+			for (const auto& block_and_atom : legalization) {
+				if (usages.at(block_and_atom.first) > 1) {
+					overused_count += 1;
+				}
+			}
+
+			{const auto indent = dout(DL::INFO).indentWithTitle("Legalization Result");
+				util::print_assoc_container(legalization, dout(DL::INFO), "", "", "\n");
+				{const auto indent = dout(DL::INFO).indentWithTitle("Block Usage");
+				util::print_assoc_container(usages, dout(DL::INFO), "", "", "\n");}
+			}
+			dout(DL::INFO) << "Atom-based overuse: " << overused_count << '/' << current_result.size() << '\n';
+
 			auto assignments = assign_to_quadrants(
 				anchor_infos,
 				current_result
@@ -315,6 +343,122 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 
 		return result;
 	}
+};
+
+template<typename P>
+auto adjacent_points(P point) {
+	return util::make_generator<int>(
+		0,
+		[=](auto&& index) { return index == 8; },
+		[=](auto&& index) { return index + 1; },
+		[=](auto&& index) {
+			switch (index) {
+				case 0: return point + std::make_pair( 1, 1);
+				case 1: return point + std::make_pair( 1, 0);
+				case 2: return point + std::make_pair( 1,-1);
+				case 3: return point + std::make_pair( 0,-1);
+				case 4: return point + std::make_pair(-1,-1);
+				case 5: return point + std::make_pair(-1, 0);
+				case 6: return point + std::make_pair(-1, 1);
+				case 7: return point + std::make_pair( 0, 1);
+				default: throw "unexpected";
+			}
+		}
+	);
+}
+
+template<typename Device, typename FixedBlockLocations>
+struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLocations>, Device, FixedBlockLocations> {
+	DECLARE_USING_FLOWBASE_MEMBERS(LegalizationFlow, FlowBase<LegalizationFlow, Device, FixedBlockLocations>)
+
+	LegalizationFlow(const LegalizationFlow&) = default;
+	LegalizationFlow(LegalizationFlow&&) = default;
+
+	template<typename AtomRange>
+	auto flow_main(
+		AtomRange&& moveable_atom_locations
+	) const {
+		const auto& indent = dout(DL::INFO).indentWithTitle("Legalization Flow");
+		using device::AtomID;
+		using device::BlockID;
+		using BlockPoint = geom::Point<std::int16_t>;
+
+		std::unordered_multimap<BlockID, AtomID> snappings;
+		std::unordered_set<AtomID> already_snapped;
+
+		auto add_snapping = [&](auto&& block, auto&& atom) {
+			snappings.emplace(block, atom);
+			already_snapped.emplace(atom);
+		};
+
+		auto valid_and_empty = [&](const auto& block_point) {
+			return snappings.find(BlockID::fromPoint(block_point)) == end(snappings)
+				&& this->dev.info().bounds().intersects(block_point);
+		};
+
+		auto metric = [&](const auto& atom, const auto& test_point) {
+			return distanceSquared(moveable_atom_locations.at(atom), test_point);
+		};
+
+		for (const auto& block_and_loc : fixed_block_locations) {
+			add_snapping(block_and_loc.second, block_and_loc.first);
+		}
+
+		std::unordered_map<BlockID, std::map<double, AtomID>> atom_distance_to_closest_nonfixed_block;
+
+		for (const auto& atom_and_loc : moveable_atom_locations) {
+			auto bp = geom::make_point(
+				std::lround(atom_and_loc.second.x()),
+				std::lround(atom_and_loc.second.y())
+			);
+
+			const auto dist = metric(atom_and_loc.first, geom::Point<double>(bp));
+
+			atom_distance_to_closest_nonfixed_block[BlockID::fromPoint(BlockPoint(bp))][dist] = atom_and_loc.first;
+		}
+
+		for (const auto& block_and_dist_to_id : atom_distance_to_closest_nonfixed_block) {
+			if (valid_and_empty(block_and_dist_to_id.first.asPoint<BlockPoint>())) {
+				add_snapping(block_and_dist_to_id.first, begin(block_and_dist_to_id.second)->second);
+			}
+		}
+
+		auto best_block_for = [&](const auto& closest_block, const auto& atom) {
+			const auto points = adjacent_points(closest_block.template asPoint<BlockPoint>());
+
+			boost::optional<std::decay_t<decltype(*begin(points))>> best_point;
+			{
+				decltype(metric(atom, *best_point)) best_point_metric;
+
+				for (const auto& test_point : points) {
+					if (valid_and_empty(test_point)) {
+						auto test_point_metric = metric(atom, test_point);
+						if (!best_point || test_point_metric > best_point_metric) {
+							best_point_metric = test_point_metric;
+							best_point = test_point;
+						}
+					}
+				}
+			}
+
+			if (best_point) {
+				return BlockID::fromPoint(*best_point);
+			} else {
+				return closest_block; // overuse
+			}
+		};
+
+		for (const auto& block_and_dist_to_id : atom_distance_to_closest_nonfixed_block) {
+			for (const auto& dist_and_atom : block_and_dist_to_id.second) {
+				if (already_snapped.find(dist_and_atom.second) == end(already_snapped)) { // TODO do real tracking of alroady assigned atoms
+					add_snapping(best_block_for(block_and_dist_to_id.first, dist_and_atom.second), dist_and_atom.second);
+				}
+			}
+		}
+
+		return snappings;
+	}
+
 };
 
 } // end anon namespace
