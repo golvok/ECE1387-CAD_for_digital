@@ -313,7 +313,7 @@ void drawPlacementData(const graphics::detail::FPGAGraphicsDataState_Placement& 
 		graphics::drawtext_in(block_bounds.at(block) + graphics::t_point(0.0f, -0.1f), util::stringify_through_stream(id));
 	}
 
-	if (LOD_screen_area_test(graphics::t_bound_box(0.0f, 0.0f, 0.1f, 0.1f), 20.0f)) {
+	if (LOD_screen_area_test(graphics::t_bound_box(0.0f, 0.0f, 0.1f, 0.1f), 5000.0f)) {
 		for (const auto& id_and_point : data.nonmoveableBlockLocations()) {
 			const auto& id = id_and_point.first;
 			const auto point = location_of(id);
@@ -332,7 +332,6 @@ void drawPlacementData(const graphics::detail::FPGAGraphicsDataState_Placement& 
 				if (atom != atom2) {
 					const auto p = location_of(atom);
 					const auto p2 = location_of(atom2);
-
 					drawline(p, p2);
 				}
 			}
@@ -346,7 +345,7 @@ void drawPlacementData(const graphics::detail::FPGAGraphicsDataState_Placement& 
 		graphics::setcolor(0x00, 0xFF, 0x00);
 		graphics::fillarc(point.x, point.y, 0.1f, 0, 360);
 		graphics::setcolor(0x00, 0x00, 0x00);
-		graphics::drawtext(point.x, point.y, util::stringify_through_stream(id), 0.2f);
+		graphics::drawtext(point.x, point.y, util::stringify_through_stream(id), 0.4f);
 	}
 }
 
