@@ -190,7 +190,7 @@ struct SimpleCliqueSolveFlow : public APLFlowBase<SimpleCliqueSolveFlow<Device, 
 			result,
 			fixed_block_locations,
 			net_members
-		);
+		) << '\n';
 
 		if (dout(DL::APL_D2).enabled()) {
 			{const auto indent = dout(DL::APL_D1).indentWithTitle("Solution");
