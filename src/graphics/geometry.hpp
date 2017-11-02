@@ -28,6 +28,7 @@ namespace geom {
  */
 template<typename PRECISION>
 struct Point {
+	using DataType = PRECISION;
 private:
 	PRECISION m_x;
 	PRECISION m_y;
@@ -174,9 +175,17 @@ template<typename PRECISION, typename PRECISION2>
 auto operator+ (const Point<PRECISION>& lhs, const Point<PRECISION2>& rhs) {
 	return make_point(lhs.x() + rhs.x(), lhs.y() + rhs.y());
 }
+template<typename PRECISION, typename Pair>
+auto operator+ (const Point<PRECISION>& lhs, const Pair& rhs) {
+	return make_point(lhs.x() + rhs.first, lhs.y() + rhs.second);
+}
 template<typename PRECISION, typename PRECISION2>
 auto operator- (const Point<PRECISION>& lhs, const Point<PRECISION2>& rhs) {
 	return make_point(lhs.x() - rhs.x(), lhs.y() - rhs.y());
+}
+template<typename PRECISION, typename Pair>
+auto operator- (const Point<PRECISION>& lhs, const Pair& rhs) {
+	return make_point(lhs.x() - rhs.first, lhs.y() - rhs.second);
 }
 
 template<typename PRECISION, typename PRECISION2>
