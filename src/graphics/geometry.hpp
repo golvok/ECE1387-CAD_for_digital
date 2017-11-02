@@ -43,7 +43,7 @@ public:
 
 	template<typename THEIR_PRECISION, typename = std::enable_if_t<is_safe_numeric_conversion<THEIR_PRECISION, PRECISION>>>
 	operator Point<THEIR_PRECISION>() {
-		return {static_cast<PRECISION>(x()), static_cast<PRECISION>(y())};
+		return {static_cast<THEIR_PRECISION>(x()), static_cast<THEIR_PRECISION>(y())};
 	}
 
 	Point(const Point& src) : Point(src.x(),src.y()) { }
