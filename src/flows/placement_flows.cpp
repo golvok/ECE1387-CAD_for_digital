@@ -223,56 +223,12 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 					false
 				);
 
-			const auto anchor_infos = [&]() {
-				std::vector<decltype(begin(moveable_atom_locations))> x_order;
-				for (auto it = begin(moveable_atom_locations); it != end(moveable_atom_locations); ++it) {
-					x_order.push_back(it);
-				}
-				std::vector<decltype(begin(moveable_atom_locations))> y_order(x_order);
-
-				std::sort(begin(x_order), end(x_order), [&](auto& lhs, auto& rhs) {
-					return lhs->second.x() < rhs->second.x();
-				});
-				std::sort(begin(y_order), end(y_order), [&](auto& lhs, auto& rhs) {
-					return lhs->second.y() < rhs->second.y();
-				});
-
-				int current_num_divisions = std::min(1 << (num_spreadings+1), dev.info().bounds().get_width() + 1);
-
-				std::vector<std::vector<geom::Point<double>>> boundary_intersections(current_num_divisions + 1);
-				for (int i = 0; i <= current_num_divisions; ++i) {
-					for (int j = 0; j <= current_num_divisions; ++j) {
-						boundary_intersections.at(i).push_back(geom::make_point(
-							x_order[(i*(x_order.size()-1))/current_num_divisions]->second.x(),
-							y_order[(j*(y_order.size()-1))/current_num_divisions]->second.y()
-						));
-					}
-				}
-
-				struct AnchorInfo {
-					geom::Point<double> corresp_centroid;
-					AtomID id;
-					geom::Point<double> anchor_location;
-				};
-
-				std::vector<AnchorInfo> result;
-				for (int i = 0; i < current_num_divisions; ++i) {
-					for (int j = 0; j < current_num_divisions; ++j) {
-						result.emplace_back(AnchorInfo{
-							geom::make_bound_box<double>(
-								boundary_intersections.at(i).at(j),
-								boundary_intersections.at(i+1).at(j+1)
-							).get_center(),
-							atom_id_gen.gen_id(),
-							geom::Point<double>(current_bb.min_point()) + geom::make_point(
-								(double)current_bb.get_width()  * ((double)i + 0.5)/(double)current_num_divisions,
-								(double)current_bb.get_height() * ((double)j + 0.5)/(double)current_num_divisions
-							)
-						});
-					}
-				}
-				return result;
-			}();
+			const auto anchor_infos = compute_anchors(
+				moveable_atom_locations,
+				num_spreadings,
+				current_bb,
+				atom_id_gen
+			);
 
 			auto legalization = LegalizationFlow<Device, FixedBlockLocations>(*this).flow_main(
 				moveable_atom_locations
@@ -338,6 +294,65 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				graphics::get().waitForPress();
 			}
 		}
+	}
+
+	template<typename MovableAtomLocations, typename Bounds, typename AtomIDGen>
+	auto compute_anchors(
+		MovableAtomLocations&& moveable_atom_locations,
+		int num_spreadings,
+		Bounds&& current_bb,
+		AtomIDGen&& atom_id_gen
+	) const {
+		using AtomID = device::AtomID;
+
+		std::vector<decltype(begin(moveable_atom_locations))> x_order;
+		for (auto it = begin(moveable_atom_locations); it != end(moveable_atom_locations); ++it) {
+			x_order.push_back(it);
+		}
+		std::vector<decltype(begin(moveable_atom_locations))> y_order(x_order);
+
+		std::sort(begin(x_order), end(x_order), [&](auto& lhs, auto& rhs) {
+			return lhs->second.x() < rhs->second.x();
+		});
+		std::sort(begin(y_order), end(y_order), [&](auto& lhs, auto& rhs) {
+			return lhs->second.y() < rhs->second.y();
+		});
+
+		int current_num_divisions = std::min(1 << (num_spreadings+1), dev.info().bounds().get_width() + 1);
+
+		std::vector<std::vector<geom::Point<double>>> boundary_intersections(current_num_divisions + 1);
+		for (int i = 0; i <= current_num_divisions; ++i) {
+			for (int j = 0; j <= current_num_divisions; ++j) {
+				boundary_intersections.at(i).push_back(geom::make_point(
+					x_order[(i*(x_order.size()-1))/current_num_divisions]->second.x(),
+					y_order[(j*(y_order.size()-1))/current_num_divisions]->second.y()
+				));
+			}
+		}
+
+		struct AnchorInfo {
+			geom::Point<double> corresp_centroid;
+			AtomID id;
+			geom::Point<double> anchor_location;
+		};
+
+		std::vector<AnchorInfo> result;
+		for (int i = 0; i < current_num_divisions; ++i) {
+			for (int j = 0; j < current_num_divisions; ++j) {
+				result.emplace_back(AnchorInfo{
+					geom::make_bound_box<double>(
+						boundary_intersections.at(i).at(j),
+						boundary_intersections.at(i+1).at(j+1)
+					).get_center(),
+					atom_id_gen.gen_id(),
+					geom::Point<double>(current_bb.min_point()) + geom::make_point(
+						(double)current_bb.get_width()  * ((double)i + 0.5)/(double)current_num_divisions,
+						(double)current_bb.get_height() * ((double)j + 0.5)/(double)current_num_divisions
+					)
+				});
+			}
+		}
+		return result;
 	}
 
 	template<typename AnchorInfos, typename AtomRange>
