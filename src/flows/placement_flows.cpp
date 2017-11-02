@@ -128,7 +128,8 @@ struct SimpleCliqueSolveFlow : public APLFlowBase<SimpleCliqueSolveFlow<Device, 
 	template<typename Weighter = SimpleCliqueWeighter>
 	auto flow_main(
 		const std::vector<std::vector<device::AtomID>>& net_members,
-		Weighter weighter = Weighter()
+		Weighter weighter = Weighter(),
+		bool display_result = true
 	) const {
 		const auto indent = dout(DL::INFO).indentWithTitle("Simple Clique Solve Flow");
 
@@ -146,14 +147,16 @@ struct SimpleCliqueSolveFlow : public APLFlowBase<SimpleCliqueSolveFlow<Device, 
 			}
 		}
 
-		const auto graphics_keeper = graphics::get().fpga().pushPlacingState(
-			net_members,
-			fixed_block_locations,
-			anchor_locations,
-			result,
-			false
-		);
-		graphics::get().waitForPress();
+		if (display_result) {
+			const auto graphics_keeper = graphics::get().fpga().pushPlacingState(
+				net_members,
+				fixed_block_locations,
+				anchor_locations,
+				result,
+				false
+			);
+			graphics::get().waitForPress();
+		}
 
 		return result;
 	}
@@ -170,7 +173,8 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 	template<typename ShouldStop>
 	auto flow_main(
 		const std::vector<std::vector<device::AtomID>>& net_members,
-		ShouldStop&& should_stop
+		ShouldStop&& should_stop,
+		bool display_result = true
 	) const {
 		const auto indent = dout(DL::INFO).indentWithTitle("Clique And Spread Flow");
 		const auto graphics_keeper = graphics::get().fpga().pushPlacingState(
@@ -213,7 +217,8 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 						} else {
 							return 2.0/(double)net_size;
 						}
-					}
+					},
+					false
 				);
 
 			const auto anchor_infos = [&]() {
@@ -314,6 +319,17 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 			}}
 
 			std::move(begin(assignments.new_nets), end(assignments.new_nets), std::back_inserter(current_net_members));
+
+			if (display_result) {
+				const auto graphics_keeper = graphics::get().fpga().pushPlacingState(
+					current_net_members,
+					fixed_block_locations,
+					current_anchor_locations,
+					moveable_atom_locations,
+					false
+				);
+				graphics::get().waitForPress();
+			}
 		}
 	}
 
