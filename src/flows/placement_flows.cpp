@@ -239,6 +239,8 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 		using AtomID = device::AtomID;
 		using BlockID = device::BlockID;
 
+		std::unordered_map<AtomID, geom::Point<double>> best_moveable_atom_locations;
+
 		std::unordered_map<AtomID, int> anchor_generation;
 		auto current_anchor_locations = anchor_locations; // copy
 		auto current_net_members = net_members; // copy
@@ -298,7 +300,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				}
 			}
 
-			{const auto indent = dout(DL::INFO).indentWithTitle("Legalization Result");
+			{const auto indent = dout(DL::INFO).indentWithTitle("Snapping Legalization Result");
 				util::print_assoc_container(legalization, dout(DL::APL_D1), "", "", "\n");
 				{const auto indent = dout(DL::APL_D2).indentWithTitle("Block Overusage");
 					for (const auto& block_and_usage : block_usage) {
@@ -311,7 +313,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				std::transform(begin(legalization), end(legalization), std::inserter(legalization_atom_locations, end(legalization_atom_locations)), [&](const auto& block_and_atom) {
 					return std::make_pair(block_and_atom.second, block_and_atom.first.template asPoint<geom::Point<double>>());
 				});
-				dout(DL::INFO) << "Legalized HPBB WireLength = " << compute_hpbb_wirelength(legalization_atom_locations, fixed_block_locations, net_members) << '\n';
+				dout(DL::INFO) << "HPBB WireLength = " << compute_hpbb_wirelength(legalization_atom_locations, fixed_block_locations, net_members) << '\n';
 				dout(DL::INFO) << "Atom-based overuse: " << overused_count << '/' << moveable_atom_locations.size() << " (" << 100.0*(double)overused_count/(double)moveable_atom_locations.size() << "%)\n";
 
 			}
@@ -341,6 +343,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 
 			std::move(begin(assignments.new_nets), end(assignments.new_nets), std::back_inserter(current_net_members));
 
+
 			if (display_result) {
 				const auto graphics_keeper = graphics::get().fpga().pushPlacingState(
 					current_net_members,
@@ -351,6 +354,44 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				);
 				graphics::get().waitForPress();
 			}
+
+			best_moveable_atom_locations = std::move(moveable_atom_locations);
+		}
+
+		auto final_legalization = LegalizationFlow<Device, FixedBlockLocations>(*this).flow_main(
+			best_moveable_atom_locations,
+			false
+		);
+
+		std::unordered_map<BlockID, int> block_usage;
+		for (const auto& block_and_atom : final_legalization) {
+			block_usage[block_and_atom.first] += 1;
+		}
+
+		int overused_count = 0;
+		for (const auto& block_and_atom : final_legalization) {
+			if (block_usage.at(block_and_atom.first) > 1) {
+				overused_count += 1;
+			}
+		}
+
+		{const auto indent = dout(DL::INFO).indentWithTitle("Final Legalization Result");
+			util::print_assoc_container(final_legalization, dout(DL::APL_D1), "", "", "\n");
+			{const auto indent = dout(DL::APL_D2).indentWithTitle("Block Overusage");
+				for (const auto& block_and_usage : block_usage) {
+					if (block_and_usage.second > 1) {
+						dout(DL::APL_D2) << block_and_usage.first << " -> " << block_and_usage.second << '\n';
+					}
+				}
+			}
+			std::unordered_map<AtomID, geom::Point<double>> final_legalization_atom_locations;
+			std::transform(begin(final_legalization), end(final_legalization), std::inserter(final_legalization_atom_locations, end(final_legalization_atom_locations)), [&](const auto& block_and_atom) {
+				return std::make_pair(block_and_atom.second, block_and_atom.first.template asPoint<geom::Point<double>>());
+			});
+			dout(DL::INFO) << "HPBB WireLength = " << compute_hpbb_wirelength(final_legalization_atom_locations, fixed_block_locations, net_members) << '\n';
+			dout(DL::INFO) << "Atom-based overuse: " << overused_count << '/' << best_moveable_atom_locations.size() << " (" << 100.0*(double)overused_count/(double)best_moveable_atom_locations.size() << "%)\n";
+			dout(DL::INFO) << "Atoms Legalized: " << (final_legalization.size() - fixed_block_locations.size()) << '/' << best_moveable_atom_locations.size() << " (" << 100.0*(double)(final_legalization.size() - fixed_block_locations.size())/(double)best_moveable_atom_locations.size() << "%)\n";
+
 		}
 	}
 
@@ -546,9 +587,10 @@ struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLoc
 
 	template<typename AtomRange>
 	auto flow_main(
-		AtomRange&& moveable_atom_locations
+		AtomRange&& moveable_atom_locations,
+		bool allow_overlaps = true
 	) const {
-		const auto& indent = dout(DL::INFO).indentWithTitle("Legalization Flow");
+		const auto& indent = dout(DL::INFO).indentWithTitle(std::string("Legalization Flow ") + (allow_overlaps ? "(allowing overlaps)" : "(not alllowing overlaps)"));
 		using device::AtomID;
 		using device::BlockID;
 		using BlockPoint = geom::Point<std::int16_t>;
@@ -559,6 +601,10 @@ struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLoc
 		auto add_snapping = [&](auto&& block, auto&& atom) {
 			snappings.emplace(block, atom);
 			already_snapped.emplace(atom);
+		};
+
+		auto was_already_snapped = [&](auto&& atom) {
+			return already_snapped.find(atom) != end(already_snapped);
 		};
 
 		auto valid_and_empty = [&](const auto& block_point) {
@@ -615,7 +661,7 @@ struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLoc
 				for (const auto& test_point : points) {
 					if (valid_and_empty(test_point)) {
 						auto test_point_metric = metric(atom, test_point);
-						if (!best_point || test_point_metric > best_point_metric) {
+						if (!best_point || test_point_metric < best_point_metric) {
 							best_point_metric = test_point_metric;
 							best_point = test_point;
 						}
@@ -639,11 +685,60 @@ struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLoc
 				< distance_squared_to_centre(rhs->second);
 		});
 
+		std::vector<AtomID> needs_further_legalization;
+
 		for (const auto& atom_and_loc_it : movable_atoms_sorted) {
 			const auto& atom = atom_and_loc_it->first;
 			const auto& loc = atom_and_loc_it->second;
 			if (already_snapped.find(atom) == end(already_snapped)) {
-				add_snapping(best_block_for(compute_closest_block(loc), atom), atom);
+				auto best_block = best_block_for(compute_closest_block(loc), atom);
+				if (allow_overlaps || valid_and_empty(best_block.template asPoint<BlockPoint>())) {
+					add_snapping(best_block, atom);
+				} else {
+					needs_further_legalization.push_back(atom);
+				}
+			}
+		}
+
+		for (int dist = 2; dist < dev.info().bounds().get_width(); ++dist) {
+			for (const auto& atom : needs_further_legalization) {
+				if (was_already_snapped(atom)) {
+					continue;
+				}
+				auto centre = compute_closest_block(moveable_atom_locations.at(atom));
+				geom::BoundBox<int> search_permiter(
+					centre + geom::make_point(dist,dist),
+					centre - geom::make_point(dist,dist)
+				);
+
+				boost::optional<geom::Point<int>> best_point;
+				double best_point_metric = std::numeric_limits<double>::max();
+
+				for (const auto& search_line : {
+					std::make_pair( search_permiter.min_point(), search_permiter.minxmaxy_point() ),
+					std::make_pair( search_permiter.minxmaxy_point(), search_permiter.max_point() ),
+					std::make_pair( search_permiter.max_point(), search_permiter.maxxminy_point() ),
+					std::make_pair( search_permiter.maxxminy_point(), search_permiter.min_point() ),
+				}) {
+					const auto step = geom::make_point(
+						search_line.first.x() < search_line.second.x() ? 1 : (search_line.first.x() == search_line.second.x() ? 0 : -1),
+						search_line.first.y() < search_line.second.y() ? 1 : (search_line.first.y() == search_line.second.y() ? 0 : -1)
+					);
+
+					for(auto test_point = search_line.first; test_point != search_line.second; test_point += step) {
+						if (valid_and_empty(test_point)) {
+							const auto test_point_metric = metric(atom, test_point);
+							if (!best_point || best_point_metric > test_point_metric) {
+								best_point = test_point;
+								best_point_metric = test_point_metric;
+							}
+						}
+					}
+				}
+
+				if (best_point) {
+					add_snapping(BlockID::fromPoint(*best_point), atom);
+				}
 			}
 		}
 
