@@ -359,6 +359,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 
 			const auto prev_atom_overuse = *std::prev(std::prev(end(atom_overuse)));
 			if (prev_atom_overuse < 0.2 && prev_atom_overuse < atom_overuse.back()) {
+				dout(DL::INFO) << "Rejectenig this solution, and using previous.\n";
 				break;
 			}
 
