@@ -724,7 +724,7 @@ struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLoc
 			}
 		}
 
-		for (int dist = 2; dist < dev.info().bounds().get_width(); ++dist) {
+		for (int dist = 2; dist < dev.info().bounds().get_width() + 1; ++dist) {
 			for (const auto& atom : needs_further_legalization) {
 				if (was_already_snapped(atom)) {
 					continue;
