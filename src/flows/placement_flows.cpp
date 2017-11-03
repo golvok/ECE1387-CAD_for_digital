@@ -642,9 +642,9 @@ struct LegalizationFlow : public FlowBase<LegalizationFlow<Device, FixedBlockLoc
 		};
 
 		auto metric = [&](const auto& atom, const auto& test_point) {
-			return distanceSquared(moveable_atom_locations.at(atom), test_point);
-			// (void)atom;
-			// return distance_squared_to_centre(geom::Point<double>(test_point));
+			// return distanceSquared(moveable_atom_locations.at(atom), test_point);
+			(void)atom;
+			return distance_squared_to_centre(geom::Point<double>(test_point));
 		};
 
 		auto compute_closest_block = [&](const auto& loc) {
