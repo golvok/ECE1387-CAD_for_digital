@@ -311,6 +311,11 @@ bool operator==(const Point<PRECISION1>& p1, const Point<PRECISION2>& p2) {
 	return p1.x() == p2.x() && p1.y() == p2.y();
 }
 
+template<typename PRECISION1, typename PRECISION2>
+bool operator!=(const Point<PRECISION1>& p1, const Point<PRECISION2>& p2) {
+	return !(p1 == p2);
+}
+
 /**
  * Represents a rectangle, used as a bounding box.
  */
@@ -473,6 +478,11 @@ std::ostream& operator<<(std::ostream& os, const BoundBox<PRECISION>& p) {
 template<typename PRECISION1, typename PRECISION2>
 bool operator==(const BoundBox<PRECISION1>& b1, const BoundBox<PRECISION2>& b2) {
 	return b1.min_point() == b2.min_point() && b1.max_point() == b2.max_point();
+}
+
+template<typename PRECISION1, typename PRECISION2>
+bool operator!=(const BoundBox<PRECISION1>& b1, const BoundBox<PRECISION2>& b2) {
+	return !(b1 == b2);
 }
 
 template<typename PRECISION, typename... ARGS>
