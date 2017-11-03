@@ -1,0 +1,519 @@
+%!PS-Adobe-1.0
+%%DocumentFonts: Helvetica
+%%Pages: 1
+%%BoundingBox: 213 280 443 510
+%%HiResBoundingBox: 213.270040 280.190031 442.870018 509.790008
+%%EndComments
+/censhow   %draw a centered string
+ { moveto               % move to proper spot
+   dup stringwidth pop  % get x length of string
+   -2 div               % Proper left start
+   yoff rmoveto         % Move left that much and down half font height
+   show newpath } def   % show the string
+
+/rcenshow  %draw a centered string
+ { rmoveto              % move to proper spot
+   dup stringwidth pop  % get x length of string
+   -2 div               % Proper left start
+   yoff rmoveto         % Move left that much and down half font height
+   show newpath } def   % show the string
+/setfontsize     % set font to desired size and compute centering yoff
+ { /Helvetica findfont
+   exch scalefont
+   setfont         % Font size set ...
+
+   0 0 moveto      % Get vertical centering offset
+   (Xg) true charpath
+   flattenpath pathbbox
+   /ascent exch def pop -1 mul /descent exch def pop
+   newpath
+   descent ascent sub 2 div /yoff exch def } def
+
+% Next two lines for debugging only.
+/str 20 string def
+/pnum {str cvs print (  ) print} def
+/drawline      % draw a line from (x2,y2) to (x1,y1)
+ { moveto lineto stroke } def
+
+/rect          % outline a rectangle 
+ { /y2 exch def /x2 exch def /y1 exch def /x1 exch def
+   x1 y1 moveto
+   x2 y1 lineto
+   x2 y2 lineto
+   x1 y2 lineto
+   closepath } def
+
+/drawrect      % draw outline of a rectanagle
+ { rect stroke } def
+
+/fillrect      % fill in a rectanagle
+ { rect fill } def
+
+/drawarc { arc stroke } def           % draw an arc
+/drawarcn { arcn stroke } def         % draw an arc in the opposite direction
+
+%Fill a counterclockwise or clockwise arc sector, respectively.
+/fillarc { moveto currentpoint 5 2 roll arc closepath fill } def
+/fillarcn { moveto currentpoint 5 2 roll arcn closepath fill } def
+
+/fillpoly { 3 1 roll moveto         % move to first point
+   2 exch 1 exch {pop lineto} for   % line to all other points
+   closepath fill } def
+
+%Color Definitions:
+/white { 1 setgray } def
+/black { 0 setgray } def
+/grey55 { .55 setgray } def
+/grey75 { .75 setgray } def
+/red { 1 0 0 setrgbcolor } def
+/orange { 1 0.65 0 setrgbcolor } def
+/yellow { 1 1 0 setrgbcolor } def
+/green { 0 1 0 setrgbcolor } def
+/cyan { 0 1 1 setrgbcolor } def
+/blue { 0 0 1 setrgbcolor } def
+/purple { 0.63 0.13 0.94 setrgbcolor } def
+/pink { 1 0.75 0.8 setrgbcolor } def
+/lightpink { 1 0.71 0.76 setrgbcolor } def
+/darkgreen { 0 0.5 0 setrgbcolor } def
+/magenta { 1 0 1 setrgbcolor } def
+/bisque { 1 0.89 0.77 setrgbcolor } def
+/lightskyblue { 0.53 0.81 0.98 setrgbcolor } def
+/thistle { 0.85 0.75 0.85 setrgbcolor } def
+/plum { 0.87 0.63 0.87 setrgbcolor } def
+/khaki { 0.94 0.9 0.55 setrgbcolor } def
+/coral { 1 0.5 0.31 setrgbcolor } def
+/turquoise { 0.25 0.88 0.82 setrgbcolor } def
+/mediumpurple { 0.58 0.44 0.86 setrgbcolor } def
+/darkslateblue { 0.28 0.24 0.55 setrgbcolor } def
+/darkkhaki { 0.74 0.72 0.42 setrgbcolor } def
+/lightmediumblue { 0.33 0.33 1.00 setrgbcolor } def
+/saddlebrown { 0.55 0.27 0.07 setrgbcolor } def
+/firebrick { 0.70 0.13 0.13 setrgbcolor } def
+/limegreen { 0.20 0.80 0.20 setrgbcolor } def
+
+%Solid and dashed line definitions:
+/linesolid {[] 0 setdash} def
+/linedashed {[3 3] 0 setdash} def
+
+%%EndProlog
+%%Page: 1 1
+
+black
+linesolid
+0 setlinewidth
+10 setfontsize
+9 setfontsize
+() 306.00 236.93 censhow
+10 setfontsize
+36.00 244.93 576.00 547.07 rect clip newpath
+
+white
+clippath fill
+
+black
+213.27 280.19 238.78 305.70 drawrect
+8 setfontsize
+gsave
+226.03 292.95 moveto
+0.8 0.8 scale
+0 rotate
+({0,0}) 0 0 rcenshow
+grestore
+264.29 280.19 289.81 305.70 drawrect
+gsave
+277.05 292.95 moveto
+0.8 0.8 scale
+0 rotate
+({1,0}) 0 0 rcenshow
+grestore
+315.32 280.19 340.83 305.70 drawrect
+gsave
+328.07 292.95 moveto
+0.8 0.8 scale
+0 rotate
+({2,0}) 0 0 rcenshow
+grestore
+366.34 280.19 391.85 305.70 drawrect
+gsave
+379.09 292.95 moveto
+0.8 0.8 scale
+0 rotate
+({3,0}) 0 0 rcenshow
+grestore
+417.36 280.19 442.87 305.70 drawrect
+gsave
+430.12 292.95 moveto
+0.8 0.8 scale
+0 rotate
+({4,0}) 0 0 rcenshow
+grestore
+213.27 331.21 238.78 356.73 drawrect
+gsave
+226.03 343.97 moveto
+0.8 0.8 scale
+0 rotate
+({0,1}) 0 0 rcenshow
+grestore
+264.29 331.21 289.81 356.73 drawrect
+gsave
+277.05 343.97 moveto
+0.8 0.8 scale
+0 rotate
+({1,1}) 0 0 rcenshow
+grestore
+315.32 331.21 340.83 356.73 drawrect
+gsave
+328.07 343.97 moveto
+0.8 0.8 scale
+0 rotate
+({2,1}) 0 0 rcenshow
+grestore
+366.34 331.21 391.85 356.73 drawrect
+gsave
+379.09 343.97 moveto
+0.8 0.8 scale
+0 rotate
+({3,1}) 0 0 rcenshow
+grestore
+417.36 331.21 442.87 356.73 drawrect
+gsave
+430.12 343.97 moveto
+0.8 0.8 scale
+0 rotate
+({4,1}) 0 0 rcenshow
+grestore
+213.27 382.24 238.78 407.75 drawrect
+gsave
+226.03 394.99 moveto
+0.8 0.8 scale
+0 rotate
+({0,2}) 0 0 rcenshow
+grestore
+264.29 382.24 289.81 407.75 drawrect
+gsave
+277.05 394.99 moveto
+0.8 0.8 scale
+0 rotate
+({1,2}) 0 0 rcenshow
+grestore
+315.32 382.24 340.83 407.75 drawrect
+gsave
+328.07 394.99 moveto
+0.8 0.8 scale
+0 rotate
+({2,2}) 0 0 rcenshow
+grestore
+366.34 382.24 391.85 407.75 drawrect
+gsave
+379.09 394.99 moveto
+0.8 0.8 scale
+0 rotate
+({3,2}) 0 0 rcenshow
+grestore
+417.36 382.24 442.87 407.75 drawrect
+gsave
+430.12 394.99 moveto
+0.8 0.8 scale
+0 rotate
+({4,2}) 0 0 rcenshow
+grestore
+213.27 433.26 238.78 458.77 drawrect
+gsave
+226.03 446.01 moveto
+0.8 0.8 scale
+0 rotate
+({0,3}) 0 0 rcenshow
+grestore
+264.29 433.26 289.81 458.77 drawrect
+gsave
+277.05 446.01 moveto
+0.8 0.8 scale
+0 rotate
+({1,3}) 0 0 rcenshow
+grestore
+315.32 433.26 340.83 458.77 drawrect
+gsave
+328.07 446.01 moveto
+0.8 0.8 scale
+0 rotate
+({2,3}) 0 0 rcenshow
+grestore
+366.34 433.26 391.85 458.77 drawrect
+gsave
+379.09 446.01 moveto
+0.8 0.8 scale
+0 rotate
+({3,3}) 0 0 rcenshow
+grestore
+417.36 433.26 442.87 458.77 drawrect
+gsave
+430.12 446.01 moveto
+0.8 0.8 scale
+0 rotate
+({4,3}) 0 0 rcenshow
+grestore
+213.27 484.28 238.78 509.79 drawrect
+gsave
+226.03 497.04 moveto
+0.8 0.8 scale
+0 rotate
+({0,4}) 0 0 rcenshow
+grestore
+264.29 484.28 289.81 509.79 drawrect
+gsave
+277.05 497.04 moveto
+0.8 0.8 scale
+0 rotate
+({1,4}) 0 0 rcenshow
+grestore
+315.32 484.28 340.83 509.79 drawrect
+gsave
+328.07 497.04 moveto
+0.8 0.8 scale
+0 rotate
+({2,4}) 0 0 rcenshow
+grestore
+366.34 484.28 391.85 509.79 drawrect
+gsave
+379.09 497.04 moveto
+0.8 0.8 scale
+0 rotate
+({3,4}) 0 0 rcenshow
+grestore
+417.36 484.28 442.87 509.79 drawrect
+gsave
+430.12 497.04 moveto
+0.8 0.8 scale
+0 rotate
+({4,4}) 0 0 rcenshow
+grestore
+red
+10 setfontsize
+gsave
+430.12 389.89 moveto
+0.8 0.8 scale
+0 rotate
+(5) 0 0 rcenshow
+grestore
+gsave
+226.03 491.93 moveto
+0.8 0.8 scale
+0 rotate
+(4) 0 0 rcenshow
+grestore
+gsave
+430.12 491.93 moveto
+0.8 0.8 scale
+0 rotate
+(3) 0 0 rcenshow
+grestore
+gsave
+226.03 287.85 moveto
+0.8 0.8 scale
+0 rotate
+(1) 0 0 rcenshow
+grestore
+gsave
+430.12 287.85 moveto
+0.8 0.8 scale
+0 rotate
+(2) 0 0 rcenshow
+grestore
+green
+gsave
+328.07 497.04 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+328.07 497.04 moveto
+0.8 0.8 scale
+0 rotate
+(7) 0 0 rcenshow
+grestore
+green
+gsave
+226.03 343.97 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+226.03 343.97 moveto
+0.8 0.8 scale
+0 rotate
+(6) 0 0 rcenshow
+grestore
+green
+gsave
+226.03 394.99 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+226.03 394.99 moveto
+0.8 0.8 scale
+0 rotate
+(11) 0 0 rcenshow
+grestore
+green
+gsave
+379.09 446.01 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.09 446.01 moveto
+0.8 0.8 scale
+0 rotate
+(9) 0 0 rcenshow
+grestore
+green
+gsave
+379.09 394.99 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.09 394.99 moveto
+0.8 0.8 scale
+0 rotate
+(19) 0 0 rcenshow
+grestore
+green
+gsave
+430.12 446.01 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+430.12 446.01 moveto
+0.8 0.8 scale
+0 rotate
+(8) 0 0 rcenshow
+grestore
+green
+gsave
+328.07 292.95 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+328.07 292.95 moveto
+0.8 0.8 scale
+0 rotate
+(16) 0 0 rcenshow
+grestore
+green
+gsave
+379.09 343.97 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.09 343.97 moveto
+0.8 0.8 scale
+0 rotate
+(20) 0 0 rcenshow
+grestore
+green
+gsave
+379.09 497.04 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.09 497.04 moveto
+0.8 0.8 scale
+0 rotate
+(13) 0 0 rcenshow
+grestore
+green
+gsave
+277.05 394.99 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+277.05 394.99 moveto
+0.8 0.8 scale
+0 rotate
+(18) 0 0 rcenshow
+grestore
+green
+gsave
+328.07 446.01 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+328.07 446.01 moveto
+0.8 0.8 scale
+0 rotate
+(17) 0 0 rcenshow
+grestore
+green
+gsave
+277.05 343.97 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+277.05 343.97 moveto
+0.8 0.8 scale
+0 rotate
+(10) 0 0 rcenshow
+grestore
+green
+gsave
+277.05 446.01 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+277.05 446.01 moveto
+0.8 0.8 scale
+0 rotate
+(12) 0 0 rcenshow
+grestore
+green
+gsave
+328.07 394.99 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+328.07 394.99 moveto
+0.8 0.8 scale
+0 rotate
+(14) 0 0 rcenshow
+grestore
+green
+gsave
+328.07 343.97 translate
+1.00 1 scale
+5.10 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+328.07 343.97 moveto
+0.8 0.8 scale
+0 rotate
+(15) 0 0 rcenshow
+grestore
+showpage
+
+%%Trailer

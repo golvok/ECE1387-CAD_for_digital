@@ -1,0 +1,5579 @@
+%!PS-Adobe-1.0
+%%DocumentFonts: Helvetica
+%%Pages: 1
+%%BoundingBox: 171 244 480 548
+%%HiResBoundingBox: 171.251995 244.925993 479.393985 547.073983
+%%EndComments
+/censhow   %draw a centered string
+ { moveto               % move to proper spot
+   dup stringwidth pop  % get x length of string
+   -2 div               % Proper left start
+   yoff rmoveto         % Move left that much and down half font height
+   show newpath } def   % show the string
+
+/rcenshow  %draw a centered string
+ { rmoveto              % move to proper spot
+   dup stringwidth pop  % get x length of string
+   -2 div               % Proper left start
+   yoff rmoveto         % Move left that much and down half font height
+   show newpath } def   % show the string
+/setfontsize     % set font to desired size and compute centering yoff
+ { /Helvetica findfont
+   exch scalefont
+   setfont         % Font size set ...
+
+   0 0 moveto      % Get vertical centering offset
+   (Xg) true charpath
+   flattenpath pathbbox
+   /ascent exch def pop -1 mul /descent exch def pop
+   newpath
+   descent ascent sub 2 div /yoff exch def } def
+
+% Next two lines for debugging only.
+/str 20 string def
+/pnum {str cvs print (  ) print} def
+/drawline      % draw a line from (x2,y2) to (x1,y1)
+ { moveto lineto stroke } def
+
+/rect          % outline a rectangle 
+ { /y2 exch def /x2 exch def /y1 exch def /x1 exch def
+   x1 y1 moveto
+   x2 y1 lineto
+   x2 y2 lineto
+   x1 y2 lineto
+   closepath } def
+
+/drawrect      % draw outline of a rectanagle
+ { rect stroke } def
+
+/fillrect      % fill in a rectanagle
+ { rect fill } def
+
+/drawarc { arc stroke } def           % draw an arc
+/drawarcn { arcn stroke } def         % draw an arc in the opposite direction
+
+%Fill a counterclockwise or clockwise arc sector, respectively.
+/fillarc { moveto currentpoint 5 2 roll arc closepath fill } def
+/fillarcn { moveto currentpoint 5 2 roll arcn closepath fill } def
+
+/fillpoly { 3 1 roll moveto         % move to first point
+   2 exch 1 exch {pop lineto} for   % line to all other points
+   closepath fill } def
+
+%Color Definitions:
+/white { 1 setgray } def
+/black { 0 setgray } def
+/grey55 { .55 setgray } def
+/grey75 { .75 setgray } def
+/red { 1 0 0 setrgbcolor } def
+/orange { 1 0.65 0 setrgbcolor } def
+/yellow { 1 1 0 setrgbcolor } def
+/green { 0 1 0 setrgbcolor } def
+/cyan { 0 1 1 setrgbcolor } def
+/blue { 0 0 1 setrgbcolor } def
+/purple { 0.63 0.13 0.94 setrgbcolor } def
+/pink { 1 0.75 0.8 setrgbcolor } def
+/lightpink { 1 0.71 0.76 setrgbcolor } def
+/darkgreen { 0 0.5 0 setrgbcolor } def
+/magenta { 1 0 1 setrgbcolor } def
+/bisque { 1 0.89 0.77 setrgbcolor } def
+/lightskyblue { 0.53 0.81 0.98 setrgbcolor } def
+/thistle { 0.85 0.75 0.85 setrgbcolor } def
+/plum { 0.87 0.63 0.87 setrgbcolor } def
+/khaki { 0.94 0.9 0.55 setrgbcolor } def
+/coral { 1 0.5 0.31 setrgbcolor } def
+/turquoise { 0.25 0.88 0.82 setrgbcolor } def
+/mediumpurple { 0.58 0.44 0.86 setrgbcolor } def
+/darkslateblue { 0.28 0.24 0.55 setrgbcolor } def
+/darkkhaki { 0.74 0.72 0.42 setrgbcolor } def
+/lightmediumblue { 0.33 0.33 1.00 setrgbcolor } def
+/saddlebrown { 0.55 0.27 0.07 setrgbcolor } def
+/firebrick { 0.70 0.13 0.13 setrgbcolor } def
+/limegreen { 0.20 0.80 0.20 setrgbcolor } def
+
+%Solid and dashed line definitions:
+/linesolid {[] 0 setdash} def
+/linedashed {[3 3] 0 setdash} def
+
+%%EndProlog
+%%Page: 1 1
+
+black
+linesolid
+0 setlinewidth
+10 setfontsize
+9 setfontsize
+() 306.00 236.93 censhow
+10 setfontsize
+36.00 244.93 576.00 547.07 rect clip newpath
+
+white
+clippath fill
+
+black
+173.89 244.10 181.66 251.87 drawrect
+8 setfontsize
+189.43 244.10 197.19 251.87 drawrect
+204.96 244.10 212.73 251.87 drawrect
+220.50 244.10 228.27 251.87 drawrect
+236.04 244.10 243.81 251.87 drawrect
+251.58 244.10 259.35 251.87 drawrect
+267.11 244.10 274.88 251.87 drawrect
+282.65 244.10 290.42 251.87 drawrect
+298.19 244.10 305.96 251.87 drawrect
+313.73 244.10 321.50 251.87 drawrect
+329.27 244.10 337.03 251.87 drawrect
+344.80 244.10 352.57 251.87 drawrect
+360.34 244.10 368.11 251.87 drawrect
+375.88 244.10 383.65 251.87 drawrect
+391.42 244.10 399.19 251.87 drawrect
+406.96 244.10 414.72 251.87 drawrect
+422.49 244.10 430.26 251.87 drawrect
+438.03 244.10 445.80 251.87 drawrect
+453.57 244.10 461.34 251.87 drawrect
+469.11 244.10 476.88 251.87 drawrect
+173.89 259.64 181.66 267.41 drawrect
+189.43 259.64 197.19 267.41 drawrect
+204.96 259.64 212.73 267.41 drawrect
+220.50 259.64 228.27 267.41 drawrect
+236.04 259.64 243.81 267.41 drawrect
+251.58 259.64 259.35 267.41 drawrect
+267.11 259.64 274.88 267.41 drawrect
+282.65 259.64 290.42 267.41 drawrect
+298.19 259.64 305.96 267.41 drawrect
+313.73 259.64 321.50 267.41 drawrect
+329.27 259.64 337.03 267.41 drawrect
+344.80 259.64 352.57 267.41 drawrect
+360.34 259.64 368.11 267.41 drawrect
+375.88 259.64 383.65 267.41 drawrect
+391.42 259.64 399.19 267.41 drawrect
+406.96 259.64 414.72 267.41 drawrect
+422.49 259.64 430.26 267.41 drawrect
+438.03 259.64 445.80 267.41 drawrect
+453.57 259.64 461.34 267.41 drawrect
+469.11 259.64 476.88 267.41 drawrect
+173.89 275.17 181.66 282.94 drawrect
+189.43 275.17 197.19 282.94 drawrect
+204.96 275.17 212.73 282.94 drawrect
+220.50 275.17 228.27 282.94 drawrect
+236.04 275.17 243.81 282.94 drawrect
+251.58 275.17 259.35 282.94 drawrect
+267.11 275.17 274.88 282.94 drawrect
+282.65 275.17 290.42 282.94 drawrect
+298.19 275.17 305.96 282.94 drawrect
+313.73 275.17 321.50 282.94 drawrect
+329.27 275.17 337.03 282.94 drawrect
+344.80 275.17 352.57 282.94 drawrect
+360.34 275.17 368.11 282.94 drawrect
+375.88 275.17 383.65 282.94 drawrect
+391.42 275.17 399.19 282.94 drawrect
+406.96 275.17 414.72 282.94 drawrect
+422.49 275.17 430.26 282.94 drawrect
+438.03 275.17 445.80 282.94 drawrect
+453.57 275.17 461.34 282.94 drawrect
+469.11 275.17 476.88 282.94 drawrect
+173.89 290.71 181.66 298.48 drawrect
+189.43 290.71 197.19 298.48 drawrect
+204.96 290.71 212.73 298.48 drawrect
+220.50 290.71 228.27 298.48 drawrect
+236.04 290.71 243.81 298.48 drawrect
+251.58 290.71 259.35 298.48 drawrect
+267.11 290.71 274.88 298.48 drawrect
+282.65 290.71 290.42 298.48 drawrect
+298.19 290.71 305.96 298.48 drawrect
+313.73 290.71 321.50 298.48 drawrect
+329.27 290.71 337.03 298.48 drawrect
+344.80 290.71 352.57 298.48 drawrect
+360.34 290.71 368.11 298.48 drawrect
+375.88 290.71 383.65 298.48 drawrect
+391.42 290.71 399.19 298.48 drawrect
+406.96 290.71 414.72 298.48 drawrect
+422.49 290.71 430.26 298.48 drawrect
+438.03 290.71 445.80 298.48 drawrect
+453.57 290.71 461.34 298.48 drawrect
+469.11 290.71 476.88 298.48 drawrect
+173.89 306.25 181.66 314.02 drawrect
+189.43 306.25 197.19 314.02 drawrect
+204.96 306.25 212.73 314.02 drawrect
+220.50 306.25 228.27 314.02 drawrect
+236.04 306.25 243.81 314.02 drawrect
+251.58 306.25 259.35 314.02 drawrect
+267.11 306.25 274.88 314.02 drawrect
+282.65 306.25 290.42 314.02 drawrect
+298.19 306.25 305.96 314.02 drawrect
+313.73 306.25 321.50 314.02 drawrect
+329.27 306.25 337.03 314.02 drawrect
+344.80 306.25 352.57 314.02 drawrect
+360.34 306.25 368.11 314.02 drawrect
+375.88 306.25 383.65 314.02 drawrect
+391.42 306.25 399.19 314.02 drawrect
+406.96 306.25 414.72 314.02 drawrect
+422.49 306.25 430.26 314.02 drawrect
+438.03 306.25 445.80 314.02 drawrect
+453.57 306.25 461.34 314.02 drawrect
+469.11 306.25 476.88 314.02 drawrect
+173.89 321.79 181.66 329.56 drawrect
+189.43 321.79 197.19 329.56 drawrect
+204.96 321.79 212.73 329.56 drawrect
+220.50 321.79 228.27 329.56 drawrect
+236.04 321.79 243.81 329.56 drawrect
+251.58 321.79 259.35 329.56 drawrect
+267.11 321.79 274.88 329.56 drawrect
+282.65 321.79 290.42 329.56 drawrect
+298.19 321.79 305.96 329.56 drawrect
+313.73 321.79 321.50 329.56 drawrect
+329.27 321.79 337.03 329.56 drawrect
+344.80 321.79 352.57 329.56 drawrect
+360.34 321.79 368.11 329.56 drawrect
+375.88 321.79 383.65 329.56 drawrect
+391.42 321.79 399.19 329.56 drawrect
+406.96 321.79 414.72 329.56 drawrect
+422.49 321.79 430.26 329.56 drawrect
+438.03 321.79 445.80 329.56 drawrect
+453.57 321.79 461.34 329.56 drawrect
+469.11 321.79 476.88 329.56 drawrect
+173.89 337.33 181.66 345.09 drawrect
+189.43 337.33 197.19 345.09 drawrect
+204.96 337.33 212.73 345.09 drawrect
+220.50 337.33 228.27 345.09 drawrect
+236.04 337.33 243.81 345.09 drawrect
+251.58 337.33 259.35 345.09 drawrect
+267.11 337.33 274.88 345.09 drawrect
+282.65 337.33 290.42 345.09 drawrect
+298.19 337.33 305.96 345.09 drawrect
+313.73 337.33 321.50 345.09 drawrect
+329.27 337.33 337.03 345.09 drawrect
+344.80 337.33 352.57 345.09 drawrect
+360.34 337.33 368.11 345.09 drawrect
+375.88 337.33 383.65 345.09 drawrect
+391.42 337.33 399.19 345.09 drawrect
+406.96 337.33 414.72 345.09 drawrect
+422.49 337.33 430.26 345.09 drawrect
+438.03 337.33 445.80 345.09 drawrect
+453.57 337.33 461.34 345.09 drawrect
+469.11 337.33 476.88 345.09 drawrect
+173.89 352.86 181.66 360.63 drawrect
+189.43 352.86 197.19 360.63 drawrect
+204.96 352.86 212.73 360.63 drawrect
+220.50 352.86 228.27 360.63 drawrect
+236.04 352.86 243.81 360.63 drawrect
+251.58 352.86 259.35 360.63 drawrect
+267.11 352.86 274.88 360.63 drawrect
+282.65 352.86 290.42 360.63 drawrect
+298.19 352.86 305.96 360.63 drawrect
+313.73 352.86 321.50 360.63 drawrect
+329.27 352.86 337.03 360.63 drawrect
+344.80 352.86 352.57 360.63 drawrect
+360.34 352.86 368.11 360.63 drawrect
+375.88 352.86 383.65 360.63 drawrect
+391.42 352.86 399.19 360.63 drawrect
+406.96 352.86 414.72 360.63 drawrect
+422.49 352.86 430.26 360.63 drawrect
+438.03 352.86 445.80 360.63 drawrect
+453.57 352.86 461.34 360.63 drawrect
+469.11 352.86 476.88 360.63 drawrect
+173.89 368.40 181.66 376.17 drawrect
+189.43 368.40 197.19 376.17 drawrect
+204.96 368.40 212.73 376.17 drawrect
+220.50 368.40 228.27 376.17 drawrect
+236.04 368.40 243.81 376.17 drawrect
+251.58 368.40 259.35 376.17 drawrect
+267.11 368.40 274.88 376.17 drawrect
+282.65 368.40 290.42 376.17 drawrect
+298.19 368.40 305.96 376.17 drawrect
+313.73 368.40 321.50 376.17 drawrect
+329.27 368.40 337.03 376.17 drawrect
+344.80 368.40 352.57 376.17 drawrect
+360.34 368.40 368.11 376.17 drawrect
+375.88 368.40 383.65 376.17 drawrect
+391.42 368.40 399.19 376.17 drawrect
+406.96 368.40 414.72 376.17 drawrect
+422.49 368.40 430.26 376.17 drawrect
+438.03 368.40 445.80 376.17 drawrect
+453.57 368.40 461.34 376.17 drawrect
+469.11 368.40 476.88 376.17 drawrect
+173.89 383.94 181.66 391.71 drawrect
+189.43 383.94 197.19 391.71 drawrect
+204.96 383.94 212.73 391.71 drawrect
+220.50 383.94 228.27 391.71 drawrect
+236.04 383.94 243.81 391.71 drawrect
+251.58 383.94 259.35 391.71 drawrect
+267.11 383.94 274.88 391.71 drawrect
+282.65 383.94 290.42 391.71 drawrect
+298.19 383.94 305.96 391.71 drawrect
+313.73 383.94 321.50 391.71 drawrect
+329.27 383.94 337.03 391.71 drawrect
+344.80 383.94 352.57 391.71 drawrect
+360.34 383.94 368.11 391.71 drawrect
+375.88 383.94 383.65 391.71 drawrect
+391.42 383.94 399.19 391.71 drawrect
+406.96 383.94 414.72 391.71 drawrect
+422.49 383.94 430.26 391.71 drawrect
+438.03 383.94 445.80 391.71 drawrect
+453.57 383.94 461.34 391.71 drawrect
+469.11 383.94 476.88 391.71 drawrect
+173.89 399.48 181.66 407.25 drawrect
+189.43 399.48 197.19 407.25 drawrect
+204.96 399.48 212.73 407.25 drawrect
+220.50 399.48 228.27 407.25 drawrect
+236.04 399.48 243.81 407.25 drawrect
+251.58 399.48 259.35 407.25 drawrect
+267.11 399.48 274.88 407.25 drawrect
+282.65 399.48 290.42 407.25 drawrect
+298.19 399.48 305.96 407.25 drawrect
+313.73 399.48 321.50 407.25 drawrect
+329.27 399.48 337.03 407.25 drawrect
+344.80 399.48 352.57 407.25 drawrect
+360.34 399.48 368.11 407.25 drawrect
+375.88 399.48 383.65 407.25 drawrect
+391.42 399.48 399.19 407.25 drawrect
+406.96 399.48 414.72 407.25 drawrect
+422.49 399.48 430.26 407.25 drawrect
+438.03 399.48 445.80 407.25 drawrect
+453.57 399.48 461.34 407.25 drawrect
+469.11 399.48 476.88 407.25 drawrect
+173.89 415.01 181.66 422.78 drawrect
+189.43 415.01 197.19 422.78 drawrect
+204.96 415.01 212.73 422.78 drawrect
+220.50 415.01 228.27 422.78 drawrect
+236.04 415.01 243.81 422.78 drawrect
+251.58 415.01 259.35 422.78 drawrect
+267.11 415.01 274.88 422.78 drawrect
+282.65 415.01 290.42 422.78 drawrect
+298.19 415.01 305.96 422.78 drawrect
+313.73 415.01 321.50 422.78 drawrect
+329.27 415.01 337.03 422.78 drawrect
+344.80 415.01 352.57 422.78 drawrect
+360.34 415.01 368.11 422.78 drawrect
+375.88 415.01 383.65 422.78 drawrect
+391.42 415.01 399.19 422.78 drawrect
+406.96 415.01 414.72 422.78 drawrect
+422.49 415.01 430.26 422.78 drawrect
+438.03 415.01 445.80 422.78 drawrect
+453.57 415.01 461.34 422.78 drawrect
+469.11 415.01 476.88 422.78 drawrect
+173.89 430.55 181.66 438.32 drawrect
+189.43 430.55 197.19 438.32 drawrect
+204.96 430.55 212.73 438.32 drawrect
+220.50 430.55 228.27 438.32 drawrect
+236.04 430.55 243.81 438.32 drawrect
+251.58 430.55 259.35 438.32 drawrect
+267.11 430.55 274.88 438.32 drawrect
+282.65 430.55 290.42 438.32 drawrect
+298.19 430.55 305.96 438.32 drawrect
+313.73 430.55 321.50 438.32 drawrect
+329.27 430.55 337.03 438.32 drawrect
+344.80 430.55 352.57 438.32 drawrect
+360.34 430.55 368.11 438.32 drawrect
+375.88 430.55 383.65 438.32 drawrect
+391.42 430.55 399.19 438.32 drawrect
+406.96 430.55 414.72 438.32 drawrect
+422.49 430.55 430.26 438.32 drawrect
+438.03 430.55 445.80 438.32 drawrect
+453.57 430.55 461.34 438.32 drawrect
+469.11 430.55 476.88 438.32 drawrect
+173.89 446.09 181.66 453.86 drawrect
+189.43 446.09 197.19 453.86 drawrect
+204.96 446.09 212.73 453.86 drawrect
+220.50 446.09 228.27 453.86 drawrect
+236.04 446.09 243.81 453.86 drawrect
+251.58 446.09 259.35 453.86 drawrect
+267.11 446.09 274.88 453.86 drawrect
+282.65 446.09 290.42 453.86 drawrect
+298.19 446.09 305.96 453.86 drawrect
+313.73 446.09 321.50 453.86 drawrect
+329.27 446.09 337.03 453.86 drawrect
+344.80 446.09 352.57 453.86 drawrect
+360.34 446.09 368.11 453.86 drawrect
+375.88 446.09 383.65 453.86 drawrect
+391.42 446.09 399.19 453.86 drawrect
+406.96 446.09 414.72 453.86 drawrect
+422.49 446.09 430.26 453.86 drawrect
+438.03 446.09 445.80 453.86 drawrect
+453.57 446.09 461.34 453.86 drawrect
+469.11 446.09 476.88 453.86 drawrect
+173.89 461.63 181.66 469.40 drawrect
+189.43 461.63 197.19 469.40 drawrect
+204.96 461.63 212.73 469.40 drawrect
+220.50 461.63 228.27 469.40 drawrect
+236.04 461.63 243.81 469.40 drawrect
+251.58 461.63 259.35 469.40 drawrect
+267.11 461.63 274.88 469.40 drawrect
+282.65 461.63 290.42 469.40 drawrect
+298.19 461.63 305.96 469.40 drawrect
+313.73 461.63 321.50 469.40 drawrect
+329.27 461.63 337.03 469.40 drawrect
+344.80 461.63 352.57 469.40 drawrect
+360.34 461.63 368.11 469.40 drawrect
+375.88 461.63 383.65 469.40 drawrect
+391.42 461.63 399.19 469.40 drawrect
+406.96 461.63 414.72 469.40 drawrect
+422.49 461.63 430.26 469.40 drawrect
+438.03 461.63 445.80 469.40 drawrect
+453.57 461.63 461.34 469.40 drawrect
+469.11 461.63 476.88 469.40 drawrect
+173.89 477.17 181.66 484.94 drawrect
+189.43 477.17 197.19 484.94 drawrect
+204.96 477.17 212.73 484.94 drawrect
+220.50 477.17 228.27 484.94 drawrect
+236.04 477.17 243.81 484.94 drawrect
+251.58 477.17 259.35 484.94 drawrect
+267.11 477.17 274.88 484.94 drawrect
+282.65 477.17 290.42 484.94 drawrect
+298.19 477.17 305.96 484.94 drawrect
+313.73 477.17 321.50 484.94 drawrect
+329.27 477.17 337.03 484.94 drawrect
+344.80 477.17 352.57 484.94 drawrect
+360.34 477.17 368.11 484.94 drawrect
+375.88 477.17 383.65 484.94 drawrect
+391.42 477.17 399.19 484.94 drawrect
+406.96 477.17 414.72 484.94 drawrect
+422.49 477.17 430.26 484.94 drawrect
+438.03 477.17 445.80 484.94 drawrect
+453.57 477.17 461.34 484.94 drawrect
+469.11 477.17 476.88 484.94 drawrect
+173.89 492.70 181.66 500.47 drawrect
+189.43 492.70 197.19 500.47 drawrect
+204.96 492.70 212.73 500.47 drawrect
+220.50 492.70 228.27 500.47 drawrect
+236.04 492.70 243.81 500.47 drawrect
+251.58 492.70 259.35 500.47 drawrect
+267.11 492.70 274.88 500.47 drawrect
+282.65 492.70 290.42 500.47 drawrect
+298.19 492.70 305.96 500.47 drawrect
+313.73 492.70 321.50 500.47 drawrect
+329.27 492.70 337.03 500.47 drawrect
+344.80 492.70 352.57 500.47 drawrect
+360.34 492.70 368.11 500.47 drawrect
+375.88 492.70 383.65 500.47 drawrect
+391.42 492.70 399.19 500.47 drawrect
+406.96 492.70 414.72 500.47 drawrect
+422.49 492.70 430.26 500.47 drawrect
+438.03 492.70 445.80 500.47 drawrect
+453.57 492.70 461.34 500.47 drawrect
+469.11 492.70 476.88 500.47 drawrect
+173.89 508.24 181.66 516.01 drawrect
+189.43 508.24 197.19 516.01 drawrect
+204.96 508.24 212.73 516.01 drawrect
+220.50 508.24 228.27 516.01 drawrect
+236.04 508.24 243.81 516.01 drawrect
+251.58 508.24 259.35 516.01 drawrect
+267.11 508.24 274.88 516.01 drawrect
+282.65 508.24 290.42 516.01 drawrect
+298.19 508.24 305.96 516.01 drawrect
+313.73 508.24 321.50 516.01 drawrect
+329.27 508.24 337.03 516.01 drawrect
+344.80 508.24 352.57 516.01 drawrect
+360.34 508.24 368.11 516.01 drawrect
+375.88 508.24 383.65 516.01 drawrect
+391.42 508.24 399.19 516.01 drawrect
+406.96 508.24 414.72 516.01 drawrect
+422.49 508.24 430.26 516.01 drawrect
+438.03 508.24 445.80 516.01 drawrect
+453.57 508.24 461.34 516.01 drawrect
+469.11 508.24 476.88 516.01 drawrect
+173.89 523.78 181.66 531.55 drawrect
+189.43 523.78 197.19 531.55 drawrect
+204.96 523.78 212.73 531.55 drawrect
+220.50 523.78 228.27 531.55 drawrect
+236.04 523.78 243.81 531.55 drawrect
+251.58 523.78 259.35 531.55 drawrect
+267.11 523.78 274.88 531.55 drawrect
+282.65 523.78 290.42 531.55 drawrect
+298.19 523.78 305.96 531.55 drawrect
+313.73 523.78 321.50 531.55 drawrect
+329.27 523.78 337.03 531.55 drawrect
+344.80 523.78 352.57 531.55 drawrect
+360.34 523.78 368.11 531.55 drawrect
+375.88 523.78 383.65 531.55 drawrect
+391.42 523.78 399.19 531.55 drawrect
+406.96 523.78 414.72 531.55 drawrect
+422.49 523.78 430.26 531.55 drawrect
+438.03 523.78 445.80 531.55 drawrect
+453.57 523.78 461.34 531.55 drawrect
+469.11 523.78 476.88 531.55 drawrect
+173.89 539.32 181.66 547.09 drawrect
+189.43 539.32 197.19 547.09 drawrect
+204.96 539.32 212.73 547.09 drawrect
+220.50 539.32 228.27 547.09 drawrect
+236.04 539.32 243.81 547.09 drawrect
+251.58 539.32 259.35 547.09 drawrect
+267.11 539.32 274.88 547.09 drawrect
+282.65 539.32 290.42 547.09 drawrect
+298.19 539.32 305.96 547.09 drawrect
+313.73 539.32 321.50 547.09 drawrect
+329.27 539.32 337.03 547.09 drawrect
+344.80 539.32 352.57 547.09 drawrect
+360.34 539.32 368.11 547.09 drawrect
+375.88 539.32 383.65 547.09 drawrect
+391.42 539.32 399.19 547.09 drawrect
+406.96 539.32 414.72 547.09 drawrect
+422.49 539.32 430.26 547.09 drawrect
+438.03 539.32 445.80 547.09 drawrect
+453.57 539.32 461.34 547.09 drawrect
+469.11 539.32 476.88 547.09 drawrect
+red
+10 setfontsize
+gsave
+177.77 261.97 moveto
+0.8 0.8 scale
+0 rotate
+(20) 0 0 rcenshow
+grestore
+gsave
+177.77 293.04 moveto
+0.8 0.8 scale
+0 rotate
+(19) 0 0 rcenshow
+grestore
+gsave
+177.77 308.58 moveto
+0.8 0.8 scale
+0 rotate
+(18) 0 0 rcenshow
+grestore
+gsave
+177.77 355.19 moveto
+0.8 0.8 scale
+0 rotate
+(17) 0 0 rcenshow
+grestore
+gsave
+472.99 277.50 moveto
+0.8 0.8 scale
+0 rotate
+(6) 0 0 rcenshow
+grestore
+gsave
+441.92 246.43 moveto
+0.8 0.8 scale
+0 rotate
+(5) 0 0 rcenshow
+grestore
+gsave
+379.76 246.43 moveto
+0.8 0.8 scale
+0 rotate
+(4) 0 0 rcenshow
+grestore
+gsave
+286.54 246.43 moveto
+0.8 0.8 scale
+0 rotate
+(3) 0 0 rcenshow
+grestore
+gsave
+177.77 246.43 moveto
+0.8 0.8 scale
+0 rotate
+(1) 0 0 rcenshow
+grestore
+gsave
+239.92 246.43 moveto
+0.8 0.8 scale
+0 rotate
+(2) 0 0 rcenshow
+grestore
+gsave
+472.99 324.12 moveto
+0.8 0.8 scale
+0 rotate
+(7) 0 0 rcenshow
+grestore
+gsave
+472.99 355.19 moveto
+0.8 0.8 scale
+0 rotate
+(8) 0 0 rcenshow
+grestore
+gsave
+472.99 526.11 moveto
+0.8 0.8 scale
+0 rotate
+(9) 0 0 rcenshow
+grestore
+gsave
+472.99 541.65 moveto
+0.8 0.8 scale
+0 rotate
+(10) 0 0 rcenshow
+grestore
+gsave
+441.92 541.65 moveto
+0.8 0.8 scale
+0 rotate
+(11) 0 0 rcenshow
+grestore
+gsave
+379.76 541.65 moveto
+0.8 0.8 scale
+0 rotate
+(12) 0 0 rcenshow
+grestore
+gsave
+286.54 541.65 moveto
+0.8 0.8 scale
+0 rotate
+(13) 0 0 rcenshow
+grestore
+gsave
+224.39 541.65 moveto
+0.8 0.8 scale
+0 rotate
+(14) 0 0 rcenshow
+grestore
+gsave
+177.77 526.11 moveto
+0.8 0.8 scale
+0 rotate
+(15) 0 0 rcenshow
+grestore
+gsave
+177.77 495.03 moveto
+0.8 0.8 scale
+0 rotate
+(16) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(226) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(169) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(204) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(193) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(241) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(298) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(200) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(237) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(80) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(140) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(78) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(68) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(333) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(112) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(313) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(212) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(257) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(287) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(213) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(304) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(159) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(362) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(71) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(279) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(210) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(329) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(320) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(216) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(177) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(230) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(81) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(291) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(164) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(155) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(166) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(318) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(292) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(327) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(224) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(37) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(203) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(324) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(153) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(217) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(337) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(157) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(278) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(299) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(58) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(395) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(67) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(239) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(194) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(228) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(92) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(132) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(282) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(369) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(202) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(290) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(29) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(366) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(138) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(133) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(351) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(181) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(384) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(47) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(349) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(95) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(74) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(66) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(317) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(150) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(61) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(398) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(64) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(231) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(128) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(295) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(258) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(100) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(393) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(56) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(266) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(103) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(352) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(355) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(144) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(311) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(146) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(121) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(135) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(147) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(314) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(148) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(376) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(39) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(370) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(33) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(51) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(388) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(26) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(363) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(323) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(82) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(259) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(256) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(89) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(90) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(151) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(49) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(386) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(195) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(28) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(365) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(328) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(161) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(307) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(364) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(27) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(30) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(367) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(371) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(34) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(368) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(31) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(54) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(391) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(145) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(312) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(280) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(79) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(25) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(182) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(142) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(300) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(52) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(389) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(305) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(380) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(43) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(46) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(383) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(235) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(162) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(152) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(167) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(134) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(301) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(310) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(143) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(222) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(116) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(353) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(73) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(240) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(326) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(377) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(40) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(361) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(24) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(124) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(379) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(42) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(45) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(382) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(70) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(316) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(149) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(206) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(373) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(36) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(254) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(96) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(32) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(35) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(372) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(331) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(243) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(76) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(234) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(381) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(44) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(214) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(332) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(97) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(338) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(171) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(250) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(268) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(374) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(229) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(62) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(399) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(139) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(306) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(69) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(253) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(86) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(65) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(232) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(223) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(390) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(53) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(136) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(303) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(168) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(335) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(98) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(275) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(238) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(141) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(308) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(114) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(281) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(123) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(336) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(48) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(385) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(190) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(23) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(360) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(330) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(163) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(75) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(242) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(211) 0 0 rcenshow
+grestore
+green
+gsave
+177.77 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+177.77 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(191) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(358) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(21) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(160) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(126) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(322) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(93) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(309) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(180) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(347) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(350) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(173) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(343) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(252) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(85) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(244) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(77) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(340) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(172) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(342) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(84) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(356) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(339) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(341) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(344) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(165) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(245) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(246) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(325) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(345) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(348) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(346) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(101) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(269) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(102) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(297) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(208) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(296) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(129) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(272) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(105) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(175) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(106) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(264) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(274) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(107) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(108) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(354) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(357) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(187) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(219) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(110) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(120) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(111) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(183) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(271) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(104) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(192) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(359) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(22) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(115) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(118) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(286) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(119) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(276) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(109) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(125) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(94) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(261) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(392) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(55) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(289) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(83) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 325.67 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 325.67 moveto
+0.8 0.8 scale
+0 rotate
+(184) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(334) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(284) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(137) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(50) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(387) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(221) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(122) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(130) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 372.29 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 372.29 moveto
+0.8 0.8 scale
+0 rotate
+(176) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(91) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(283) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(99) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(315) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(72) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(60) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(397) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(88) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(215) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(41) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(378) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(59) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(396) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(199) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(249) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(319) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(209) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(189) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(273) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(270) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(117) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(185) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(87) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(179) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(178) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(236) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(255) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(220) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(170) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(57) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(394) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(285) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 310.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 310.13 moveto
+0.8 0.8 scale
+0 rotate
+(218) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(302) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(158) 0 0 rcenshow
+grestore
+green
+gsave
+239.92 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+239.92 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(156) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(293) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(205) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(294) 0 0 rcenshow
+grestore
+green
+gsave
+472.99 512.13 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+472.99 512.13 moveto
+0.8 0.8 scale
+0 rotate
+(188) 0 0 rcenshow
+grestore
+green
+gsave
+410.84 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+410.84 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(248) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 387.82 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 387.82 moveto
+0.8 0.8 scale
+0 rotate
+(251) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(277) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(260) 0 0 rcenshow
+grestore
+green
+gsave
+395.30 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+395.30 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(263) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 481.05 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 481.05 moveto
+0.8 0.8 scale
+0 rotate
+(247) 0 0 rcenshow
+grestore
+green
+gsave
+302.07 356.75 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+302.07 356.75 moveto
+0.8 0.8 scale
+0 rotate
+(196) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(127) 0 0 rcenshow
+grestore
+green
+gsave
+255.46 434.44 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+255.46 434.44 moveto
+0.8 0.8 scale
+0 rotate
+(201) 0 0 rcenshow
+grestore
+green
+gsave
+286.54 263.52 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+286.54 263.52 moveto
+0.8 0.8 scale
+0 rotate
+(197) 0 0 rcenshow
+grestore
+green
+gsave
+224.39 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+224.39 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(400) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(63) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(198) 0 0 rcenshow
+grestore
+green
+gsave
+271.00 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+271.00 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(207) 0 0 rcenshow
+grestore
+green
+gsave
+333.15 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+333.15 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(113) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(288) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 403.36 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 403.36 moveto
+0.8 0.8 scale
+0 rotate
+(154) 0 0 rcenshow
+grestore
+green
+gsave
+457.45 247.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+457.45 247.98 moveto
+0.8 0.8 scale
+0 rotate
+(321) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 279.06 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 279.06 moveto
+0.8 0.8 scale
+0 rotate
+(265) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(38) 0 0 rcenshow
+grestore
+green
+gsave
+348.69 449.98 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+348.69 449.98 moveto
+0.8 0.8 scale
+0 rotate
+(375) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(186) 0 0 rcenshow
+grestore
+green
+gsave
+364.23 543.20 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+364.23 543.20 moveto
+0.8 0.8 scale
+0 rotate
+(174) 0 0 rcenshow
+grestore
+green
+gsave
+441.92 341.21 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+441.92 341.21 moveto
+0.8 0.8 scale
+0 rotate
+(233) 0 0 rcenshow
+grestore
+green
+gsave
+426.38 527.66 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+426.38 527.66 moveto
+0.8 0.8 scale
+0 rotate
+(262) 0 0 rcenshow
+grestore
+green
+gsave
+317.61 294.60 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+317.61 294.60 moveto
+0.8 0.8 scale
+0 rotate
+(227) 0 0 rcenshow
+grestore
+green
+gsave
+379.76 465.51 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+379.76 465.51 moveto
+0.8 0.8 scale
+0 rotate
+(225) 0 0 rcenshow
+grestore
+green
+gsave
+208.85 418.90 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+208.85 418.90 moveto
+0.8 0.8 scale
+0 rotate
+(267) 0 0 rcenshow
+grestore
+green
+gsave
+193.31 496.59 translate
+1.00 1 scale
+1.55 0.00 360.00 0 0 fillarc
+grestore
+black
+gsave
+193.31 496.59 moveto
+0.8 0.8 scale
+0 rotate
+(131) 0 0 rcenshow
+grestore
+showpage
+
+%%Trailer
