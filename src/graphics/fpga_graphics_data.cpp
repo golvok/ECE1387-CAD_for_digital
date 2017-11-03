@@ -353,6 +353,7 @@ void drawPlacementData(const graphics::detail::FPGAGraphicsDataState_Placement& 
 
 	for (const auto& id_and_point : data.moveableBlockLocations()) {
 		const auto& id = id_and_point.first;
+		if (data.fixedBlockLocations().find(id) != end(data.fixedBlockLocations())) { continue; }
 		const auto point = location_of(id);
 
 		graphics::setcolor(0x00, 0xFF, 0x00);
