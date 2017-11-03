@@ -399,6 +399,19 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 			dout(DL::INFO) << "Atom-based overuse: " << overused_count << '/' << best_moveable_atom_locations.size() << " (" << 100.0*(double)overused_count/(double)best_moveable_atom_locations.size() << "%)\n";
 			dout(DL::INFO) << "Atoms Legalized: " << (final_legalization.block_mapped_to_atom.size() - fixed_block_locations.size()) << '/' << best_moveable_atom_locations.size() << " (" << 100.0*(double)(final_legalization.block_mapped_to_atom.size() - fixed_block_locations.size())/(double)best_moveable_atom_locations.size() << "%)\n";
 
+			std::unordered_map<AtomID, geom::Point<double>> movable_atoms_legalzed_locations;
+			std::transform(begin(final_legalization.block_mapped_to_atom), end(final_legalization.block_mapped_to_atom), std::inserter(movable_atoms_legalzed_locations, end(movable_atoms_legalzed_locations)), [&](const auto& elem) {
+				return std::make_pair(elem.first, elem.second.template asPoint<geom::Point<double>>());
+			});
+			const auto graphics_keeper = graphics::get().fpga().pushPlacingState(
+				dev,
+				net_members,
+				fixed_block_locations,
+				{},
+				movable_atoms_legalzed_locations,
+				false
+			);
+			graphics::get().waitForPress();
 		}
 	}
 
