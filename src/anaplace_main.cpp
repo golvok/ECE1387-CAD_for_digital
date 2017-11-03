@@ -61,7 +61,7 @@ int program_main(const ProgramConfig& config) {
 
 			// flows::placement::simple_clique_solve(pr.netMembers(), pr.fixedBlockLocations(), device_desc);
 
-			flows::placement::clique_and_spread(pr.netMembers(), pr.fixedBlockLocations(), device_desc, 15);
+			flows::placement::clique_and_spread(pr.netMembers(), pr.fixedBlockLocations(), device_desc, 30);
 		}
 	);
 	apply_visitor(visitor, parse_result);

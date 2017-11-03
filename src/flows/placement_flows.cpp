@@ -250,6 +250,8 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 		current_bb.min_point() -= geom::make_point(0.5, 0.5);
 		current_bb.max_point() += geom::make_point(0.5, 0.5);
 
+		std::vector<double> atom_overuse = {1.0,};
+
 		util::IDGenerator<AtomID> atom_id_gen(100000); // TODO have the file parser return something better
 
 		for (int num_spreadings = 0; /* always */; ++num_spreadings) {
@@ -302,6 +304,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				}
 			}
 
+			atom_overuse.push_back((double)overused_count/(double)moveable_atom_locations.size());
 			{const auto indent = dout(DL::INFO).indentWithTitle("Snapping Legalization Result");
 				util::print_assoc_container(legalization.atoms_mapped_to_blocks, dout(DL::APL_D1), "", "", "\n");
 				{const auto indent = dout(DL::APL_D2).indentWithTitle("Block Overusage");
@@ -313,7 +316,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 				}
 
 				dout(DL::INFO) << "HPBB WireLength = " << compute_hpbb_wirelength(legalization.block_mapped_to_atom, fixed_block_locations, net_members, [](auto& elem) { return elem.second.template asPoint<geom::Point<double>>(); }) << '\n';
-				dout(DL::INFO) << "Atom-based overuse: " << overused_count << '/' << moveable_atom_locations.size() << " (" << 100.0*(double)overused_count/(double)moveable_atom_locations.size() << "%)\n";
+				dout(DL::INFO) << "Atom-based overuse: " << overused_count << '/' << moveable_atom_locations.size() << " (" << 100.0*atom_overuse.back() << "%)\n";
 
 			}
 
@@ -352,6 +355,11 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 					false
 				);
 				graphics::get().waitForPress();
+			}
+
+			const auto prev_atom_overuse = *std::prev(std::prev(end(atom_overuse)));
+			if (prev_atom_overuse < 0.2 && prev_atom_overuse < atom_overuse.back()) {
+				break;
 			}
 
 			best_moveable_atom_locations = std::move(moveable_atom_locations);
