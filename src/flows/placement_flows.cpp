@@ -203,6 +203,7 @@ struct SimpleCliqueSolveFlow : public APLFlowBase<SimpleCliqueSolveFlow<Device, 
 
 		if (display_result) {
 			const auto graphics_keeper = graphics::get().fpga().pushPlacingState(
+				dev,
 				net_members,
 				fixed_block_locations,
 				anchor_locations,
@@ -232,6 +233,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 	) const {
 		const auto indent = dout(DL::INFO).indentWithTitle("Clique And Spread Flow");
 		const auto graphics_keeper = graphics::get().fpga().pushPlacingState(
+			dev,
 			{},
 			fixed_block_locations,
 			{},
@@ -348,6 +350,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 
 			if (display_result) {
 				const auto graphics_keeper = graphics::get().fpga().pushPlacingState(
+					dev,
 					current_net_members,
 					fixed_block_locations,
 					current_anchor_locations,

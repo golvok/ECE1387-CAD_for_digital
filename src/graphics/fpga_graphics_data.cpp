@@ -281,7 +281,7 @@ void drawPlacementData(const graphics::detail::FPGAGraphicsDataState_Placement& 
 	graphics::setcolor(0,0,0);
 	const auto block_bounds = drawBlocks(device::Device<device::WiltonConnector>(device::DeviceInfo{
 		device::DeviceType::Wilton,
-		geom::BoundBox<int>(0,0,40,40),
+		data.getPDev()->info().bounds(),
 		10,
 		1,
 		2,
@@ -377,7 +377,9 @@ void FPGAGraphicsData::drawAll() {
 		drawDevice(device, data);
 	}), data.getDevice());
 
-	drawPlacementData(data);
+	if (data.getPDev()) {
+		drawPlacementData(data);
+	}
 }
 
 } // end namespace graphics
