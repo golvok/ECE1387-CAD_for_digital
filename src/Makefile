@@ -62,6 +62,7 @@ endif
 # add flags for debugging
 ifeq ($(BUILD_MODE),debug)
 	EXTRA_FLAGS += -ggdb -D DEBUG # -D _GLIBCXX_DEBUG
+	EXTRA_FLAGS += -Wno-maybe-uninitialized # silence g++
 endif
 
 # add flags for release
