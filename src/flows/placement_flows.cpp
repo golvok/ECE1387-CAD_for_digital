@@ -260,6 +260,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 			if (should_stop(num_spreadings)) {
 				break;
 			}
+			const auto indent = dout(DL::INFO).indentWithTitle("Iteration " + std::to_string(num_spreadings));
 
 			const auto moveable_atom_locations = SimpleCliqueSolveFlow<Device, FixedBlockLocations>(*this)
 				.withAnchorLocations(current_anchor_locations)
