@@ -54,11 +54,11 @@ public:
 
 	template<typename P>
 	auto asPoint() const {
-		return P(
-			getX().getValue(),
-			getY().getValue()
-		);
+		return P(x(), y());
 	}
+
+	auto x() const { return getX().getValue(); }
+	auto y() const { return getY().getValue(); }
 
 	template<typename P>
 	static BlockID fromPoint(P&& p) {
