@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ ! -d "src" ] || [ ! -f "src/Makefile" ]; then
-	echo "please execute in the top level directory; where src/ and test/ are"
+	echo "please execute in the top level directory; where src/ is"
 	exit 1;
 fi
 
