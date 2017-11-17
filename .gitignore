@@ -20,6 +20,8 @@ test/runs/*
 *.autosave.xoj
 *.swp
 lab*-*.pdf
+exer*.pdf
+.~lock*.ods#
 
 #suitesparse
 SuiteSparse/**/*.o

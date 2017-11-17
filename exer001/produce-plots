@@ -1,0 +1,130 @@
+#!/usr/bin/env python
+
+import pprint as PPrint
+import math
+import argparse
+import csv
+import statistics
+
+pprint = PPrint.PrettyPrinter(indent=2, width=1).pprint
+
+def main():
+	defalts = DotMap(
+		temp_select=[0.015, 0.03, 0.05, 0.1, 0.5, 1, 5, 20, 50, 100,],
+		# temp_select=[0.015, 0.02, 0.03, 0.04, 0.05, 0.1, 0.5, 1, 5, 20, 40, 60, 80, 100,],
+		# temp_select=[0.015, 0.03, 0.05, 0.1, 0.5,]
+);
+	parser = argparse.ArgumentParser(description="")
+	parser.add_argument("--" + "results_dir".replace("_","-"), required=True)
+	parser.add_argument("--" + "temp_select".replace("_","-"))
+
+	args = parser.parse_args()
+
+	args.placement_exit_data = args.results_dir + "/placement_exit_data.csv"
+	args.temp_select = list(map(float, args.temp_select.split(','))) if args.temp_select is not None else defalts.temp_select
+
+	placement_processing(args)
+
+def placement_processing(args):
+	data = DotMap();
+
+	with open(args.placement_exit_data, 'r', newline='') as placement_exit_data:
+		reader = csv.reader(placement_exit_data)
+		for row in reader:
+			if len(row) == 0: continue
+			circuit, temp, seed, cost = row[0], float(row[1]), row[2], float(row[3].split(' ')[3]);
+			if circuit not in data: data[circuit] = DotMap()
+			if temp not in data[circuit]: data[circuit][temp] = DotMap()
+			data[circuit][temp][seed] = cost
+
+	pprint({"raw_data" : data});
+
+	stats = DotMap();
+
+	for circuit in data:
+		stats[circuit] = DotMap();
+		for temp in data[circuit]:
+			stats[circuit][temp] = DotMap();
+			stats[circuit][temp].stddev = statistics.pstdev(data[circuit][temp].values())
+			stats[circuit][temp].mean = statistics.mean(data[circuit][temp].values())
+
+
+	pprint({"stats" : stats});
+
+	table = [["circuit"] + list(map(str, args.temp_select))]
+	for circuit in stats:
+		row = [circuit];
+		for temp in args.temp_select:
+			row += ["{:0.2f}".format(stats[circuit][temp].stddev)]
+		table += [row];
+	print_latex_table("stddev by temp", table)
+
+	table = [["circuit"] + list(map(str, args.temp_select))]
+	for circuit in stats:
+		row = [circuit];
+		for temp in args.temp_select:
+			row += ["{:0.1f}".format(100.0*stats[circuit][temp].stddev/stats[circuit][temp].mean)]
+		table += [row];
+	print_latex_table("stddev by temp as percent of mean", table)
+
+	table = [["circuit"] + list(map(str, args.temp_select))]
+	for circuit in stats:
+		row = [circuit];
+		for temp in args.temp_select:
+			row += ["{:0.1f}".format(stats[circuit][temp].mean)]
+		table += [row];
+	print_latex_table("mean by temp", table)
+
+def print_latex_table(name, table):
+	print("% " + name)
+	for row in table:
+		print(" & ".join(row) + " \\\\")
+
+class DotMap(dict):
+	"""
+	Example:
+	m = DotMap({'first_name': 'Eduardo'}, last_name='Pool', age=24, sports=['Soccer'])
+	"""
+	def __init__(self, *args, **kwargs):
+		super(DotMap, self).__init__(*args, **kwargs)
+		for arg in args:
+			if isinstance(arg, dict):
+				for k, v in arg.items():
+					self[k] = v
+
+		if kwargs:
+			for k, v in kwargs.items():
+				self[k] = v
+
+	def __getattr__(self, attr):
+		return self.get(attr)
+
+	def __setattr__(self, key, value):
+		self.__setitem__(key, value)
+
+	def __setitem__(self, key, value):
+		super(DotMap, self).__setitem__(key, value)
+		self.__dict__.update({key: value})
+
+	def __delattr__(self, item):
+		self.__delitem__(item)
+
+	def __delitem__(self, key):
+		super(DotMap, self).__delitem__(key)
+		del self.__dict__[key]
+
+	def __hash__(self):
+		# hash(self.__dict__)
+		return 5; ## performance be damned
+
+	def __eq__(self, other):
+		return dict.__eq__(self, other)
+
+	def __ne__(self, other): return not self == other
+
+	def __deepcopy__(self, memo):
+		return DotMap([(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()]);
+
+
+if __name__ == "__main__":
+	main();

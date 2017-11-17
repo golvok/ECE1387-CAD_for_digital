@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+TEMPS="0.015 0.02 0.03 0.04 0.05 0.1 0.5 0.57 1 5 20 40 50 60 80 100"
+SEEDS="$(seq 1 10)"
+ALL_CIRCUITS="bigkey mkSMAdapter4B or1200 pair"
+WORK_DIR="run-circuits-temp$1"
+EXTRA_ARGS="--nodisp"
+PLACEMENT_EXIT_DATA_CSV="$WORK_DIR/placement_exit_data.csv"
+#ROUTE_ARGS="--route"
+
+ARCH="$CAD_FOR_DIGITAL_E001_DATADIR/k6_N10_mem32K_40nm.xml"
+
+for CIRCUIT in $ALL_CIRCUITS; do
+	for TEMP in $TEMPS; do
+		for SEED in $SEEDS; do
+			(
+				mkdir -p "$WORK_DIR/$CIRCUIT-$TEMP-$SEED"
+				cd "$WORK_DIR/$CIRCUIT-$TEMP-$SEED"
+
+				cp "$CAD_FOR_DIGITAL_E001_DATADIR/$CIRCUIT.blif" .
+
+				if [[ ! -f "$CIRCUIT.net" ]]; then
+					PACK_ARGS="--pack"
+				fi
+
+				if [[ ! -f "$CIRCUIT.place" ]]; then
+					PLACE_ARGS="--place --place_algorithm bounding_box --seed $SEED --init_t $TEMP"
+				fi
+
+				if [[ -z "$PACK_ARGS" && -z "$PLACE_ARGS" && -z "$ROUTE_ARGS" ]]; then
+					echo "SKIPPING $CIRCUIT-$TEMP-$SEED"
+				else
+					VPR_CALL="vpr \"$ARCH\" \"$CIRCUIT.blif\" $EXTRA_ARGS $PACK_ARGS $PLACE_ARGS $ROUTE_ARGS"
+					echo "starting $CIRCUIT-$TEMP-$SEED: $VPR_CALL"
+					vpr "$ARCH" "$CIRCUIT.blif" $EXTRA_ARGS $PACK_ARGS $PLACE_ARGS $ROUTE_ARGS >> /dev/null;
+					echo "done $CIRCUIT-$TEMP-$SEED"
+				fi
+			) &
+		done
+	done
+done
+
+wait
+
+echo "=== Results ==="
+
+echo "" > "$PLACEMENT_EXIT_DATA_CSV"
+
+for CIRCUIT in $ALL_CIRCUITS; do
+	for TEMP in $TEMPS; do
+		for SEED in $SEEDS; do
+			echo -en "$CIRCUIT-T$TEMP-S$SEED:\t"
+
+			echo -n "$CIRCUIT, $TEMP, $SEED, " >> "$PLACEMENT_EXIT_DATA_CSV"
+			cat "$WORK_DIR/$CIRCUIT-$TEMP-$SEED/vpr_stdout.log" | grep "Placement cost" | tee -a "$PLACEMENT_EXIT_DATA_CSV"
+		done
+	done
+done
+
+echo "end results"
+
