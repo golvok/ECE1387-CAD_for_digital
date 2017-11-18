@@ -1,14 +1,15 @@
 # Compiled Object files
-build/OBJ/**/*.o
-build/OBJ/**/*.so
+**/build/OBJ/**/*.o
+**/build/OBJ/**/*.so
 
 # Dependency Files
-build/DEPS/**/*.d
+**/build/DEPS/**/*.d
 
 # Executables
 build/EXE/anaplace
 build/EXE/maize-router
 build/EXE/test-netlist
+branch-and-bound/build/EXE/sat-maxer
 
 # YCM compiled config
 .ycm_extra_conf.pyc
