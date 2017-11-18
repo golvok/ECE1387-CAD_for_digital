@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+if [ ! -d "vtr_release" ]; then
+	echo "please execute in the top level directory"
+	exit 1;
+fi
+
+if [ -z "$SHELL" ]; then
+	echo "WARNING: \$SHELL not set, using bash"
+	SHELL_EXE="bash";
+else
+	SHELL_EXE="$SHELL";
+fi
+
+if [ ! -z "$CAD_FOR_DIGITAL_E001_ROOTDIR" ]; then
+	echo "WARNING: invocation from already initialized environment. Old CAD_FOR_DIGITAL_E001_ROOTDIR=$CAD_FOR_DIGITAL_E001_ROOTDIR";
+fi
+
+export CAD_FOR_DIGITAL_E001_ROOTDIR="$(readlink --canonicalize "$PWD")/";
+export CAD_FOR_DIGITAL_E001_SCRIPTSDIR="$CAD_FOR_DIGITAL_E001_ROOTDIR/scripts/";
+export CAD_FOR_DIGITAL_E001_DATADIR="$CAD_FOR_DIGITAL_E001_ROOTDIR/data/";
+export CAD_FOR_DIGITAL_E001_VPRDIR="$CAD_FOR_DIGITAL_E001_ROOTDIR/vtr_release/vpr/";
+
+export PATH="$PATH:$CAD_FOR_DIGITAL_E001_VPRDIR:$CAD_FOR_DIGITAL_E001_SCRIPTSDIR"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(readlink --canonicalize ./SuiteSparse/lib)"
+
+echo "Entering $SHELL_EXE with setup environment. CAD_FOR_DIGITAL_E001_ROOTDIR=$CAD_FOR_DIGITAL_E001_ROOTDIR";
+$SHELL_EXE
+echo "Exiting environment. Old CAD_FOR_DIGITAL_E001_ROOTDIR=$CAD_FOR_DIGITAL_E001_ROOTDIR";

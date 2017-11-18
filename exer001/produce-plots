@@ -10,20 +10,28 @@ pprint = PPrint.PrettyPrinter(indent=2, width=1).pprint
 
 def main():
 	defalts = DotMap(
-		temp_select=[0.015, 0.03, 0.05, 0.1, 0.5, 1, 5, 20, 50, 100,],
+		# temp_select=[0.015, 0.03, 0.05, 0.1, 0.5, 1, 5, 20, 50, 100,],
 		# temp_select=[0.015, 0.02, 0.03, 0.04, 0.05, 0.1, 0.5, 1, 5, 20, 40, 60, 80, 100,],
 		# temp_select=[0.015, 0.03, 0.05, 0.1, 0.5,]
 );
 	parser = argparse.ArgumentParser(description="")
 	parser.add_argument("--" + "results_dir".replace("_","-"), required=True)
 	parser.add_argument("--" + "temp_select".replace("_","-"))
+	parser.add_argument("--" + "run_name_select".replace("_","-"))
+	parser.add_argument("--" + "routing".replace("_","-"), action='store_true')
+	parser.add_argument("--" + "placement".replace("_","-"), action='store_true')
 
 	args = parser.parse_args()
 
 	args.placement_exit_data = args.results_dir + "/placement_exit_data.csv"
+	args.routing_exit_data = args.results_dir + "/routing_exit_data.csv"
 	args.temp_select = list(map(float, args.temp_select.split(','))) if args.temp_select is not None else defalts.temp_select
+	args.run_name_select = args.run_name_select.split(',') if args.run_name_select is not None else defalts.run_name_select
 
-	placement_processing(args)
+	if args.placement:
+		placement_processing(args)
+	if args.routing:
+		routing_processing(args)
 
 def placement_processing(args):
 	data = DotMap();
@@ -51,34 +59,111 @@ def placement_processing(args):
 
 	pprint({"stats" : stats});
 
-	table = [["circuit"] + list(map(str, args.temp_select))]
+	tems_present_and_selected = [];
+	for circuit in stats:
+		for temp in stats[circuit]:
+			if (args.temp_select is None or temp in args.temp_select) and temp not in tems_present_and_selected:
+				tems_present_and_selected += [temp]
+
+	table = [["circuit"] + list(map(str, tems_present_and_selected))]
 	for circuit in stats:
 		row = [circuit];
-		for temp in args.temp_select:
+		for temp in tems_present_and_selected:
 			row += ["{:0.2f}".format(stats[circuit][temp].stddev)]
 		table += [row];
 	print_latex_table("stddev by temp", table)
 
-	table = [["circuit"] + list(map(str, args.temp_select))]
+	table = [["circuit"] + list(map(str, tems_present_and_selected))]
 	for circuit in stats:
 		row = [circuit];
-		for temp in args.temp_select:
+		for temp in tems_present_and_selected:
 			row += ["{:0.1f}".format(100.0*stats[circuit][temp].stddev/stats[circuit][temp].mean)]
 		table += [row];
 	print_latex_table("stddev by temp as percent of mean", table)
 
-	table = [["circuit"] + list(map(str, args.temp_select))]
+	table = [["circuit"] + list(map(str, tems_present_and_selected))]
 	for circuit in stats:
 		row = [circuit];
-		for temp in args.temp_select:
+		for temp in tems_present_and_selected:
 			row += ["{:0.1f}".format(stats[circuit][temp].mean)]
 		table += [row];
 	print_latex_table("mean by temp", table)
+
+def routing_processing(args):
+	data = DotMap();
+
+	with open(args.routing_exit_data, 'r', newline='') as routing_exit_data:
+		reader = csv.reader(routing_exit_data)
+		for row in reader:
+			if len(row) == 0: continue
+			circuit, run_name, seed, cost, route_time = row[0], row[1], row[2], float(row[3].split(' ')[4]), float(row[4].split(' ')[3]);
+			if circuit not in data: data[circuit] = DotMap()
+			if run_name not in data[circuit]: data[circuit][run_name] = DotMap()
+			data[circuit][run_name][seed] = DotMap(
+				cost=cost,
+				route_time=route_time,
+			)
+
+	pprint({"raw_data" : data});
+
+	stats = DotMap(summary=DotMap());
+
+	for circuit in data:
+		stats[circuit] = DotMap();
+		for run_name in data[circuit]:
+			stats[circuit][run_name] = DotMap();
+			stats[circuit][run_name].stddev = statistics.pstdev([s.cost for n,s in data[circuit][run_name].items()])
+			stats[circuit][run_name].mean = statistics.mean([s.cost for n,s in data[circuit][run_name].items()])
+			stats[circuit][run_name].mean_route_time = statistics.mean([s.route_time for n,s in data[circuit][run_name].items()])
+			if run_name not in stats.summary: stats.summary[run_name] = DotMap(means=[]);
+			stats.summary[run_name].means += [stats[circuit][run_name].mean]
+
+	for run_name in stats.summary:
+		stats.summary[run_name].mean = geomean(stats.summary[run_name].means)
+
+	pprint({"stats" : stats});
+
+	run_names_present_and_selected = [];
+	for circuit in stats:
+		for run_name in stats[circuit]:
+			if (args.run_name_select is None or run_name in args.run_name_select) and run_name not in run_names_present_and_selected:
+				run_names_present_and_selected += [run_name]
+
+	table = [["run name"] + list(map(str, run_names_present_and_selected))]
+
+	for circuit in stats:
+		row = [circuit];
+		for run_name in run_names_present_and_selected:
+			row += ["{:0.2f}".format(stats[circuit][run_name].mean)]
+		table += [row];
+	print_latex_table("mean by run_name", table)
+
+
+	table = [["run name"] + list(map(str, run_names_present_and_selected))]
+
+	for circuit in stats:
+		row = [circuit];
+		for run_name in run_names_present_and_selected:
+			if circuit == "summary": continue
+			row += ["{:0.2f}".format(stats[circuit][run_name].mean_route_time)]
+		table += [row];
+	print_latex_table("mean router_time by run_name", table)
+
 
 def print_latex_table(name, table):
 	print("% " + name)
 	for row in table:
 		print(" & ".join(row) + " \\\\")
+
+
+
+def geomean(numbers):
+	product = 1
+	for n in numbers:
+		product *= n
+	return product ** (1.0/len(numbers))
+
+
 
 class DotMap(dict):
 	"""

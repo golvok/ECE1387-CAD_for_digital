@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+SEEDS="$(seq 1 4)"
+RUN_TYPES="default"
+RUN_TYPES="$RUN_TYPES decr_ipres_0.4 decr_ipres_0.25 decr_pfacm_1.1 decr_pfacm_1.2"
+RUN_TYPES="$RUN_TYPES decr_astar_1.15 decr_astar_1.10 decr_astar_1.05"
+RUN_TYPES="$RUN_TYPES decr_accf_0.95 decr_accf_0.90 decr_accf_0.85"
+
+RUN_TYPES="$RUN_TYPES decr_ipres_0.40_and_decr_pfacm_1.1 decr_ipres_0.40_and_decr_pfacm_1.2 decr_ipres_0.25_and_decr_pfacm_1.1 decr_ipres_0.25_and_decr_pfacm_1.2"
+RUN_TYPES="$RUN_TYPES decr_ipres_0.40_and_decr_pfacm_1.1_and_decr_astar_1.10"
+RUN_TYPES="$RUN_TYPES decr_ipres_0.40_and_decr_pfacm_1.1_and_decr_astar_1.10_and_decr_accf_0.90"
+RUN_TYPES="$RUN_TYPES decr_pfacm_1.05 decr_ipres_0.40_and_decr_pfacm_1.05_and_decr_astar_1.10"
+
+# RUN_TYPES="$RUN_TYPES reverse_pins reverse_nets"
+ALL_CIRCUITS="bigkey mkSMAdapter4B or1200 pair"
+WORK_DIR="run-routing$1"
+EXTRA_ARGS="--nodisp --timing_analysis on"
+ROUTING_EXIT_DATA_CSV="$WORK_DIR/routing_exit_data.csv"
+
+ARCH="$CAD_FOR_DIGITAL_E001_DATADIR/k6_N10_mem32K_40nm.xml"
+
+for CIRCUIT in $ALL_CIRCUITS; do
+	if [[ "$CIRCUIT" == "bigkey" ]];        then CWIDTH=40; fi
+	if [[ "$CIRCUIT" == "mkSMAdapter4B" ]]; then CWIDTH=56; fi
+	if [[ "$CIRCUIT" == "or1200" ]];        then CWIDTH=70; fi
+	if [[ "$CIRCUIT" == "pair" ]];          then CWIDTH=40; fi
+	for RUN_TYPE in $RUN_TYPES; do
+		ROUTE_EXTRA_ARGS=""
+		if [[ "$RUN_TYPE" == *"default"* ]];         then ROUTE_EXTRA_ARGS=" "; fi
+		if [[ "$RUN_TYPE" == *"reverse_pins"* ]];    then ROUTE_EXTRA_ARGS=" "; fi
+		if [[ "$RUN_TYPE" == *"reverse_nets"* ]];    then ROUTE_EXTRA_ARGS=" "; fi
+		if [[ "$RUN_TYPE" == *"decr_ipres_0.4"* ]];  then ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --initial_pres_fac 0.4"; fi
+		if [[ "$RUN_TYPE" == *"decr_ipres_0.25"* ]]; then ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --initial_pres_fac 0.25"; fi
+		if [[ "$RUN_TYPE" == *"decr_pfacm_1.00"* ]]; then ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --pres_fac_mult 1.0"; fi
+		if [[ "$RUN_TYPE" == *"decr_pfacm_1.05"* ]]; then ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --pres_fac_mult 1.05"; fi
+		if [[ "$RUN_TYPE" == *"decr_pfacm_1.1"* ]];  then ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --pres_fac_mult 1.1"; fi
+		if [[ "$RUN_TYPE" == *"decr_pfacm_1.2"* ]];  then ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --pres_fac_mult 1.2"; fi
+		if [[ "$RUN_TYPE" == *"decr_astar_1.15"* ]]; then ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --astar_fac 1.15"; fi
+		if [[ "$RUN_TYPE" == *"decr_astar_1.10"* ]]; then ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --astar_fac 1.10"; fi
+		if [[ "$RUN_TYPE" == *"decr_astar_1.05"* ]]; then ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --astar_fac 1.05"; fi
+		if [[ "$RUN_TYPE" == *"decr_accf_0.95"* ]];  then ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --acc_fac 0.95"; fi
+		if [[ "$RUN_TYPE" == *"decr_accf_0.90"* ]];  then ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --acc_fac 0.90"; fi
+		if [[ "$RUN_TYPE" == *"decr_accf_0.85"* ]];  then ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --acc_fac 0.85"; fi
+
+		if [[ -z "$ROUTE_EXTRA_ARGS" ]]; then
+			echo "BAD RUN TYPE $RUN_TYPE"
+		else
+			ROUTE_EXTRA_ARGS="$ROUTE_EXTRA_ARGS --max_router_iterations 200"
+			for SEED in $SEEDS; do
+				(
+					WORK_SUBDIR="$CIRCUIT-$RUN_TYPE-S$SEED"
+					mkdir -p "$WORK_DIR/$WORK_SUBDIR"
+					cd "$WORK_DIR/$WORK_SUBDIR"
+
+					cp "$CAD_FOR_DIGITAL_E001_DATADIR/$CIRCUIT.blif" .
+
+					if [[ ! -f "$CIRCUIT.net" ]]; then
+						PACK_ARGS="--pack"
+					fi
+
+					if [[ ! -f "$CIRCUIT.place" ]]; then
+						PLACE_ARGS="--place --seed $SEED"
+					fi
+					
+					if [[ ! -f "$CIRCUIT.route" ]]; then
+						ROUTE_ARGS="--route --route_chan_width $CWIDTH $ROUTE_EXTRA_ARGS"
+					fi
+
+					if [[ -z "$PACK_ARGS" && -z "$PLACE_ARGS" && -z "$ROUTE_ARGS" ]]; then
+						echo "SKIPPING $WORK_SUBDIR"
+					else
+						VPR_CALL="vpr \"$ARCH\" \"$CIRCUIT.blif\" $EXTRA_ARGS $PACK_ARGS $PLACE_ARGS $ROUTE_ARGS"
+						echo "starting $WORK_SUBDIR: $VPR_CALL"
+						# vpr "$ARCH" "$CIRCUIT.blif" $EXTRA_ARGS $PACK_ARGS $PLACE_ARGS $ROUTE_ARGS >> /dev/null;
+						# rm *.place *.route *.net
+						echo "done $WORK_SUBDIR"
+					fi
+				) &
+			done
+		fi
+	done
+done
+
+wait
+
+echo "=== Results ==="
+
+echo "" > "$ROUTING_EXIT_DATA_CSV"
+
+for CIRCUIT in $ALL_CIRCUITS; do
+	for RUN_TYPE in $RUN_TYPES; do
+		for SEED in $SEEDS; do
+			WORK_SUBDIR="$CIRCUIT-$RUN_TYPE-S$SEED"
+			echo -en "$WORK_SUBDIR:\t"
+
+			echo -n "$CIRCUIT, $RUN_TYPE, $SEED, " >> "$ROUTING_EXIT_DATA_CSV"
+			cat "$WORK_DIR/$WORK_SUBDIR/vpr_stdout.log" | grep "Final critical path" | tr -d '\012\015' | tee -a "$ROUTING_EXIT_DATA_CSV"
+			echo -n ", " >> "$ROUTING_EXIT_DATA_CSV"
+			cat "$WORK_DIR/$WORK_SUBDIR/vpr_stdout.log" | grep "Routing took" | tee -a "$ROUTING_EXIT_DATA_CSV"
+		done
+	done
+done
+
+echo "end results"
+

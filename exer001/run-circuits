@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-TEMPS="0.015 0.02 0.03 0.04 0.05 0.1 0.5 0.57 1 5 20 40 50 60 80 100"
+TEMPS="0.01 0.05 0.1 0.5 0.75 1.0"
+# TEMPS="0.015 0.02 0.03 0.04 0.05 0.1 0.5 0.57 1 5 20 40 50 60 80 100"
 SEEDS="$(seq 1 10)"
 ALL_CIRCUITS="bigkey mkSMAdapter4B or1200 pair"
 WORK_DIR="run-circuits-temp$1"
