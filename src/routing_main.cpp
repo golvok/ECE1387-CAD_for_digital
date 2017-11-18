@@ -1,6 +1,6 @@
 
 #include <flows/routing_flows.hpp>
-#include <graphics/graphics_wrapper.hpp>
+#include <graphics/graphics_wrapper_fpga.hpp>
 #include <parsing/routing_cmdargs_parser.hpp>
 #include <parsing/routing_input_parser.hpp>
 #include <util/lambda_compose.hpp>

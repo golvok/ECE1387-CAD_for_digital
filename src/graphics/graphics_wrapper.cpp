@@ -7,16 +7,12 @@
 
 namespace graphics {
 
-Graphics& get() {
-	static Graphics singleton;
-	return singleton;
-}
-
 Graphics::Graphics()
 	: enabled(false)
 	, impl(nullptr)
-	, fpga_graphics_data()
 { }
+
+Graphics::~Graphics() { }
 
 class Graphics::Impl {
 private:
@@ -74,7 +70,7 @@ public:
 					},
 					[this]() noexcept {
 						// drawscreen
-						graphics_interface->fpga().drawAll();
+						graphics_interface->drawAll();
 					}
 				);
 				wait_for_proceed.notify_all();

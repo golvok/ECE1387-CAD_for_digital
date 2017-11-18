@@ -2,7 +2,7 @@
 
 #include <algo/routing.hpp>
 #include <flows/flows_common.hpp>
-#include <graphics/graphics_wrapper.hpp>
+#include <graphics/graphics_wrapper_fpga.hpp>
 #include <util/lambda_compose.hpp>
 #include <util/logging.hpp>
 

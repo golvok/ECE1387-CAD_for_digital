@@ -1,19 +1,9 @@
 #ifndef GRAHPCIS__GRAPHICS_WRAPPER_H
 #define GRAHPCIS__GRAPHICS_WRAPPER_H
 
-#include <graphics/fpga_graphics_data.hpp>
-
 #include <memory>
 
 namespace graphics {
-
-class Graphics;
-class TrainsArea;
-
-/**
- * Singleton getter for graphics
- */
-Graphics& get();
 
 /**
  * The main API for making windows and graphics elements.
@@ -24,11 +14,9 @@ class Graphics {
 	class Impl;
 	std::unique_ptr<Impl> impl;
 
-	// this is here (as opposed to being in the Impl) so that it always exists
-	// and can be written to.
-	FPGAGraphicsData fpga_graphics_data;
 public:
 	Graphics();
+	virtual ~Graphics();
 
 	Graphics(const Graphics&) = delete;
 	Graphics& operator=(const Graphics&) = delete;
@@ -53,12 +41,9 @@ public:
 	 */
 	void join();
 
-	/**
-	 * Get the data interface for the FPGA Area.
-	 * The intended way of making data availible to the FPGA Area graphics.
-	 */
-	FPGAGraphicsData& fpga() { return fpga_graphics_data; }
 	void startThreadsAndOpenWindow();
+
+	virtual void drawAll() { }
 private:
 };
 

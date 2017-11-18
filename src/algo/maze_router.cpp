@@ -2,7 +2,7 @@
 
 #include <device/connectors.hpp>
 #include <device/device.hpp>
-#include <graphics/graphics_wrapper.hpp>
+#include <graphics/graphics_wrapper_fpga.hpp>
 #include <util/template_utils.hpp>
 
 namespace algo {

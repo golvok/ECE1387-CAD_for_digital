@@ -2,7 +2,7 @@
 
 #include <algo/analytic_placement.hpp>
 #include <flows/flows_common.hpp>
-#include <graphics/graphics_wrapper.hpp>
+#include <graphics/graphics_wrapper_fpga.hpp>
 
 #include <array>
 

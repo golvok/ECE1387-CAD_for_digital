@@ -1,6 +1,6 @@
 
 #include <flows/placement_flows.hpp>
-#include <graphics/graphics_wrapper.hpp>
+#include <graphics/graphics_wrapper_fpga.hpp>
 #include <parsing/anaplace_cmdargs_parser.hpp>
 #include <parsing/anaplace_datafile_parser.hpp>
 #include <util/lambda_compose.hpp>

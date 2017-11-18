@@ -306,7 +306,7 @@ public:
 	}
 
 private:
-	friend class Graphics;
+	friend class FPGAGraphics;
 	template<typename> friend class detail::pushState_instantiator;
 
 	template<typename Device>

@@ -4,7 +4,7 @@
 #include <algo/maze_router.hpp>
 #include <device/connectors.hpp>
 #include <device/device.hpp>
-#include <graphics/graphics_wrapper.hpp>
+#include <graphics/graphics_wrapper_fpga.hpp>
 #include <util/logging.hpp>
 
 #include <boost/optional.hpp>
