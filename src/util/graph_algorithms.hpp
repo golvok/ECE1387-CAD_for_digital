@@ -137,8 +137,8 @@ void breadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_list, 
 
 }
 
-template<typename FanoutGen, typename InitialList, typename Target, typename Visitor, typename ShouldIgnore = detail::AlwaysFalse>
-auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_list, Target&& target, Visitor&& visitor, ShouldIgnore&& should_ignore = ShouldIgnore()) const {
+template<typename FanoutGen, typename InitialList, typename IsTarget, typename Visitor, typename ShouldIgnore = detail::AlwaysFalse>
+auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_list, IsTarget&& isTarget, Visitor&& visitor, ShouldIgnore&& should_ignore = ShouldIgnore()) const {
 	struct VertexData {
 		std::vector<ID> fanin = {};
 	};
@@ -232,7 +232,7 @@ auto wavedBreadthFirstVisit(FanoutGen&& fanout_gen, const InitialList& initial_l
 					}
 				}
 
-				if (exploreData.fanout == target) {
+				if (isTarget(exploreData.fanout)) {
 					found_target = true;
 				}
 
