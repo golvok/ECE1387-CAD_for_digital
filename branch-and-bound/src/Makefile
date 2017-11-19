@@ -92,7 +92,7 @@ LDFLAGS  += $(EXTRA_FLAGS) $(WARNING_FLAGS) $(LIBRARY_LINK_FLAGS)
 .PRECIOUS: $(OBJ_DIR)%.o
 
 # define source directories
-SOURCE_DIRS = algo/ flows/ graphics/ parsing/ util/ util/tests/ ./
+SOURCE_DIRS = algo/ datastructures/ graphics/ parsing/ util/ util/tests/ ./
 
 ALL_OBJ_DIRS  = $(addprefix $(OBJ_DIR),  $(SOURCE_DIRS))
 ALL_DEPS_DIRS = $(addprefix $(DEPS_DIR), $(SOURCE_DIRS))
@@ -136,6 +136,7 @@ GRAPHICS_OBJECTS = \
 # add more dependencies here:
 $(EXE_DIR)sat-maxer: \
 	$(OBJ_DIR)sat_maxer_main.o \
+	$(OBJ_DIR)datastructures/cnf_expression.o \
 	$(OBJ_DIR)parsing/sat_maxer_cmdargs_parser.o \
 	$(OBJ_DIR)parsing/sat_maxer_datafile_parser.o \
 	$(OBJ_DIR)util/logging.o \

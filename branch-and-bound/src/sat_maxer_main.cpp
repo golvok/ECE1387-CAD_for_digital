@@ -46,6 +46,11 @@ int main(int argc, char const** argv) {
 int program_main(const ProgramConfig& config) {
 
 	std::ifstream data_file(config.dataFileName());
+	if (!data_file.is_open()) {
+		util::print_and_throw<std::invalid_argument>([&](auto&& str) {
+			str << "unable to open data file\n";
+		});
+	}
 
 	auto parse_result = input::parse_data(data_file);
 	auto visitor = util::compose_withbase<boost::static_visitor<void>>(
@@ -68,6 +73,11 @@ void do_optional_input_data_dump(const std::string& data_file_name, const input:
 		return;
 	}
 
-	(void)data_file_name;
-	(void)pr;
+	const auto indent = dout(DL::DATA_READ1).indentWithTitle("data file name: \"" + data_file_name + '"');
+	for (const auto& disjunction : pr.expression().all_disjunctions()) {
+		for (const auto& literal : disjunction) {
+			dout(DL::DATA_READ1) << literal << ' ';
+		}
+		dout(DL::DATA_READ1) << '\n';
+	}
 }

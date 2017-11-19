@@ -1,7 +1,7 @@
 #ifndef PARSING__ROUTING_INPUT_PARSER_H
 #define PARSING__ROUTING_INPUT_PARSER_H
 
-#include <graphics/geometry.hpp>
+#include <datastructures/cnf_expression.hpp>
 
 #include <iosfwd>
 #include <vector>
@@ -14,6 +14,10 @@ namespace sat_maxer {
 namespace input {
 
 struct ParseResult {
+	auto& expression() const { return m_expression; }
+	auto& expression()       { return m_expression; }
+
+	CNFExpression m_expression;
 };
 
 /**

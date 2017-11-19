@@ -72,15 +72,13 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 		return err_stream.str();
 	}
 
-	dout(DL::INFO) << boost::get<0>(parse_results) << ' ' << boost::get<1>(parse_results) << '\n';
-	for (const auto& conjunction : boost::get<2>(parse_results)) {
-		for (const auto& term : conjunction) {
-			dout(DL::INFO) << term << ' ';
-		}
-		dout(DL::INFO) << '\n';
+	for (auto& disjunction : boost::get<2>(parse_results)) {
+		disjunction.pop_back(); // ignore training zero
 	}
 
-	return ParseResult{};
+	CNFExpression expression(boost::get<2>(parse_results));
+
+	return ParseResult{expression,};
 }
 
 }
