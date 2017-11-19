@@ -2,6 +2,7 @@
 #include <graphics/graphics_wrapper_sat_maxer.hpp>
 #include <parsing/sat_maxer_cmdargs_parser.hpp>
 #include <parsing/sat_maxer_datafile_parser.hpp>
+#include <util/graph_algorithms.hpp>
 #include <util/lambda_compose.hpp>
 #include <util/logging.hpp>
 
@@ -16,7 +17,7 @@ using namespace parsing::sat_maxer;
 using namespace parsing::sat_maxer::cmdargs;
 
 int program_main(const ProgramConfig& config);
-
+void satisfy_maximally(const CNFExpression& expression);
 void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr);
 
 int main(int argc, char const** argv) {
@@ -61,11 +62,97 @@ int program_main(const ProgramConfig& config) {
 		},
 		[&](const input::ParseResult& pr) {
 			do_optional_input_data_dump(config.dataFileName(), pr);
+			satisfy_maximally(pr.expression());
 		}
 	);
 	apply_visitor(visitor, parse_result);
 
 	return 0;
+}
+
+struct Graph {
+	struct Vertex {
+		std::vector<LiteralID>::const_iterator lit_pos;
+		bool inverted;
+		int id;
+
+		Literal literal() const {
+			return Literal(inverted, *lit_pos);
+		}
+
+		bool operator==(const Vertex& rhs) const {
+			return std::forward_as_tuple(lit_pos, inverted, id)
+				== std::forward_as_tuple(rhs.lit_pos, rhs.inverted, rhs.id);
+		}
+	};
+
+
+	template<typename LiteralOrder>
+	Graph(const LiteralOrder& lo)
+		: m_literal_order(begin(lo), end(lo))
+		, next_id(0)
+	{ }
+
+	auto fanout(const Vertex& v) const {
+		return std::array<Vertex, 2>{{
+			{std::next(v.lit_pos), true, ++next_id},
+			{std::next(v.lit_pos), false, ++next_id},
+		}};
+	}
+
+	auto roots() const {
+		return std::array<Vertex, 2>{{
+			{begin(m_literal_order), true, ++next_id},
+			{begin(m_literal_order), false, ++next_id},
+		}};
+	}
+
+
+	bool isValid(const Vertex& v) const {
+		return v.lit_pos != end(m_literal_order);
+	}
+private:
+	std::vector<LiteralID> m_literal_order;
+	mutable int next_id;
+};
+
+namespace std {
+	template<> struct hash<Graph::Vertex> {
+		auto operator()(const Graph::Vertex& v) const {
+			return std::hash<std::decay_t<decltype(*v.lit_pos)>>()(*v.lit_pos)
+				| std::hash<std::decay_t<decltype(v.inverted)>>()(v.inverted)
+				| std::hash<std::decay_t<decltype(v.id)>>()(v.id)
+			;
+		}
+	};
+}
+
+void satisfy_maximally(const CNFExpression& expression) {
+	const auto graphAlgo = util::GraphAlgo<Graph::Vertex>();
+
+	const auto graph = Graph{expression.all_literals()};
+
+	struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
+		void onExplore(const Graph::Vertex& vertex) const {
+			// TODO update lower bound
+			dout(DL::INFO) << vertex.literal() << ' ';
+			(void)vertex;
+		}
+	} visitor;
+
+	graphAlgo.wavedBreadthFirstVisit(
+		graph,
+		graph.roots(),
+		[&](const auto&) {
+			// want to explore untill tree is exhausted
+			return false;
+		},
+		visitor,
+		[&](const auto& vertex) {
+			// TODO check againts lower bound too
+			return !graph.isValid(vertex);
+		}
+	);
 }
 
 void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr) {
