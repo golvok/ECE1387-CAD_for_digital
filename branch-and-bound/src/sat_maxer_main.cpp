@@ -2,6 +2,7 @@
 #include <graphics/graphics_wrapper_sat_maxer.hpp>
 #include <parsing/sat_maxer_cmdargs_parser.hpp>
 #include <parsing/sat_maxer_datafile_parser.hpp>
+#include <util/generator.hpp>
 #include <util/graph_algorithms.hpp>
 #include <util/lambda_compose.hpp>
 #include <util/logging.hpp>
@@ -74,46 +75,45 @@ struct Graph {
 	struct Vertex {
 		std::vector<LiteralID>::const_iterator lit_pos;
 		bool inverted;
-		int id;
 
 		Literal literal() const {
 			return Literal(inverted, *lit_pos);
 		}
 
-		bool operator==(const Vertex& rhs) const {
-			return std::forward_as_tuple(lit_pos, inverted, id)
-				== std::forward_as_tuple(rhs.lit_pos, rhs.inverted, rhs.id);
-		}
+		// bool operator==(const Vertex& rhs) const {
+		// 	return std::forward_as_tuple(lit_pos, inverted, id)
+		// 		== std::forward_as_tuple(rhs.lit_pos, rhs.inverted, rhs.id);
+		// }
 	};
 
 
 	template<typename LiteralOrder>
 	Graph(const LiteralOrder& lo)
 		: m_literal_order(begin(lo), end(lo))
-		, next_id(0)
 	{ }
 
-	auto fanout(const Vertex& v) const {
-		return std::array<Vertex, 2>{{
-			{std::next(v.lit_pos), true, ++next_id},
-			{std::next(v.lit_pos), false, ++next_id},
-		}};
+	auto fanout(const Vertex& source) const {
+		auto src_lit_pos = source.lit_pos;
+		return util::make_generator<int> (
+			isValid(source) ? 0 : 2,
+			[](const int& index) { return index == 2; },
+			[](const int& index) { return index + 1; },
+			[src_lit_pos](const int& index) { return Vertex{ std::next(src_lit_pos), index == 0 ? false : true }; }
+		);
 	}
 
 	auto roots() const {
 		return std::array<Vertex, 2>{{
-			{begin(m_literal_order), true, ++next_id},
-			{begin(m_literal_order), false, ++next_id},
+			{begin(m_literal_order), false},
+			{begin(m_literal_order), true},
 		}};
 	}
-
 
 	bool isValid(const Vertex& v) const {
 		return v.lit_pos != end(m_literal_order);
 	}
 private:
 	std::vector<LiteralID> m_literal_order;
-	mutable int next_id;
 };
 
 namespace std {
@@ -121,16 +121,17 @@ namespace std {
 		auto operator()(const Graph::Vertex& v) const {
 			return std::hash<std::decay_t<decltype(*v.lit_pos)>>()(*v.lit_pos)
 				| std::hash<std::decay_t<decltype(v.inverted)>>()(v.inverted)
-				| std::hash<std::decay_t<decltype(v.id)>>()(v.id)
+				// | std::hash<std::decay_t<decltype(v.id)>>()(v.id)
 			;
 		}
 	};
 }
 
 void satisfy_maximally(const CNFExpression& expression) {
-	const auto graphAlgo = util::GraphAlgo<Graph::Vertex>();
-
+	using ID = Graph::Vertex;
 	const auto graph = Graph{expression.all_literals()};
+	const auto initial_list = graph.roots();
+
 
 	struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 		void onExplore(const Graph::Vertex& vertex) const {
@@ -140,19 +141,45 @@ void satisfy_maximally(const CNFExpression& expression) {
 		}
 	} visitor;
 
-	graphAlgo.wavedBreadthFirstVisit(
-		graph,
-		graph.roots(),
-		[&](const auto&) {
-			// want to explore untill tree is exhausted
-			return false;
-		},
-		visitor,
-		[&](const auto& vertex) {
-			// TODO check againts lower bound too
-			return !graph.isValid(vertex);
+	struct State {
+		ID vertex;
+	};
+
+	std::vector<State> seed_states;
+	// for (const auto& id : initial_list) {
+	// 	seed_states.emplace_back(State{
+	// 		id;
+	// 	});
+	// }
+	seed_states.emplace_back(State{
+		*begin(initial_list)
+	});
+
+	for (const auto& seed_state : seed_states) {
+		std::vector<State> state_stack { seed_state, };
+
+		while (!state_stack.empty()) {
+			const auto& state = state_stack.back();
+
+			visitor.onExplore(state.vertex);
+			auto new_state = State{
+				*begin(graph.fanout(state.vertex))
+			};
+
+			if (!graph.isValid(new_state.vertex)) {
+				while (!state_stack.empty()) {
+					if (!state_stack.back().vertex.inverted) {
+						state_stack.back().vertex.inverted = true;
+						break;
+					} else {
+						state_stack.pop_back();
+					}
+				}
+			} else {
+				state_stack.push_back(new_state);
+			}
 		}
-	);
+	}
 }
 
 void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr) {
