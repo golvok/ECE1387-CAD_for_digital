@@ -73,7 +73,9 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 	}
 
 	for (auto& disjunction : boost::get<2>(parse_results)) {
-		disjunction.pop_back(); // ignore training zero
+		if (not disjunction.empty()){
+			disjunction.pop_back(); // ignore training zero
+		}
 	}
 
 	CNFExpression expression(boost::get<2>(parse_results));
