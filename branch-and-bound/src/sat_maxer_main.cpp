@@ -127,22 +127,58 @@ namespace std {
 	};
 }
 
+struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
+	const CNFExpression& expression;
+
+	Visitor(const CNFExpression& expression)
+		: expression(expression)
+	{ }
+
+	void onExplore(const Graph::Vertex& vertex) const {
+		// TODO update lower bound
+		// dout(DL::INFO) << vertex.literal() << ' ';
+		(void)vertex;
+	}
+
+	template<typename T>
+	auto evalPartialSolution(const T& partial_solution) {
+		std::unordered_map<LiteralID, bool> literal_settings;
+		for (const auto& setting : partial_solution) {
+			const auto& lit = setting.vertex.literal();
+			literal_settings.emplace(
+				lit.id(), !lit.inverted()
+			);
+		}
+
+		auto counts = eval_disjunctions(expression, literal_settings);
+		// dout(DL::INFO) << "counts={tc=" << counts.true_count << ", fc=" << counts.false_count << ", uc=" << counts.undecidable_count << "}";
+
+		struct Result {
+			int lower_bound;
+			int upper_bound;
+			bool is_complete_solution;
+		} result {
+			counts.false_count,
+			counts.false_count + counts.undecidable_count,
+			counts.undecidable_count == 0,
+		};
+
+		// dout(DL::INFO) << ", result={lb=" << result.lower_bound << ", ub=" << result.upper_bound << ", ics=" << std::boolalpha << result.is_complete_solution << "}\n";
+		return result;
+	}
+};
+
 void satisfy_maximally(const CNFExpression& expression) {
 	using ID = Graph::Vertex;
 	const auto graph = Graph{expression.all_literals()};
 	const auto initial_list = graph.roots();
 
 
-	struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
-		void onExplore(const Graph::Vertex& vertex) const {
-			// TODO update lower bound
-			dout(DL::INFO) << vertex.literal() << ' ';
-			(void)vertex;
-		}
-	} visitor;
+	Visitor visitor { expression };
 
 	struct State {
 		ID vertex;
+		int parent_lower_bound;
 	};
 
 	std::vector<State> seed_states;
@@ -152,8 +188,11 @@ void satisfy_maximally(const CNFExpression& expression) {
 	// 	});
 	// }
 	seed_states.emplace_back(State{
-		*begin(initial_list)
+		*begin(initial_list),
+		-100,
 	});
+
+	auto best_cost = visitor.evalPartialSolution(std::vector<State>()).upper_bound;
 
 	for (const auto& seed_state : seed_states) {
 		std::vector<State> state_stack { seed_state, };
@@ -162,13 +201,24 @@ void satisfy_maximally(const CNFExpression& expression) {
 			const auto& state = state_stack.back();
 
 			visitor.onExplore(state.vertex);
+			auto cost = visitor.evalPartialSolution(state_stack);
+
+			const bool skip_branch = cost.lower_bound >= best_cost;
+			if (cost.is_complete_solution) {
+				best_cost = std::min(best_cost, cost.upper_bound);
+				if (!skip_branch) {
+					dout(DL::INFO) << "\tbest=" << best_cost << "\n";
+				}
+			}
+
 			auto new_state = State{
-				*begin(graph.fanout(state.vertex))
+				*begin(graph.fanout(state.vertex)),
+				cost.lower_bound,
 			};
 
-			if (!graph.isValid(new_state.vertex)) {
+			if (skip_branch || !graph.isValid(new_state.vertex)) {
 				while (!state_stack.empty()) {
-					if (!state_stack.back().vertex.inverted) {
+					if (state_stack.back().parent_lower_bound < best_cost and !state_stack.back().vertex.inverted) {
 						state_stack.back().vertex.inverted = true;
 						break;
 					} else {

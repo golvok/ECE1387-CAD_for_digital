@@ -25,4 +25,37 @@ private:
 	std::unordered_set<LiteralID> m_all_literals;
 };
 
+template<typename T>
+auto eval_disjunctions(const CNFExpression& expression, const T& literal_settings) {
+	// count all disjunctions that have all terms set, and are false.
+	struct Result {
+		int true_count = 0;
+		int false_count = 0;
+		int undecidable_count = 0;
+	} result;
+	for (const auto& disjunction : expression.all_disjunctions()) {
+		bool disjunction_value = false;
+		bool disjunction_decidable = true;
+		for (const auto& literal : disjunction) {
+			const auto& lookup = literal_settings.find(literal.id());
+			if (lookup == end(literal_settings)) {
+				disjunction_decidable = false;
+			} else {
+				bool literal_value = literal.inverted() ? !lookup->second : lookup->second;
+				disjunction_value = disjunction_value || literal_value;
+			}
+		}
+		if (disjunction_value) {
+			result.true_count += 1;
+		} else {
+			if (disjunction_decidable) {
+				result.false_count += 1;
+			} else {
+				result.undecidable_count += 1;
+			}
+		}
+	}
+	return result;
+}
+
 #endif /* DATASTRUCTURES__CNF_EXPRESSION_HPP */
