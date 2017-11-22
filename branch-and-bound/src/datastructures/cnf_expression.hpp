@@ -23,7 +23,7 @@ struct CNFExpression {
 	using DisjunctionID = int;
 private:
 	std::vector<std::vector<Literal>> m_disjunctions;
-	std::unordered_set<LiteralID> m_all_literals;
+	std::vector<LiteralID> m_all_literals;
 };
 
 template<typename T>
