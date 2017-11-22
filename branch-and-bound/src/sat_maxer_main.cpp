@@ -130,7 +130,7 @@ namespace std {
 
 struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 	const CNFExpression& expression;
-	CNFEvaluation<std::unordered_map, std::vector> evaluator;
+	CNFEvaluation<std::vector> evaluator;
 	int num_partial_settings_explored = 0;
 	int num_complete_settings_explored = 0;
 
