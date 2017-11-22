@@ -8,6 +8,10 @@
 struct LiteralIDTag { static const std::uint16_t DEFAULT_VALUE = 0xFFFF; };
 using LiteralID = util::ID<std::int16_t, LiteralIDTag>;
 
+inline bool operator<(const LiteralID& lhs, const LiteralID& rhs) {
+	return lhs.getValue() < rhs.getValue();
+}
+
 struct LiteralTag { static const std::uint16_t DEFAULT_VALUE = 0xFFFF; };
 struct Literal : public util::ID <std::uint16_t, LiteralTag>, public util::print_printable {
 	template<typename T>
