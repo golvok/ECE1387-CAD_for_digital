@@ -22,7 +22,7 @@ int program_main(const ProgramConfig& config);
 void satisfy_maximally(const CNFExpression& expression);
 void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr);
 
-int main(int argc, char const** argv) {
+int main(int argc, char const** argv) { try{
 
 	dout.setHighestTitleRank(7);
 
@@ -39,12 +39,12 @@ int main(int argc, char const** argv) {
 	}
 
 	const auto result = program_main(parsed_args.programConfig());
-
 	graphics::get().close();
 	graphics::get().join();
 
 	return result;
-}
+
+} catch (std::exception& e) { std::cerr << "Uncaught exception: .what() = \"" << e.what() << '"' << std::endl; return -1; } }
 
 int program_main(const ProgramConfig& config) {
 

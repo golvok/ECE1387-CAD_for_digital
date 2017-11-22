@@ -44,7 +44,7 @@ BUILD_SUBDIRS = $(EXE_DIR) $(OBJ_DIR) $(DEPS_DIR)
 WARNING_FLAGS += -Wall -Wextra -pedantic -Weffc++ -Wconversion -Werror
 
 # put other flags for both the compiler & linker here
-EXTRA_FLAGS = -std=c++14 -D X11 -fopenmp
+EXTRA_FLAGS += -std=c++14 -D X11 -fopenmp
 
 BOOST_VERSION_TEST_INPUT = \#include <boost/version.hpp>\nBOOST_VERSION\n
 BOOST_VERSION = $(shell echo -e '$(BOOST_VERSION_TEST_INPUT)' | gcc -x c++ -E - | tail -n 1)
@@ -57,11 +57,11 @@ endif
 ifeq ($(BUILD_MODE),debug)
 	EXTRA_FLAGS += -ggdb -D DEBUG # -D _GLIBCXX_DEBUG
 	EXTRA_FLAGS += -Wno-maybe-uninitialized # silence g++
-endif
-
-# add flags for release
-ifeq ($(BUILD_MODE),release)
+else ifeq ($(BUILD_MODE),release)
 	EXTRA_FLAGS += -flto -O3
+	EXTRA_FLAGS += -Wno-maybe-uninitialized # silence g++
+else ifeq ($(BUILD_MODE),profile)
+	EXTRA_FLAGS += -flto -O1 -pg -g -no-pie
 	EXTRA_FLAGS += -Wno-maybe-uninitialized # silence g++
 endif
 
