@@ -1,4 +1,5 @@
 
+#include <datastructures/cnf_evaluation.hpp>
 #include <graphics/graphics_wrapper_sat_maxer.hpp>
 #include <parsing/sat_maxer_cmdargs_parser.hpp>
 #include <parsing/sat_maxer_datafile_parser.hpp>
@@ -129,18 +130,29 @@ namespace std {
 
 struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 	const CNFExpression& expression;
+	CNFEvaluation<std::unordered_map, std::unordered_map> evaluator;
 	int num_partial_settings_explored = 0;
 	int num_complete_settings_explored = 0;
 
 	Visitor(const CNFExpression& expression)
 		: expression(expression)
+		, evaluator(expression)
 	{ }
 
-	void onExplore(const Graph::Vertex& vertex) const {
-		// TODO update lower bound
+	void onExplore(const Graph::Vertex& vertex) {
 		// dout(DL::INFO) << vertex.literal() << ' ';
+		const auto& new_counts = evaluator.addSetting(vertex.literal().id(), !vertex.inverted);
+		(void)new_counts;
 		(void)vertex;
 	}
+
+	void onLeave(const Graph::Vertex& vertex) {
+		const auto& new_counts = evaluator.removeSetting(vertex.literal().id(), !vertex.inverted);
+		// dout(DL::INFO) << vertex.literal() << ": leavecounts={fc=" << new_counts.false_count << ", uc=" << new_counts.undecidable_count << "}\n";
+		(void)new_counts;
+		(void)vertex;
+	}
+
 
 	template<typename T>
 	auto evalPartialSolution(const T& partial_solution) {
@@ -152,8 +164,8 @@ struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 			);
 		}
 
-		auto counts = eval_disjunctions(expression, literal_settings);
-		// dout(DL::INFO) << "counts={tc=" << counts.true_count << ", fc=" << counts.false_count << ", uc=" << counts.undecidable_count << "}";
+		auto& counts = evaluator.getCounts();
+		// dout(DL::INFO) << "counts={fc=" << counts.false_count << ", uc=" << counts.undecidable_count << "}";
 
 		struct Result {
 			int lower_bound;
@@ -230,6 +242,7 @@ void satisfy_maximally(const CNFExpression& expression) {
 
 			if (skip_branch || !graph.isValid(new_state.vertex)) {
 				while (!state_stack.empty()) {
+					visitor.onLeave(state_stack.back().vertex);
 					if (state_stack.back().parent_lower_bound < best_cost and !state_stack.back().vertex.inverted) {
 						state_stack.back().vertex.inverted = true;
 						break;

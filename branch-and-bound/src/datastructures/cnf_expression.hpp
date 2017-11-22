@@ -20,6 +20,7 @@ struct CNFExpression {
 	auto& all_disjunctions() const { return m_disjunctions; }
 	auto& all_disjunctions()       { return m_disjunctions; }
 
+	using DisjunctionID = int;
 private:
 	std::vector<std::vector<Literal>> m_disjunctions;
 	std::unordered_set<LiteralID> m_all_literals;
