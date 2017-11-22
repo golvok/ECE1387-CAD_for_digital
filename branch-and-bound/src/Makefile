@@ -61,7 +61,7 @@ else ifeq ($(BUILD_MODE),release)
 	EXTRA_FLAGS += -flto -O3
 	EXTRA_FLAGS += -Wno-maybe-uninitialized # silence g++
 else ifeq ($(BUILD_MODE),profile)
-	EXTRA_FLAGS += -flto -O1 -pg -g -no-pie
+	EXTRA_FLAGS += -flto -O3 -pg -g -no-pie
 	EXTRA_FLAGS += -Wno-maybe-uninitialized # silence g++
 endif
 
