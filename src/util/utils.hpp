@@ -250,9 +250,9 @@ template<typename CONTAINER, typename OSTREAM, typename FUNC = ::util::detail::p
 void print_container(
 	const CONTAINER& c,
 	OSTREAM&& os,
-	const std::string& sep = ", ",
-	const std::string& prefix_str = "{ ",
-	const std::string& suffix_str = " }",
+	const std::string& sep,
+	const std::string& prefix_str,
+	const std::string& suffix_str,
 	FUNC func = FUNC{}
 ) {
 	using std::begin; using std::end;
@@ -268,6 +268,15 @@ void print_container(
 		});
 	}
 	os << suffix_str;
+}
+
+template<typename CONTAINER, typename OSTREAM, typename FUNC = ::util::detail::printer>
+void print_container(
+	const CONTAINER& c,
+	OSTREAM&& os,
+	FUNC func = FUNC{}
+) {
+	print_container(c, os, ", ", "{ ", " }", func);
 }
 
 template<typename CONTAINER, typename OSTREAM, typename FUNC = ::util::detail::printer>

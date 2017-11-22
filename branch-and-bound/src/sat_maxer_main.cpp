@@ -190,6 +190,13 @@ struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 		// dout(DL::INFO) << ", result={lb=" << result.lower_bound << ", ub=" << result.upper_bound << ", ics=" << std::boolalpha << result.is_complete_solution << "}\n";
 		return result;
 	}
+
+	template<typename Cost, typename StateStack>
+	void onNewBest(const Cost& best_cost, const StateStack& state_stack) {
+		dout(DL::INFO) << "\tnew best: cost=" << best_cost << "settings=";
+		util::print_container(state_stack, dout(DL::INFO), [=](auto&& str, auto&& s) { str << s.vertex.literal(); });
+		dout(DL::INFO) << "\n";
+	}
 };
 
 void satisfy_maximally(const CNFExpression& expression) {
@@ -231,7 +238,7 @@ void satisfy_maximally(const CNFExpression& expression) {
 			if (cost.is_complete_solution) {
 				best_cost = std::min(best_cost, cost.upper_bound);
 				if (!skip_branch) {
-					dout(DL::INFO) << "\tbest=" << best_cost << "\n";
+					visitor.onNewBest(best_cost, state_stack);
 				}
 			}
 
