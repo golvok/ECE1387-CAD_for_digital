@@ -97,16 +97,16 @@ private:
 
 	template<typename DisjunctionList>
 	static auto create_all_unkown_disjunction_status(const DisjunctionList& disj_list) {
-		DisjunctionMap<DisjunctionID, DisjunctionStatus> result;
+		DisjunctionMap<DisjunctionStatus> result;
 		for (int idisj = 0; idisj < (int)disj_list.size(); ++idisj) {
-			result.emplace(idisj, DisjunctionStatus((int)disj_list.at(idisj).size()));
+			result.emplace_back(DisjunctionStatus((int)disj_list.at(idisj).size()));
 		}
 		return result;
 	}
 
 	CNFExpression expression;
 	LiteralMap<LiteralID, std::vector<DisjunctionID>> disjunctions_with_literal;
-	DisjunctionMap<DisjunctionID, DisjunctionStatus> disjunction_status;
+	DisjunctionMap<DisjunctionStatus> disjunction_status;
 	Counts current_result;
 };
 
