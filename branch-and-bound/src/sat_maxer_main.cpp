@@ -197,6 +197,10 @@ struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 		util::print_container(state_stack, dout(DL::INFO), [=](auto&& str, auto&& s) { str << s.vertex.literal(); });
 		dout(DL::INFO) << "\n";
 	}
+
+	void onComplete() {
+		dout(DL::INFO) << "In the end, explored: " << num_partial_settings_explored << " partial settings and " << num_complete_settings_explored << " complete settings. (total = " << (num_partial_settings_explored + num_complete_settings_explored) << ")\n";
+	}
 };
 
 struct GraphicsVisitor : Visitor {
@@ -278,6 +282,8 @@ void satisfy_maximally(const CNFExpression& expression) {
 			}
 		}
 	}
+
+	visitor.onComplete();
 }
 
 void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr) {
