@@ -224,9 +224,16 @@ struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 struct GraphicsVisitor : Visitor {
 	using Visitor::Visitor;
 
+	bool did_graphics_init = false;
+
 	template<typename StateStack>
 	void onExplore(const Graph::Vertex& vertex, const StateStack& state_stack) {
 		Visitor::onExplore(vertex, state_stack);
+
+		if (not did_graphics_init) {
+			did_graphics_init = true;
+			graphics::get().tree().setNumLevelsVisible((int)expression.all_disjunctions().size());
+		}
 
 		std::vector<Literal> path;
 		for (const auto& state : state_stack) {
