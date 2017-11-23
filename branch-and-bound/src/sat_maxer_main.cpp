@@ -157,13 +157,7 @@ struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 
 	template<typename T>
 	auto evalPartialSolution(const T& partial_solution) {
-		std::unordered_map<LiteralID, bool> literal_settings;
-		for (const auto& setting : partial_solution) {
-			const auto& lit = setting.vertex.literal();
-			literal_settings.emplace(
-				lit.id(), !lit.inverted()
-			);
-		}
+		(void)partial_solution;
 
 		auto& counts = evaluator.getCounts();
 		// dout(DL::INFO) << "counts={fc=" << counts.false_count << ", uc=" << counts.undecidable_count << "}";
