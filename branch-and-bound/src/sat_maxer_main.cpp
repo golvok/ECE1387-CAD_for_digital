@@ -199,13 +199,25 @@ struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 	}
 };
 
+struct GraphicsVisitor : Visitor {
+	using Visitor::Visitor;
+
+	template<typename StateStack>
+	void onExplore(const Graph::Vertex& vertex, const StateStack& state_stack) {
+		Visitor::onExplore(vertex, state_stack);
+		(void)vertex;
+		(void)state_stack;
+	}
+};
+
 void satisfy_maximally(const CNFExpression& expression) {
 	using ID = Graph::Vertex;
 	const auto graph = Graph{expression.all_literals()};
 	const auto initial_list = graph.roots();
 
 
-	Visitor visitor { expression };
+	GraphicsVisitor visitor { expression };
+	// Visitor visitor { expression };
 
 	struct State {
 		ID vertex;
