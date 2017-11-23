@@ -133,6 +133,7 @@ struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 	CNFEvaluation<std::vector> evaluator;
 	int num_partial_settings_explored = 0;
 	int num_complete_settings_explored = 0;
+	std::vector<Literal> best_solution = {};
 
 	Visitor(const CNFExpression& expression)
 		: expression(expression)
@@ -184,7 +185,9 @@ struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 		}
 
 		if ((num_partial_settings_explored + num_complete_settings_explored) % 500000 == 0) {
-			dout(DL::INFO) << "explored: " << num_partial_settings_explored << " partial settings, " << num_complete_settings_explored << " complete settings.\n";
+			dout(DL::INFO) << "Status: ";
+			printExploredMessage(dout(DL::INFO));
+			dout(DL::INFO) << "\n";
 		}
 
 		// dout(DL::INFO) << ", result={lb=" << result.lower_bound << ", ub=" << result.upper_bound << ", ics=" << std::boolalpha << result.is_complete_solution << "}\n";
@@ -193,13 +196,28 @@ struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 
 	template<typename Cost, typename StateStack>
 	void onNewBest(const Cost& best_cost, const StateStack& state_stack) {
-		dout(DL::INFO) << "\tnew best: cost=" << best_cost << "settings=";
-		util::print_container(state_stack, dout(DL::INFO), [=](auto&& str, auto&& s) { str << s.vertex.literal(); });
+		best_solution.clear();
+		std::transform(begin(state_stack), end(state_stack), std::back_inserter(best_solution), [=](auto&& s) { return s.vertex.literal(); });
+		dout(DL::INFO) << "New best: cost=" << best_cost << " settings=";
+		util::print_container(best_solution, dout(DL::INFO));
 		dout(DL::INFO) << "\n";
 	}
 
+	template<typename Stream>
+	void printExploredMessage(Stream&& stream) {
+		stream << "explored "
+			<< num_partial_settings_explored << " partial settings and "
+			<< num_complete_settings_explored << " complete settings. "
+			<< "(total = " << (num_partial_settings_explored + num_complete_settings_explored) << ')'
+		;
+	}
+
 	void onComplete() {
-		dout(DL::INFO) << "In the end, explored: " << num_partial_settings_explored << " partial settings and " << num_complete_settings_explored << " complete settings. (total = " << (num_partial_settings_explored + num_complete_settings_explored) << ")\n";
+		dout(DL::INFO) << "Done. In the end:\n\t";
+		printExploredMessage(dout(DL::INFO));
+		dout(DL::INFO) << "\n\tbest solution: ";
+		util::print_container(best_solution, dout(DL::INFO));
+		dout(DL::INFO) << "\n";
 	}
 };
 
