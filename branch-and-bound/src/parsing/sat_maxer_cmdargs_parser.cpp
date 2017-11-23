@@ -23,7 +23,7 @@ ProgramConfig::ProgramConfig()
 	, m_shouldUseIncremental(false)
 { }
 
-ParsedArguments::ParsedArguments(int argc_int, char const** argv)
+ParsedArguments::ParsedArguments(int argc_int, char** argv)
 	: m_meta()
 	, m_programConfig()
 {
@@ -52,7 +52,7 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 
 	progopts.add_options()
 		("help,h", "print help message")
-		("problem-file,f", po::value(&m_programConfig.m_dataFileName)->required(), "The file with the SAT-MAX problem to solve")
+		("problem-file,f", po::value(&m_programConfig.m_dataFileName), "The file with the SAT-MAX problem to solve")
 		("variable-order,r", po::value<std::string>()->default_value("GBD,MCF,F"), ("Comma or (single-token) space separated list of sort orders, interpreted as a hierarchy with top level first. Valid strings: " + vo_helpstring).c_str())
 		("incremental", po::bool_switch(&m_programConfig.m_shouldUseIncremental), "Use incremental mode for computing costs")
 	;
@@ -70,7 +70,11 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 	}
 
 	po::notify(vm);
-
+	if (!vm.count("problem-file")) {
+		util::print_and_throw<std::invalid_argument>([&](auto&& str) {
+			str << "`--problem-file <problem-file>` is required";
+		});
+	}
 	if (vm.count("debug")) {
 		auto debug_levels = DebugLevel::getStandardDebug();
 		m_meta.levels_to_enable.insert(end(m_meta.levels_to_enable),begin(debug_levels),end(debug_levels));
@@ -93,7 +97,7 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 	}
 }
 
-ParsedArguments parse(int arc_int, char const** argv) {
+ParsedArguments parse(int arc_int, char** argv) {
 	return ParsedArguments(arc_int, argv);
 }
 

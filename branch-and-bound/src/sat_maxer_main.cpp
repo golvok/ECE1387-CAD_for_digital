@@ -24,7 +24,7 @@ int program_main(const ProgramConfig& config, bool enable_graphics_calls);
 void satisfy_maximally(const CNFExpression& expression);
 void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr, const CNFExpression& expression);
 
-int main(int argc, char const** argv) { try{
+int main(int argc, char** argv) { try{
 
 	dout.setHighestTitleRank(7);
 
