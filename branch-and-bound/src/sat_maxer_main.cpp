@@ -183,7 +183,7 @@ struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 			num_partial_settings_explored += 1;
 		}
 
-		if (num_partial_settings_explored % 500000 == 0) {
+		if ((num_partial_settings_explored + num_complete_settings_explored) % 500000 == 0) {
 			dout(DL::INFO) << "explored: " << num_partial_settings_explored << " partial settings, " << num_complete_settings_explored << " complete settings.\n";
 		}
 
