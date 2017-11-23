@@ -139,18 +139,18 @@ struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 		, evaluator(expression)
 	{ }
 
-	void onExplore(const Graph::Vertex& vertex) {
+	template<typename StateStack>
+	void onExplore(const Graph::Vertex& vertex, const StateStack& state_stack) {
 		// dout(DL::INFO) << vertex.literal() << ' ';
 		const auto& new_counts = evaluator.addSetting(vertex.literal().id(), !vertex.inverted);
 		(void)new_counts;
-		(void)vertex;
+		(void)state_stack;
 	}
 
 	void onLeave(const Graph::Vertex& vertex) {
 		const auto& new_counts = evaluator.removeSetting(vertex.literal().id(), !vertex.inverted);
 		// dout(DL::INFO) << vertex.literal() << ": leavecounts={fc=" << new_counts.false_count << ", uc=" << new_counts.undecidable_count << "}\n";
 		(void)new_counts;
-		(void)vertex;
 	}
 
 
@@ -231,7 +231,7 @@ void satisfy_maximally(const CNFExpression& expression) {
 		while (!state_stack.empty()) {
 			const auto& state = state_stack.back();
 
-			visitor.onExplore(state.vertex);
+			visitor.onExplore(state.vertex, state_stack);
 			auto cost = visitor.evalPartialSolution(state_stack);
 
 			const bool skip_branch = cost.lower_bound >= best_cost;
