@@ -39,7 +39,7 @@ int main(int argc, char const** argv) { try{
 	}
 
 	const auto result = program_main(parsed_args.programConfig());
-	graphics::get().close();
+	// graphics::get().close();
 	graphics::get().join();
 
 	return result;
@@ -205,8 +205,12 @@ struct GraphicsVisitor : Visitor {
 	template<typename StateStack>
 	void onExplore(const Graph::Vertex& vertex, const StateStack& state_stack) {
 		Visitor::onExplore(vertex, state_stack);
-		(void)vertex;
-		(void)state_stack;
+
+		std::vector<Literal> path;
+		for (const auto& state : state_stack) {
+			path.push_back(state.vertex.literal());
+		}
+		graphics::get().tree().addPath(std::move(path));
 	}
 };
 

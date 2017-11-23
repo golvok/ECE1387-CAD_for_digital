@@ -137,6 +137,7 @@ GRAPHICS_OBJECTS = \
 $(EXE_DIR)sat-maxer: \
 	$(OBJ_DIR)sat_maxer_main.o \
 	$(OBJ_DIR)datastructures/cnf_expression.o \
+	$(OBJ_DIR)graphics/sat_maxer_graphics_data.o \
 	$(OBJ_DIR)parsing/sat_maxer_cmdargs_parser.o \
 	$(OBJ_DIR)parsing/sat_maxer_datafile_parser.o \
 	$(OBJ_DIR)util/logging.o \

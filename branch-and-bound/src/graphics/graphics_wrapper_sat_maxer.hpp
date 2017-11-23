@@ -18,7 +18,7 @@ public:
 		graphics_data.drawAll();
 	}
 
-	SatMaxerGraphicsData& fpga() { return graphics_data; }
+	SatMaxerGraphicsData& tree() { return graphics_data; }
 };
 
 /**
