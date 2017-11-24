@@ -6,7 +6,7 @@
 #include <util/logging.hpp>
 
 SatMaxerGraphicsData::SatMaxerGraphicsData()
-	: paths_to_draw(500)
+	: paths_to_draw()
 	, num_levels_visible(-1)
 	, width(2048)
 	, level_step(10)
@@ -19,7 +19,11 @@ void SatMaxerGraphicsData::setNumLevelsVisible(int num) {
 }
 
 void SatMaxerGraphicsData::addPath(std::vector<Literal>&& path) {
-	paths_to_draw.push(new std::vector<Literal>(std::move(path)));
+	auto* path_copy = new std::vector<Literal>(std::move(path));
+	while (not paths_to_draw.push(path_copy)) {
+		using namespace std::chrono_literals;
+		std::this_thread::sleep_for(1ns);
+	}
 }
 
 void SatMaxerGraphicsData::drawAll() {
@@ -31,7 +35,7 @@ void SatMaxerGraphicsData::drawAll() {
 
 	while (true) {
 		using namespace std::chrono_literals;
-		std::this_thread::sleep_for(1ms);
+		std::this_thread::sleep_for(1ns);
 
 		paths_to_draw.consume_all([&](auto& path_ptr) {
 			auto& path = *path_ptr;

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <boost/lockfree/queue.hpp>
+#include <boost/lockfree/policies.hpp>
 
 struct SatMaxerGraphicsData {
 	SatMaxerGraphicsData();
@@ -16,7 +17,8 @@ struct SatMaxerGraphicsData {
 
 	void drawAll();
 private:
-	boost::lockfree::queue<std::vector<Literal>*> paths_to_draw;
+	static const int QUEUE_SIZE = 65534; // this appears to be the maximum size allowed
+	boost::lockfree::queue<std::vector<Literal>*, boost::lockfree::capacity<QUEUE_SIZE>> paths_to_draw;
 	int num_levels_visible;
 	float width;
 	float level_step;
