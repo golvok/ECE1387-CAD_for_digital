@@ -103,6 +103,19 @@ struct Graph {
 		);
 	}
 
+	bool hasNextSibling(const Vertex& v) const {
+		return v.inverted == false;
+	}
+
+	Vertex nextSibling(Vertex&& v) const {
+		v.inverted = true;
+		return v;
+	}
+
+	bool hasFanout(const Vertex& v) const {
+		return std::next(v.lit_pos) != end(m_literal_order);
+	}
+
 	auto roots() const {
 		return std::array<Vertex, 2>{{
 			{begin(m_literal_order), false},
@@ -178,7 +191,7 @@ struct Visitor : public util::DefaultGraphVisitor<Graph::Vertex> {
 			num_partial_settings_explored += 1;
 		}
 
-		if ((num_partial_settings_explored + num_complete_settings_explored) % 500000 == 0) {
+		if ((num_partial_settings_explored + num_complete_settings_explored) % 1000000 == 0) {
 			dout(DL::INFO) << "Status: ";
 			printExploredMessage(dout(DL::INFO));
 			dout(DL::INFO) << "\n";
@@ -281,23 +294,21 @@ void satisfy_maximally(const CNFExpression& expression) {
 				}
 			}
 
-			auto new_state = State{
-				*begin(graph.fanout(state.vertex)),
-				cost.lower_bound,
-			};
-
-			if (skip_branch || !graph.isValid(new_state.vertex)) {
+			if (skip_branch || !graph.hasFanout(state.vertex)) {
 				while (!state_stack.empty()) {
 					visitor.onLeave(state_stack.back().vertex);
 					if (state_stack.back().parent_lower_bound < best_cost and !state_stack.back().vertex.inverted) {
-						state_stack.back().vertex.inverted = true;
+						state_stack.back().vertex = graph.nextSibling(std::move(state_stack.back().vertex));
 						break;
 					} else {
 						state_stack.pop_back();
 					}
 				}
 			} else {
-				state_stack.push_back(new_state);
+				state_stack.push_back(State{
+					*begin(graph.fanout(state.vertex)),
+					cost.lower_bound
+				});
 			}
 		}
 	}
