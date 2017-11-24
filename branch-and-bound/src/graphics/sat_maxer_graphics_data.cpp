@@ -14,7 +14,6 @@ SatMaxerGraphicsData::SatMaxerGraphicsData()
 
 void SatMaxerGraphicsData::setNumLevelsVisible(int num) {
 	num_levels_visible = num;
-	dout(DL::INFO) << "svw: " << level_step*(float)num_levels_visible << '\n';
 	graphics::set_visible_world(-width/2, 0, width/2, level_step*(float)num_levels_visible);
 }
 
