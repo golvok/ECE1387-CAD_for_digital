@@ -78,7 +78,7 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 		}
 	}
 
-	CNFExpression expression(boost::get<2>(parse_results));
+	CNFExpression expression(VariableOrder::FILE, boost::get<2>(parse_results));
 
 	return ParseResult{expression,};
 }

@@ -7,8 +7,13 @@
 #include <unordered_set>
 #include <vector>
 
+enum class VariableOrder {
+	FILE,
+	MOST_COMMON_FIRST,
+};
+
 struct CNFExpression {
-	CNFExpression(const std::vector<std::vector<int>>& data);
+	CNFExpression(VariableOrder ordering, const std::vector<std::vector<int>>& data);
 	CNFExpression(const CNFExpression&) = default;
 	CNFExpression(CNFExpression&&) = default;
 	CNFExpression& operator=(const CNFExpression&) = default;

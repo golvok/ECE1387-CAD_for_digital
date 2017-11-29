@@ -55,7 +55,7 @@ struct DefaultMaxSatVisitor {
 			num_partial_settings_explored += 1;
 		}
 
-		if ((num_partial_settings_explored + num_complete_settings_explored) % 1000000 == 0) {
+		if ((num_partial_settings_explored + num_complete_settings_explored) % 10000000 == 0) {
 			dout(DL::INFO) << "Status: ";
 			printExploredMessage(dout(DL::INFO));
 			dout(DL::INFO) << "\n";
