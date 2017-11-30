@@ -46,9 +46,9 @@ struct DefaultVisitor {
 			int upper_bound;
 			bool is_complete_solution;
 		} result {
-			counts.false_count,
-			counts.false_count + counts.undecidable_count,
-			counts.undecidable_count == 0,
+			counts.falseCount(),
+			counts.falseCount() + counts.undecidableCount(),
+			counts.undecidableCount() == 0,
 		};
 
 		if (result.is_complete_solution) {

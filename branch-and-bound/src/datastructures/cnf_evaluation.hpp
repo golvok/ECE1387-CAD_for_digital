@@ -14,6 +14,9 @@ struct CNFEvaluation {
 	using DisjunctionID = CNFExpression::DisjunctionID;
 
 	struct Counts {
+		int falseCount() const { return false_count; }
+		int undecidableCount() const { return undecidable_count; }
+
 		int false_count = 0;
 		int undecidable_count = 0;
 	};
