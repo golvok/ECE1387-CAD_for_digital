@@ -112,7 +112,8 @@ boost::optional<std::vector<ID>> maze_route(IDSet&& sources, ID2&& sink, FanoutG
 		detail::displayWavefront<ID>(sources, sink, fanout_gen, std::vector<ID>(), std::vector<ID>(), wave);
 	};
 
-	const auto data2 = util::GraphAlgo<ID>().withThreads(nthreads).wavedBreadthFirstVisit(fanout_gen, sources, sink, Visitor<ID, decltype(onWaveStart)>(onWaveStart), should_ignore);
+	auto is_sink = [&](auto& v) { return v == sink; };
+	const auto data2 = util::GraphAlgo<ID>().withThreads(nthreads).wavedBreadthFirstVisit(fanout_gen, sources, is_sink, Visitor<ID, decltype(onWaveStart)>(onWaveStart), should_ignore);
 
 	dout(DL::ROUTE_D1) << "tracing2back... ";
 
