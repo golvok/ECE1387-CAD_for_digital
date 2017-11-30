@@ -50,15 +50,15 @@ int main(int argc, char const** argv) { try{
 
 
 template<typename Vertex>
-struct GraphicsVisitor : DefaultMaxSatVisitor<Vertex> {
-	using DefaultMaxSatVisitor<Vertex>::DefaultMaxSatVisitor;
-	using DefaultMaxSatVisitor<Vertex>::expression;
+struct GraphicsVisitor : maxsat::DefaultVisitor<Vertex> {
+	using maxsat::DefaultVisitor<Vertex>::DefaultVisitor;
+	using maxsat::DefaultVisitor<Vertex>::expression;
 
 	bool did_graphics_init = false;
 
 	template<typename StateStack>
 	void onExplore(const Vertex& vertex, const StateStack& state_stack) {
-		DefaultMaxSatVisitor<Vertex>::onExplore(vertex, state_stack);
+		maxsat::DefaultVisitor<Vertex>::onExplore(vertex, state_stack);
 
 		if (not did_graphics_init) {
 			did_graphics_init = true;
@@ -98,7 +98,7 @@ int program_main(const ProgramConfig& config, bool enable_graphics_calls) {
 				GraphicsVisitor<ID> visitor { pr.expression() };
 				branchAndBound<ID>(visitor, graph);
 			} else {
-				DefaultMaxSatVisitor<ID> visitor { pr.expression() };
+				maxsat::DefaultVisitor<ID> visitor { pr.expression() };
 				branchAndBound<ID>(visitor, graph);
 			}
 		}

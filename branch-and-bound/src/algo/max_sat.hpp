@@ -4,15 +4,17 @@
 #include <datastructures/cnf_evaluation.hpp>
 #include <util/logging.hpp>
 
+namespace maxsat {
+
 template<typename Vertex>
-struct DefaultMaxSatVisitor {
+struct DefaultVisitor {
 	const CNFExpression& expression;
 	CNFEvaluation<std::vector> evaluator;
 	int num_partial_settings_explored = 0;
 	int num_complete_settings_explored = 0;
 	std::vector<Literal> best_solution = {};
 
-	DefaultMaxSatVisitor(const CNFExpression& expression)
+	DefaultVisitor(const CNFExpression& expression)
 		: expression(expression)
 		, evaluator(expression)
 	{ }
@@ -91,5 +93,7 @@ struct DefaultMaxSatVisitor {
 		dout(DL::INFO) << "\n";
 	}
 };
+
+} // end namespace maxsat
 
 #endif /* ALGO__MAX_SAT_HPP */
