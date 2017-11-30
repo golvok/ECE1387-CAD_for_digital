@@ -9,6 +9,7 @@
 
 enum class VariableOrder {
 	FILE,
+	GROUPED_BY_DISJUNCTION,
 	MOST_COMMON_FIRST,
 };
 

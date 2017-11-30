@@ -79,6 +79,7 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 	}
 
 	auto variable_ordering = {
+		VariableOrder::GROUPED_BY_DISJUNCTION,
 		VariableOrder::MOST_COMMON_FIRST,
 		VariableOrder::FILE,
 	};

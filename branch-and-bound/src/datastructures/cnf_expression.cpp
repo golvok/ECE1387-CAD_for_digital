@@ -38,15 +38,19 @@ CNFExpression::CNFExpression(const std::vector<VariableOrder>& ordering, const s
 	std::unordered_map<Literal, int> literal_counts;
 	std::unordered_map<Literal, int> literal_file_pos;
 	std::unordered_map<LiteralID, int> literal_id_file_pos;
+	std::unordered_map<LiteralID, int> literal_id_first_disjunction;
 
+	int disjunction_pos = 0;
 	int curr_file_pos = 0;
 	for (const auto& disjunction : all_disjunctions()) {
 		for (const auto& lit : disjunction) {
 			literal_counts[lit] += 1;
 			literal_id_file_pos.emplace(lit.id(), curr_file_pos);
 			literal_file_pos.emplace(lit, curr_file_pos);
+			literal_id_first_disjunction.emplace(lit.id(), disjunction_pos);
 			curr_file_pos += 1;
 		}
+		disjunction_pos += 1;
 	}
 
 	std::unordered_map<int, std::vector<Literal>> count_to_literal;
@@ -71,6 +75,10 @@ CNFExpression::CNFExpression(const std::vector<VariableOrder>& ordering, const s
 			> std::max(literal_counts.at(Literal(true,rhs)), literal_counts.at(Literal(false,rhs)));
 	};
 
+	auto by_disjunction = [&](auto& lhs, auto& rhs) {
+		return literal_id_first_disjunction.at(lhs) < literal_id_first_disjunction.at(rhs);
+	};
+
 	for (auto it = rbegin(ordering); it != rend(ordering); ++it) {
 		std::stable_sort(begin(m_all_literals), end(m_all_literals), [&](auto& lhs, auto& rhs) {
 			switch (*it) {
@@ -78,6 +86,8 @@ CNFExpression::CNFExpression(const std::vector<VariableOrder>& ordering, const s
 					return by_literal_id_file_pos(lhs, rhs);
 				break; } case VariableOrder::MOST_COMMON_FIRST: {
 					return by_literal_count(lhs, rhs);
+				break; } case VariableOrder::GROUPED_BY_DISJUNCTION: {
+					return by_disjunction(lhs, rhs);
 				break; } default: {
 					util::print_and_throw<std::runtime_error>([&](auto& str) {
 						str << "unhandled vaiable ordering type: " << (int)*it;
