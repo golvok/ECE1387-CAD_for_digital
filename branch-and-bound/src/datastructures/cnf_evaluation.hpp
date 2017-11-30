@@ -17,13 +17,18 @@ auto eval_disjunctions(const CNFExpression& expression, const T& literal_setting
 		int false_count = 0;
 		int undecidable_count = 0;
 	} result;
+
+	std::vector<Literal> single_unsets;
+
 	for (const auto& disjunction : expression.all_disjunctions()) {
 		bool disjunction_value = false;
-		bool disjunction_decidable = true;
+		int unset_count = 0;
+		Literal last_unset(true, util::make_id<LiteralID>((short)-1)); // only to be used if unset_count > 0
 		for (const auto& literal : disjunction) {
 			const auto& lookup = literal_settings.at(literal.id().getValue());
 			if (lookup.unset()) {
-				disjunction_decidable = false;
+				unset_count += 1;
+				last_unset = literal;
 			} else {
 				bool literal_value = literal.inverted() ? !lookup.valueIfSet() : lookup.valueIfSet();
 				disjunction_value = disjunction_value || literal_value;
@@ -32,13 +37,33 @@ auto eval_disjunctions(const CNFExpression& expression, const T& literal_setting
 		if (disjunction_value) {
 			result.true_count += 1;
 		} else {
-			if (disjunction_decidable) {
+			if (unset_count == 0) {
 				result.false_count += 1;
 			} else {
+				if (unset_count == 1) {
+					single_unsets.push_back(last_unset);
+				}
 				result.undecidable_count += 1;
 			}
 		}
 	}
+
+	for (const auto& lit_id : expression.all_literals()) {
+		int pos_count = 0;
+		int neg_count = 0;
+		for (const auto& lit : single_unsets) {
+			if (lit_id == lit.id()) {
+				if (lit.inverted()) {
+					neg_count += 1;
+				} else {
+					pos_count += 1;
+				}
+			}
+		}
+
+		result.false_count += std::min(pos_count, neg_count);
+	}
+
 	return result;
 }
 
