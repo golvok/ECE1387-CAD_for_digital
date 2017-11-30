@@ -78,7 +78,12 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 		}
 	}
 
-	CNFExpression expression(VariableOrder::FILE, boost::get<2>(parse_results));
+	auto variable_ordering = {
+		VariableOrder::MOST_COMMON_FIRST,
+		VariableOrder::FILE,
+	};
+
+	CNFExpression expression(variable_ordering, boost::get<2>(parse_results));
 
 	return ParseResult{expression,};
 }

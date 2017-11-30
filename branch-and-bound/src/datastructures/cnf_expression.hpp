@@ -13,7 +13,7 @@ enum class VariableOrder {
 };
 
 struct CNFExpression {
-	CNFExpression(VariableOrder ordering, const std::vector<std::vector<int>>& data);
+	CNFExpression(const std::vector<VariableOrder>& ordering, const std::vector<std::vector<int>>& data);
 	CNFExpression(const CNFExpression&) = default;
 	CNFExpression(CNFExpression&&) = default;
 	CNFExpression& operator=(const CNFExpression&) = default;
