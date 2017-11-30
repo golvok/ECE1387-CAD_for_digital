@@ -38,7 +38,7 @@ struct DefaultVisitor {
 	auto evalPartialSolution(const T& partial_solution) {
 		(void)partial_solution;
 
-		auto& counts = evaluator.getCounts();
+		const auto& counts = evaluator.getCounts();
 		// dout(DL::INFO) << "counts={fc=" << counts.false_count << ", uc=" << counts.undecidable_count << "}";
 
 		struct Result {

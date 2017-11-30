@@ -6,6 +6,42 @@
 
 #include <vector>
 
+template<typename T>
+auto eval_disjunctions(const CNFExpression& expression, const T& literal_settings) {
+	// count all disjunctions that have all terms set, and are false.
+	struct Result {
+		int falseCount() const { return false_count; }
+		int undecidableCount() const { return undecidable_count; }
+
+		int true_count = 0;
+		int false_count = 0;
+		int undecidable_count = 0;
+	} result;
+	for (const auto& disjunction : expression.all_disjunctions()) {
+		bool disjunction_value = false;
+		bool disjunction_decidable = true;
+		for (const auto& literal : disjunction) {
+			const auto& lookup = literal_settings.at(literal.id().getValue());
+			if (lookup.unset()) {
+				disjunction_decidable = false;
+			} else {
+				bool literal_value = literal.inverted() ? !lookup.valueIfSet() : lookup.valueIfSet();
+				disjunction_value = disjunction_value || literal_value;
+			}
+		}
+		if (disjunction_value) {
+			result.true_count += 1;
+		} else {
+			if (disjunction_decidable) {
+				result.false_count += 1;
+			} else {
+				result.undecidable_count += 1;
+			}
+		}
+	}
+	return result;
+}
+
 template<
 	template <typename...> class LiteralMap
 >
@@ -21,8 +57,13 @@ struct CNFEvaluation {
 		int undecidable_count = 0;
 	};
 
+	enum class LiteralSetting : char {
+		FARSE, TRUTH, UNSET,
+	};
+
 	struct DisjunctionStatus {
 		bool decidable() const { return num_unknown <= 0 || num_true > 0; }
+		int numUnknown() const { return num_unknown; }
 		bool valueIfDecidable() const { return num_true > 0; }
 
 		void add(bool value)    { countFor(value) += 1; num_unknown -= 1; }
@@ -42,16 +83,36 @@ struct CNFEvaluation {
 		int num_unknown;
 	};
 
+	struct LiteralStatus {
+		LiteralStatus()
+			: setting(LiteralSetting::UNSET)
+			, extra_false_settings(0)
+		{ }
+
+		bool unset() const { return setting == LiteralSetting::UNSET; }
+		bool valueIfSet() const { return setting == LiteralSetting::TRUTH; }
+
+		void set(bool value) { if (value) { setting = LiteralSetting::TRUTH; } else { setting = LiteralSetting::FARSE; } }
+		void setAsUnset() { setting = LiteralSetting::UNSET; }
+
+	private:
+		LiteralSetting setting;
+		int extra_false_settings;
+	};
+
 	using DisjunctionsWithLiterals = LiteralMap<std::vector<DisjunctionStatus*>>;
 
 	CNFEvaluation(const CNFExpression& expr)
 		: expression(expr)
 		, disjunction_status(create_all_unkown_disjunction_status(expr.all_disjunctions()))
 		, disjunctions_with_literal(find_disjunctions_with_literals(expr.all_disjunctions(), disjunction_status, expr.all_literals()))
+		, literal_status((int)expr.all_literals().size() + 1)
 		, current_result{0, (int)expr.all_disjunctions().size()}
 	{ }
 
 	const Counts& addSetting(const LiteralID& lit_id, bool value) {
+		literal_status.at(lit_id.getValue()).set(value);
+
 		for (auto* disj_status_ptr : disjunctions_with_literal.at(lit_id.getValue())) {
 			const auto& disj = expression.all_disjunctions().at(disj_status_ptr->id());
 			const auto& lit = *std::find_if(begin(disj), end(disj), [&](auto& lit) { return lit.id() == lit_id; });
@@ -71,6 +132,8 @@ struct CNFEvaluation {
 	}
 
 	const Counts& removeSetting(const LiteralID& lit_id, bool value) {
+		literal_status.at(lit_id.getValue()).setAsUnset();
+
 		for (auto* disj_status_ptr : disjunctions_with_literal.at(lit_id.getValue())) {
 			const auto& disj = expression.all_disjunctions().at(disj_status_ptr->id());
 			const auto& lit = *std::find_if(begin(disj), end(disj), [&](auto& lit) { return lit.id() == lit_id; });
@@ -91,6 +154,7 @@ struct CNFEvaluation {
 	}
 
 	const Counts& getCounts() const { return current_result; }
+	// auto getCounts() const { return eval_disjunctions(expression, literal_status); }
 
 private:
 	template<typename DisjunctionList, typename DisjunctionStatusList, typename LiteralList>
@@ -114,8 +178,11 @@ private:
 	}
 
 	CNFExpression expression;
+
 	DisjunctionMap<DisjunctionStatus> disjunction_status;
 	DisjunctionsWithLiterals disjunctions_with_literal;
+	LiteralMap<LiteralStatus> literal_status;
+
 	Counts current_result;
 };
 
