@@ -21,18 +21,15 @@ auto eval_disjunctions(const CNFExpression& expression, const T& literal_setting
 	} result;
 
 	std::vector<Literal> single_unsets;
-	std::vector<std::pair<Literal, Literal>> double_unsets;
 
 	for (const auto& disjunction : expression.all_disjunctions()) {
 		bool disjunction_value = false;
 		int unset_count = 0;
 		Literal last_unset(true, util::make_id<LiteralID>((short)-1)); // only to be used if unset_count > 0
-		Literal prev_last_unset(true, util::make_id<LiteralID>((short)-1)); // only to be used if unset_count > 0
 		for (const auto& literal : disjunction) {
 			const auto& lookup = literal_settings.at(literal.id().getValue());
 			if (lookup.unset()) {
 				unset_count += 1;
-				prev_last_unset = last_unset;
 				last_unset = literal;
 			} else {
 				bool literal_value = literal.inverted() ? !lookup.valueIfSet() : lookup.valueIfSet();
@@ -47,12 +44,6 @@ auto eval_disjunctions(const CNFExpression& expression, const T& literal_setting
 			} else {
 				if (unset_count == 1) {
 					single_unsets.push_back(last_unset);
-				} else if (unset_count == 2) {
-					if (prev_last_unset.id().getValue() < last_unset.id().getValue()) {
-						double_unsets.emplace_back(prev_last_unset, last_unset);
-					} else {
-						double_unsets.emplace_back(last_unset, prev_last_unset);
-					}
 				}
 
 				result.undecidable_count += 1;
@@ -74,44 +65,6 @@ auto eval_disjunctions(const CNFExpression& expression, const T& literal_setting
 		}
 
 		result.false_count += std::min(pos_count, neg_count);
-	}
-
-	auto count_index = [&](auto&& lit_pair) {
-		if (lit_pair.first.inverted()) {
-			if (lit_pair.second.inverted()) {
-				return 0;
-			} else {
-				return 1;
-			}
-		} else {
-			if (lit_pair.second.inverted()) {
-				return 2;
-			} else {
-				return 3;
-			}
-		}
-	};
-
-	if (double_unsets.size() >= 4) {
-		for (auto lit_id_it1 = begin(expression.all_literals()); lit_id_it1 != end(expression.all_literals()); ++lit_id_it1) {
-			for (auto lit_id_it2 = std::next(lit_id_it1); lit_id_it2 != end(expression.all_literals()); ++lit_id_it2) {
-				std::array<int,4> counts;
-				std::fill(begin(counts), end(counts), 0);
-				for (const auto& lit_pair : double_unsets) {
-					if (*lit_id_it1 == lit_pair.first.id() && *lit_id_it2 == lit_pair.second.id()) {
-						counts[count_index(lit_pair)] += 1;
-					} else if (*lit_id_it1 == lit_pair.second.id() && *lit_id_it2 == lit_pair.first.id()) {
-						counts[count_index(std::make_pair(lit_pair.second, lit_pair.first))] += 1;
-					}
-				}
-
-				auto false_count_incr = *std::min_element(begin(counts), end(counts));
-				if (false_count_incr != 0) {
-					dout(DL::INFO) << "found one!";
-				}
-				result.false_count += false_count_incr;
-			}
-		}
 	}
 
 	return result;
