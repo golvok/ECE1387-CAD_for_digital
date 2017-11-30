@@ -126,23 +126,23 @@ std::unordered_map<device::AtomID, geom::Point<double>> exact_solution(
 		}}
 		{const auto indent = dout(DL::APL_D4).indentWithTitle("Data for UMFPACK");
 			{const auto indent = dout(DL::APL_D4).indentWithTitle("Column Starts");
-				util::print_container(col_starts, dout(DL::APL_D4));
+				util::print_container(dout(DL::APL_D4), col_starts);
 				dout(DL::APL_D4) << '\n';
 			}
 			{const auto indent = dout(DL::APL_D4).indentWithTitle("Row Numbers");
-				util::print_container(rows_numbers, dout(DL::APL_D4));
+				util::print_container(dout(DL::APL_D4), rows_numbers);
 				dout(DL::APL_D4) << '\n';
 			}
 			{const auto indent = dout(DL::APL_D4).indentWithTitle("Values");
-				util::print_container(values, dout(DL::APL_D4));
+				util::print_container(dout(DL::APL_D4), values);
 				dout(DL::APL_D4) << '\n';
 			}
 			{const auto indent = dout(DL::APL_D4).indentWithTitle("RHS X Values");
-				util::print_container(right_hand_side.x, dout(DL::APL_D4));
+				util::print_container(dout(DL::APL_D4), right_hand_side.x);
 				dout(DL::APL_D4) << '\n';
 			}
 			{const auto indent = dout(DL::APL_D4).indentWithTitle("RHS Y Values");
-				util::print_container(right_hand_side.y, dout(DL::APL_D4));
+				util::print_container(dout(DL::APL_D4), right_hand_side.y);
 				dout(DL::APL_D4) << '\n';
 			}
 		}

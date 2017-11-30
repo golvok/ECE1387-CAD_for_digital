@@ -196,7 +196,7 @@ struct SimpleCliqueSolveFlow : public APLFlowBase<SimpleCliqueSolveFlow<Device, 
 
 		if (dout(DL::APL_D2).enabled()) {
 			{const auto indent = dout(DL::APL_D1).indentWithTitle("Solution");
-				util::print_assoc_container(result, dout(DL::APL_D1));
+				util::print_assoc_container(dout(DL::APL_D1), result);
 				dout(DL::APL_D1) << '\n';
 			}
 		}
@@ -309,7 +309,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 
 			atom_overuse.push_back((double)overused_count/(double)moveable_atom_locations.size());
 			{const auto indent = dout(DL::INFO).indentWithTitle("Snapping Legalization Result");
-				util::print_assoc_container(legalization.atoms_mapped_to_blocks, dout(DL::APL_D1), "", "", "\n");
+				util::print_assoc_container(dout(DL::APL_D1), legalization.atoms_mapped_to_blocks, "", "", "\n");
 				{const auto indent = dout(DL::APL_D2).indentWithTitle("Block Overusage");
 					for (const auto& block_and_usage : block_usage) {
 						if (block_and_usage.second > 1) {
@@ -388,7 +388,7 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 		}
 
 		{const auto indent = dout(DL::INFO).indentWithTitle("Final Legalization Result");
-			util::print_assoc_container(final_legalization.atoms_mapped_to_blocks, dout(DL::APL_D1), "", "", "\n");
+			util::print_assoc_container(dout(DL::APL_D1), final_legalization.atoms_mapped_to_blocks, "", "", "\n");
 			{const auto indent = dout(DL::APL_D2).indentWithTitle("Block Overusage");
 				for (const auto& block_and_usage : block_usage) {
 					if (block_and_usage.second > 1) {

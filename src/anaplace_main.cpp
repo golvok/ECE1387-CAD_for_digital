@@ -100,6 +100,6 @@ void do_optional_input_data_dump(const std::string& data_file_name, const input:
 	}}
 
 	{const auto indent = dout(DL::DATA_READ1).indentWithTitle("Fixed Blocks");
-	util::print_assoc_container(pr.fixedBlockLocations(), dout(DL::DATA_READ1), "\n", "", "");
+	util::print_assoc_container(dout(DL::DATA_READ1), pr.fixedBlockLocations(), "\n", "", "");
 	dout(DL::DATA_READ1) << '\n';}
 }

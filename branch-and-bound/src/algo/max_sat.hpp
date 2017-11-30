@@ -70,7 +70,7 @@ struct DefaultMaxSatVisitor {
 		best_solution.clear();
 		std::transform(begin(state_stack), end(state_stack), std::back_inserter(best_solution), [=](auto&& s) { return s.vertex.literal(); });
 		dout(DL::INFO) << "New best: cost=" << best_cost << " settings=";
-		util::print_container(best_solution, dout(DL::INFO));
+		util::print_container(dout(DL::INFO), best_solution);
 		dout(DL::INFO) << "\n";
 	}
 
@@ -87,7 +87,7 @@ struct DefaultMaxSatVisitor {
 		dout(DL::INFO) << "Done. In the end:\n\t";
 		printExploredMessage(dout(DL::INFO));
 		dout(DL::INFO) << "\n\tbest solution: ";
-		util::print_container(best_solution, dout(DL::INFO));
+		util::print_container(dout(DL::INFO), best_solution);
 		dout(DL::INFO) << "\n";
 	}
 };

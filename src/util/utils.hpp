@@ -248,8 +248,8 @@ namespace detail {
 
 template<typename CONTAINER, typename OSTREAM, typename FUNC = ::util::detail::printer>
 void print_container(
-	const CONTAINER& c,
 	OSTREAM&& os,
+	const CONTAINER& c,
 	const std::string& sep,
 	const std::string& prefix_str,
 	const std::string& suffix_str,
@@ -272,21 +272,22 @@ void print_container(
 
 template<typename CONTAINER, typename OSTREAM, typename FUNC = ::util::detail::printer>
 void print_container(
-	const CONTAINER& c,
 	OSTREAM&& os,
+	const CONTAINER& c,
 	FUNC func = FUNC{}
 ) {
-	print_container(c, os, ", ", "{ ", " }", func);
+	print_container(os, c, ", ", "{ ", " }", func);
 }
 
-template<typename CONTAINER, typename OSTREAM, typename FUNC = ::util::detail::printer>
+template<typename CONTAINER, typename OSTREAM, typename KEY_FUNC = ::util::detail::printer, typename VALUE_FUNC = ::util::detail::printer>
 void print_assoc_container(
-	const CONTAINER& c,
 	OSTREAM&& os,
+	const CONTAINER& c,
 	const std::string& sep,
 	const std::string& prefix_str,
 	const std::string& suffix_str,
-	FUNC func = FUNC{}
+	KEY_FUNC func_value = KEY_FUNC{},
+	VALUE_FUNC func_key = VALUE_FUNC{}
 ) {
 	using std::begin; using std::end;
 	auto beg = begin(c);
@@ -295,29 +296,30 @@ void print_assoc_container(
 	os << prefix_str;
 	if (beg != en) {
 		os << prefix_str;
-		func(os,beg->first);
+		func_key(os,beg->first);
 		os << " -> ";
-		func(os,beg->second);
+		func_value(os,beg->second);
 		os << suffix_str;
 		std::for_each(std::next(beg), en, [&](const auto& v){
 			os << sep;
 			os << prefix_str;
-			func(os,v.first);
+			func_key(os,v.first);
 			os << " -> ";
-			func(os,v.second);
+			func_value(os,v.second);
 			os << suffix_str;
 		});
 	}
 	os << suffix_str;
 }
 
-template<typename CONTAINER, typename OSTREAM, typename FUNC = ::util::detail::printer>
+template<typename CONTAINER, typename OSTREAM, typename KEY_FUNC = ::util::detail::printer, typename VALUE_FUNC = ::util::detail::printer>
 void print_assoc_container(
-	const CONTAINER& c,
 	OSTREAM&& os,
-	FUNC func = FUNC{}
+	const CONTAINER& c,
+	KEY_FUNC func_value = KEY_FUNC{},
+	VALUE_FUNC func_key = VALUE_FUNC{}
 ) {
-	print_assoc_container(c, os, ", ", "{ ", " }", func);
+	print_assoc_container(os, c, ", ", "{ ", " }", func_value, func_key);
 }
 
 } // end namespace util
