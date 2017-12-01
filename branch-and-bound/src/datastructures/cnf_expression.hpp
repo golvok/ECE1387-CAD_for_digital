@@ -23,6 +23,8 @@ struct CNFExpression {
 	auto& all_literals() const { return m_all_literals; }
 	auto& all_literals()       { return m_all_literals; }
 
+	int max_literal() const;
+
 	auto& all_disjunctions() const { return m_disjunctions; }
 	auto& all_disjunctions()       { return m_disjunctions; }
 

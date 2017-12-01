@@ -64,7 +64,8 @@ auto eval_disjunctions(const CNFExpression& expression, const T& literal_setting
 			}
 		}
 
-		result.false_count += std::min(pos_count, neg_count);
+		auto min_count = std::min(pos_count, neg_count);
+		result.false_count += min_count;
 	}
 
 	return result;
@@ -133,8 +134,8 @@ struct CNFEvaluation {
 	CNFEvaluation(const CNFExpression& expr)
 		: expression(expr)
 		, disjunction_status(create_all_unkown_disjunction_status(expr.all_disjunctions()))
-		, disjunctions_with_literal(find_disjunctions_with_literals(expr.all_disjunctions(), disjunction_status, expr.all_literals()))
-		, literal_status((int)expr.all_literals().size() + 1)
+		, disjunctions_with_literal(find_disjunctions_with_literals(expr.all_disjunctions(), disjunction_status, expr.all_literals(), expr.max_literal()))
+		, literal_status(expr.max_literal() + 1)
 		, current_result{0, (int)expr.all_disjunctions().size()}
 	{ }
 
@@ -188,8 +189,8 @@ struct CNFEvaluation {
 
 private:
 	template<typename DisjunctionList, typename DisjunctionStatusList, typename LiteralList>
-	static auto find_disjunctions_with_literals(const DisjunctionList& disj_list, DisjunctionStatusList& disj_status_list, const LiteralList&) {
-		DisjunctionsWithLiterals result(disj_list.size());
+	static auto find_disjunctions_with_literals(const DisjunctionList& disj_list, DisjunctionStatusList& disj_status_list, const LiteralList&, int max_literal) {
+		DisjunctionsWithLiterals result(max_literal+1);
 		for (int idisj = 0; idisj < (int)disj_list.size(); ++idisj) {
 			for (const auto& lit : disj_list.at(idisj)) {
 				result[lit.id().getValue()].emplace_back(&disj_status_list.at(idisj));

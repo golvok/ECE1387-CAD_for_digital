@@ -97,3 +97,13 @@ CNFExpression::CNFExpression(const std::vector<VariableOrder>& ordering, const s
 		});
 	}
 }
+
+int CNFExpression::max_literal() const {
+	int result = 0;
+	for (const auto& disj : all_disjunctions()) {
+		for (const auto& lit : disj) {
+			result = std::max(result, (int)lit.id().getValue());
+		}
+	}
+	return result;
+}
