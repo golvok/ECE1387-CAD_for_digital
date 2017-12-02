@@ -31,6 +31,10 @@ struct Literal : public util::ID <std::uint16_t, LiteralTag>, public util::print
 		os << (inverted() ? '!' :  '+') << id().getValue();
 	}
 
+	Literal operator~() const {
+		return Literal(!inverted(), id());
+	}
+
 private:
 	using ID::ID;
 	static IDType makeValue(bool inverted, LiteralID id) { return IDType(id.getValue() | ((IDType)inverted << (BIT_SIZE-1))); }
