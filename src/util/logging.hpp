@@ -391,7 +391,7 @@ IndentLevel LevelStream::indentWithTitle(const T& t) {
 
 namespace util {
 	template<typename EXCEPTION, typename FUNC>
-	void print_and_throw(FUNC func, ::DebugLevel::Level level = ::DebugLevel::Level::ERROR) {
+	[[noreturn]] void print_and_throw(FUNC func, ::DebugLevel::Level level = ::DebugLevel::Level::ERROR) {
 		std::ostringstream os;
 		func(os);
 		dout(level) << '\n' << os.str() << '\n';
