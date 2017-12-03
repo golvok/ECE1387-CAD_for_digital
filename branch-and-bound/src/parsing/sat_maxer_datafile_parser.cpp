@@ -75,7 +75,7 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 	}
 
 	for (auto& disjunction : boost::get<2>(parse_results)) {
-		if (not disjunction.empty()){
+		if (not disjunction.empty() && disjunction.back() == 0) {
 			disjunction.pop_back(); // ignore training zero
 		}
 	}
