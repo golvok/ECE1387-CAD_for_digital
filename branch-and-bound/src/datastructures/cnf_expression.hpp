@@ -13,6 +13,10 @@ enum class VariableOrder {
 	MOST_COMMON_FIRST,
 };
 
+const std::vector<VariableOrder>& allVariableOrders();
+const std::vector<std::string>& stringsFor(VariableOrder vo);
+VariableOrder variableOrderFromString(const std::string& s);
+
 struct CNFExpression {
 	CNFExpression(const std::vector<VariableOrder>& ordering, const std::vector<std::vector<int>>& data);
 	CNFExpression(const CNFExpression&) = default;

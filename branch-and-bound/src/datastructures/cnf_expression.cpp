@@ -5,6 +5,47 @@
 
 #include <unordered_map>
 
+std::vector<std::pair<VariableOrder, std::vector<std::string>>> variableOrderStrings {
+	{ VariableOrder::FILE,                        {"FILE","F"} },
+	{ VariableOrder::GROUPED_BY_DISJUNCTION,      {"GROUPED_BY_DISJUNCTION","GBD"} },
+	{ VariableOrder::MOST_COMMON_FIRST,           {"MOST_COMMON_FIRST","MCF"} },
+};
+
+std::vector<VariableOrder> variableOrders {
+	VariableOrder::FILE,
+	VariableOrder::GROUPED_BY_DISJUNCTION,
+	VariableOrder::MOST_COMMON_FIRST,
+};
+
+const std::vector<VariableOrder>& allVariableOrders() {
+	return variableOrders;
+}
+
+const std::vector<std::string>& stringsFor(VariableOrder vo) {
+	for (const auto& enum_and_string_list : variableOrderStrings) {
+		if (enum_and_string_list.first == vo) {
+			return enum_and_string_list.second;
+		}
+	}
+
+	util::print_and_throw<std::runtime_error>([&](auto&& str) {
+		str << "no strings configured for VariableOrder " << (int)vo;
+	});
+}
+
+VariableOrder variableOrderFromString(const std::string& s) {
+	for (const auto& enum_and_string_list : variableOrderStrings) {
+		for (const auto& str : enum_and_string_list.second) {
+			if (str == s) {
+				return enum_and_string_list.first;
+			}
+		}
+	}
+
+	util::print_and_throw<std::invalid_argument>([&](auto&& str) {
+		str << "can't convert `" << s << "` to a VariableOrder";
+	});
+}
 
 
 CNFExpression::CNFExpression(const std::vector<VariableOrder>& ordering, const std::vector<std::vector<int>>& data)
