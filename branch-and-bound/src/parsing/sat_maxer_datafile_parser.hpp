@@ -14,10 +14,10 @@ namespace sat_maxer {
 namespace input {
 
 struct ParseResult {
-	auto& expression() const { return m_expression; }
-	auto& expression()       { return m_expression; }
+	auto& expressionData() const { return m_expressionData; }
+	auto& expressionData()       { return m_expressionData; }
 
-	CNFExpression m_expression;
+	std::vector<std::vector<int>> m_expressionData;
 };
 
 /**

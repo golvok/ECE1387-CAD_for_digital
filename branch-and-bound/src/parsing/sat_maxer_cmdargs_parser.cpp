@@ -3,6 +3,7 @@
 
 #include <unordered_set>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 
 namespace parsing {
@@ -18,6 +19,7 @@ MetaConfig::MetaConfig()
 
 ProgramConfig::ProgramConfig()
 	: m_dataFileName()
+	, m_variableOrder()
 { }
 
 ParsedArguments::ParsedArguments(int argc_int, char const** argv)
@@ -37,9 +39,18 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 		metaopts.add_options()(("DL::" + DebugLevel::getAsString(l)).c_str(), "debug flag");
 	});
 
+	std::string vo_helpstring;
+	for (const auto& vo : allVariableOrders()) {
+		for (const auto& s : stringsFor(vo)) {
+			vo_helpstring += s;
+			vo_helpstring += ", ";
+		}
+	}
+
 	progopts.add_options()
 		("help,h", "print help message")
 		("problem-file", po::value(&m_programConfig.m_dataFileName)->required(), "The file with the SAT-MAX problem to solve")
+		("variable-order", po::value<std::string>()->default_value("GBD,MCF,F"), ("Comma or (single-token) space separated list of sort orders, interpreted as a hierarchy with top level first. Valid strings: " + vo_helpstring).c_str())
 	;
 
 	po::options_description allopts;
@@ -67,6 +78,15 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 			m_meta.levels_to_enable.insert(end(m_meta.levels_to_enable),begin(levels_in_chain),end(levels_in_chain));
 		}
 	});
+
+	{
+		std::vector<std::string> tokens;
+		boost::split(tokens, vm["variable-order"].as<std::string>(), boost::is_any_of(", "));
+		for (const auto& token : tokens) {
+			if (tokens.empty()) { continue; }
+			m_programConfig.m_variableOrder.push_back(variableOrderFromString(token));
+		}
+	}
 }
 
 ParsedArguments parse(int arc_int, char const** argv) {

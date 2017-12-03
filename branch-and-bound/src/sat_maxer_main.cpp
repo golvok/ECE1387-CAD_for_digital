@@ -22,7 +22,7 @@ using namespace parsing::sat_maxer::cmdargs;
 
 int program_main(const ProgramConfig& config, bool enable_graphics_calls);
 void satisfy_maximally(const CNFExpression& expression);
-void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr);
+void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr, const CNFExpression& expression);
 
 int main(int argc, char const** argv) { try{
 
@@ -90,15 +90,16 @@ int program_main(const ProgramConfig& config, bool enable_graphics_calls) {
 			});
 		},
 		[&](const input::ParseResult& pr) {
-			do_optional_input_data_dump(config.dataFileName(), pr);
-			const auto graph = Graph{pr.expression().all_literals()};
+			auto expression = CNFExpression(config.variableOrder(), pr.expressionData());
+			do_optional_input_data_dump(config.dataFileName(), pr, expression);
+			const auto graph = Graph{expression.all_literals()};
 			using ID = decltype(graph)::Vertex;
 
 			if (enable_graphics_calls) {
-				GraphicsVisitor<ID> visitor { pr.expression() };
+				GraphicsVisitor<ID> visitor { expression };
 				branchAndBound<ID>(visitor, graph);
 			} else {
-				maxsat::DefaultVisitor<ID> visitor { pr.expression() };
+				maxsat::DefaultVisitor<ID> visitor { expression };
 				branchAndBound<ID>(visitor, graph);
 			}
 		}
@@ -108,13 +109,15 @@ int program_main(const ProgramConfig& config, bool enable_graphics_calls) {
 	return 0;
 }
 
-void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr) {
+void do_optional_input_data_dump(const std::string& data_file_name, const input::ParseResult& pr, const CNFExpression& expression) {
 	if (!dout(DL::DATA_READ1).enabled()) {
 		return;
 	}
 
+	(void)pr;
+
 	const auto indent = dout(DL::DATA_READ1).indentWithTitle("data file name: \"" + data_file_name + '"');
-	for (const auto& disjunction : pr.expression().all_disjunctions()) {
+	for (const auto& disjunction : expression.all_disjunctions()) {
 		for (const auto& literal : disjunction) {
 			dout(DL::DATA_READ1) << literal << ' ';
 		}

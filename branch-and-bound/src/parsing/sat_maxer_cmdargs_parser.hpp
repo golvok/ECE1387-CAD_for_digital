@@ -2,6 +2,7 @@
 #ifndef PARSING__ROUTING_CMDARGS_PARSER_H
 #define PARSING__ROUTING_CMDARGS_PARSER_H
 
+#include <datastructures/cnf_expression.hpp>
 #include <util/logging.hpp>
 
 #include <string>
@@ -40,6 +41,7 @@ private:
 
 struct ProgramConfig {
 	const std::string& dataFileName() const { return m_dataFileName; }
+	const auto& variableOrder() const { return m_variableOrder; }
 
 private:
 	friend struct ParsedArguments;
@@ -48,6 +50,7 @@ private:
 	ProgramConfig();
 
 	std::string m_dataFileName;
+	std::vector<VariableOrder> m_variableOrder;
 };
 
 struct ParsedArguments {

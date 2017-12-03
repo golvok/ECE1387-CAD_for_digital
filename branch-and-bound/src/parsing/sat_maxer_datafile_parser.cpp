@@ -74,21 +74,15 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 		return err_stream.str();
 	}
 
-	for (auto& disjunction : boost::get<2>(parse_results)) {
+	auto& expression_data = boost::get<2>(parse_results);
+
+	for (auto& disjunction : expression_data) {
 		if (not disjunction.empty() && disjunction.back() == 0) {
 			disjunction.pop_back(); // ignore training zero
 		}
 	}
 
-	auto variable_ordering = {
-		VariableOrder::GROUPED_BY_DISJUNCTION,
-		VariableOrder::MOST_COMMON_FIRST,
-		VariableOrder::FILE,
-	};
-
-	CNFExpression expression(variable_ordering, boost::get<2>(parse_results));
-
-	return ParseResult{expression,};
+	return ParseResult{expression_data,};
 }
 
 }
