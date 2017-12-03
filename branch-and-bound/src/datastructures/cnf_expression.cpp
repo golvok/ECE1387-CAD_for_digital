@@ -71,6 +71,7 @@ CNFExpression::CNFExpression(const std::vector<VariableOrder>& ordering, const s
 	for (const auto& disjunction : all_disjunctions()) {
 		for (const auto& lit : disjunction) {
 			literal_counts[lit] += 1;
+			literal_counts[~lit] += 0; // ensure it exists
 			literal_id_file_pos.emplace(lit.id(), curr_file_pos);
 			literal_file_pos.emplace(lit, curr_file_pos);
 			literal_id_first_disjunction.emplace(lit.id(), disjunction_pos);
@@ -97,8 +98,8 @@ CNFExpression::CNFExpression(const std::vector<VariableOrder>& ordering, const s
 	};
 
 	auto by_literal_count = [&](auto& lhs, auto& rhs) {
-		return std::max(literal_counts.at(Literal(true,lhs)), literal_counts.at(Literal(false,lhs)))
-			> std::max(literal_counts.at(Literal(true,rhs)), literal_counts.at(Literal(false,rhs)));
+		return ( literal_counts.at(Literal(true,lhs)) + literal_counts.at(Literal(false,lhs)) )
+		     > ( literal_counts.at(Literal(true,rhs)) + literal_counts.at(Literal(false,rhs)) );
 	};
 
 	auto by_disjunction = [&](auto& lhs, auto& rhs) {
