@@ -46,6 +46,8 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 			vo_helpstring += ", ";
 		}
 	}
+	// remove training comma + space
+	vo_helpstring.erase(std::prev(std::prev(end(vo_helpstring))), end(vo_helpstring));
 
 	progopts.add_options()
 		("help,h", "print help message")
