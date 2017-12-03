@@ -51,8 +51,8 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 
 	progopts.add_options()
 		("help,h", "print help message")
-		("problem-file", po::value(&m_programConfig.m_dataFileName)->required(), "The file with the SAT-MAX problem to solve")
-		("variable-order", po::value<std::string>()->default_value("GBD,MCF,F"), ("Comma or (single-token) space separated list of sort orders, interpreted as a hierarchy with top level first. Valid strings: " + vo_helpstring).c_str())
+		("problem-file,f", po::value(&m_programConfig.m_dataFileName)->required(), "The file with the SAT-MAX problem to solve")
+		("variable-order,r", po::value<std::string>()->default_value("GBD,MCF,F"), ("Comma or (single-token) space separated list of sort orders, interpreted as a hierarchy with top level first. Valid strings: " + vo_helpstring).c_str())
 	;
 
 	po::options_description allopts;
