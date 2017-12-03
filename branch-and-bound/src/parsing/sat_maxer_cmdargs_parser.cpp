@@ -33,10 +33,10 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 
 	metaopts.add_options()
 		("graphics", po::bool_switch(&m_meta.graphics_enabled), "Enable graphics")
-		("debug",    "Turn on the most common debugging options")
+		("debug",    "Turn on the most common debugging output options")
 	;
 	DebugLevel::forEachLevel([&](DebugLevel::Level l) {
-		metaopts.add_options()(("DL::" + DebugLevel::getAsString(l)).c_str(), "debug flag");
+		metaopts.add_options()(("DL::" + DebugLevel::getAsString(l)).c_str(), "debug output control flag");
 	});
 
 	std::string vo_helpstring;
