@@ -3,18 +3,21 @@
 #include <util/logging.hpp>
 #include <util/utils.hpp>
 
+#include <random>
 #include <unordered_map>
 
 std::vector<std::pair<VariableOrder, std::vector<std::string>>> variableOrderStrings {
 	{ VariableOrder::FILE,                        {"FILE","F"} },
 	{ VariableOrder::GROUPED_BY_DISJUNCTION,      {"GROUPED_BY_DISJUNCTION","GBD"} },
 	{ VariableOrder::MOST_COMMON_FIRST,           {"MOST_COMMON_FIRST","MCF"} },
+	{ VariableOrder::RANDOM,                      {"RANDOM"} },
 };
 
 std::vector<VariableOrder> variableOrders {
 	VariableOrder::FILE,
 	VariableOrder::GROUPED_BY_DISJUNCTION,
 	VariableOrder::MOST_COMMON_FIRST,
+	VariableOrder::RANDOM,
 };
 
 const std::vector<VariableOrder>& allVariableOrders() {
@@ -106,22 +109,29 @@ CNFExpression::CNFExpression(const std::vector<VariableOrder>& ordering, const s
 		return literal_id_first_disjunction.at(lhs) < literal_id_first_disjunction.at(rhs);
 	};
 
+	std::random_device rd;
+
 	for (auto it = rbegin(ordering); it != rend(ordering); ++it) {
-		std::stable_sort(begin(m_all_literals), end(m_all_literals), [&](auto& lhs, auto& rhs) {
-			switch (*it) {
-				case VariableOrder::FILE: {
-					return by_literal_id_file_pos(lhs, rhs);
-				break; } case VariableOrder::MOST_COMMON_FIRST: {
-					return by_literal_count(lhs, rhs);
-				break; } case VariableOrder::GROUPED_BY_DISJUNCTION: {
-					return by_disjunction(lhs, rhs);
-				break; } default: {
-					util::print_and_throw<std::runtime_error>([&](auto& str) {
-						str << "unhandled vaiable ordering type: " << (int)*it;
-					}); throw "impossible";
-				}
+		switch (*it) {
+			case VariableOrder::RANDOM: {
+				std::mt19937 rgen(rd());
+				std::shuffle(begin(m_all_literals), end(m_all_literals), rgen);
+			} break; default: {
+				std::stable_sort(begin(m_all_literals), end(m_all_literals), [&](auto& lhs, auto& rhs) { switch (*it) {
+					case VariableOrder::FILE: {
+						return by_literal_id_file_pos(lhs, rhs);
+					} break; case VariableOrder::MOST_COMMON_FIRST: {
+						return by_literal_count(lhs, rhs);
+					} break; case VariableOrder::GROUPED_BY_DISJUNCTION: {
+						return by_disjunction(lhs, rhs);
+					} break; default: {
+						util::print_and_throw<std::runtime_error>([&](auto& str) {
+							str << "unhandled vaiable ordering type: " << (int)*it;
+						});
+					}
+				}});
 			}
-		});
+		}
 	}
 }
 

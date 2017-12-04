@@ -11,6 +11,7 @@ enum class VariableOrder {
 	FILE,
 	GROUPED_BY_DISJUNCTION,
 	MOST_COMMON_FIRST,
+	RANDOM,
 };
 
 const std::vector<VariableOrder>& allVariableOrders();
