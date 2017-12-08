@@ -3,7 +3,7 @@
 
 #include <util/generator.hpp>
 
-struct Graph {
+struct CNFTree {
 	struct Vertex {
 		std::vector<LiteralID>::const_iterator lit_pos;
 		bool inverted;
@@ -20,7 +20,7 @@ struct Graph {
 
 
 	template<typename LiteralOrder>
-	Graph(const LiteralOrder& lo)
+	CNFTree(const LiteralOrder& lo)
 		: m_literal_order(begin(lo), end(lo))
 	{ }
 
@@ -62,8 +62,8 @@ private:
 };
 
 namespace std {
-	template<> struct hash<Graph::Vertex> {
-		auto operator()(const Graph::Vertex& v) const {
+	template<> struct hash<CNFTree::Vertex> {
+		auto operator()(const CNFTree::Vertex& v) const {
 			return std::hash<std::decay_t<decltype(*v.lit_pos)>>()(*v.lit_pos)
 				| std::hash<std::decay_t<decltype(v.inverted)>>()(v.inverted)
 				// | std::hash<std::decay_t<decltype(v.id)>>()(v.id)

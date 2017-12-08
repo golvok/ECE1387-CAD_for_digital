@@ -92,7 +92,7 @@ int program_main(const ProgramConfig& config, bool enable_graphics_calls) {
 		[&](const input::ParseResult& pr) {
 			auto expression = CNFExpression(config.variableOrder(), pr.expressionData());
 			do_optional_input_data_dump(config.dataFileName(), pr, expression);
-			const auto graph = Graph{expression.all_literals()};
+			const auto graph = CNFTree{expression.all_literals()};
 			using ID = decltype(graph)::Vertex;
 
 			if (enable_graphics_calls) {
