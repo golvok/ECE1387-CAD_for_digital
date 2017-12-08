@@ -16,7 +16,9 @@ void branchAndBound(Visitor&& visitor, Graph&& graph) {
 		-100,
 	});
 
-	auto best_cost = visitor.evalPartialSolution(std::vector<State>()).upper_bound;
+	const auto initial_solution = std::vector<State>();
+	auto best_cost = visitor.evalPartialSolution(initial_solution).upper_bound;
+	visitor.onNewBest(best_cost, initial_solution);
 
 	for (const auto& seed_state : seed_states) {
 		std::vector<State> state_stack { seed_state, };
