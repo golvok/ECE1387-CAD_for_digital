@@ -10,6 +10,7 @@ std::vector<std::pair<VariableOrder, std::vector<std::string>>> variableOrderStr
 	{ VariableOrder::FILE,                        {"FILE","F"} },
 	{ VariableOrder::GROUPED_BY_DISJUNCTION,      {"GROUPED_BY_DISJUNCTION","GBD"} },
 	{ VariableOrder::MOST_COMMON_FIRST,           {"MOST_COMMON_FIRST","MCF"} },
+	{ VariableOrder::ALL_BUT_ONE_IN_DISJUNCTION,  {"ALL_BUT_ONE_IN_DISJUNCTION","ABOID"} },
 	{ VariableOrder::RANDOM,                      {"RANDOM"} },
 };
 
@@ -17,6 +18,7 @@ std::vector<VariableOrder> variableOrders {
 	VariableOrder::FILE,
 	VariableOrder::GROUPED_BY_DISJUNCTION,
 	VariableOrder::MOST_COMMON_FIRST,
+	VariableOrder::ALL_BUT_ONE_IN_DISJUNCTION,
 	VariableOrder::RANDOM,
 };
 
@@ -68,16 +70,34 @@ CNFExpression::CNFExpression(const std::vector<VariableOrder>& ordering, const s
 	std::unordered_map<Literal, int> literal_file_pos;
 	std::unordered_map<LiteralID, int> literal_id_file_pos;
 	std::unordered_map<LiteralID, int> literal_id_first_disjunction;
+	std::unordered_map<LiteralID, bool> is_nth_var;
 
 	int disjunction_pos = 0;
 	int curr_file_pos = 0;
 	for (const auto& disjunction : all_disjunctions()) {
+		int non_nth_vars = 0;
+		for (const auto& lit : disjunction) {
+			const auto lookup = is_nth_var.find(lit.id());
+			if (lookup != end(is_nth_var) && not lookup->second) {
+				non_nth_vars += 1;
+			}
+		}
+
 		for (const auto& lit : disjunction) {
 			literal_counts[lit] += 1;
 			literal_counts[~lit] += 0; // ensure it exists
 			literal_id_file_pos.emplace(lit.id(), curr_file_pos);
 			literal_file_pos.emplace(lit, curr_file_pos);
 			literal_id_first_disjunction.emplace(lit.id(), disjunction_pos);
+			if (non_nth_vars == (int)disjunction.size()-1) {
+				is_nth_var.emplace(lit.id(), true);
+				non_nth_vars += 1; // disable this path in the future
+			} else {
+				if (is_nth_var.emplace(lit.id(), false).second) {
+					non_nth_vars += 1;
+				}
+			}
+
 			curr_file_pos += 1;
 		}
 		disjunction_pos += 1;
@@ -109,6 +129,10 @@ CNFExpression::CNFExpression(const std::vector<VariableOrder>& ordering, const s
 		return literal_id_first_disjunction.at(lhs) < literal_id_first_disjunction.at(rhs);
 	};
 
+	auto by_is_nth_var_as_last = [&](auto& lhs, auto& rhs) {
+		return (int)is_nth_var.at(lhs) < (int)is_nth_var.at(rhs);
+	};
+
 	std::random_device rd;
 
 	for (auto it = rbegin(ordering); it != rend(ordering); ++it) {
@@ -124,6 +148,8 @@ CNFExpression::CNFExpression(const std::vector<VariableOrder>& ordering, const s
 						return by_literal_count(lhs, rhs);
 					} break; case VariableOrder::GROUPED_BY_DISJUNCTION: {
 						return by_disjunction(lhs, rhs);
+					} break; case VariableOrder::ALL_BUT_ONE_IN_DISJUNCTION: {
+						return by_is_nth_var_as_last(lhs, rhs);
 					} break; default: {
 						util::print_and_throw<std::runtime_error>([&](auto& str) {
 							str << "unhandled vaiable ordering type: " << (int)*it;
