@@ -38,7 +38,7 @@ void branchAndBound(Visitor&& visitor, Graph&& graph) {
 			if (skip_branch || !graph.hasFanout(state.vertex)) {
 				while (!state_stack.empty()) {
 					visitor.onLeave(state_stack.back().vertex);
-					if (state_stack.back().parent_lower_bound < best_cost and !state_stack.back().vertex.inverted) {
+					if (state_stack.back().parent_lower_bound < best_cost && graph.hasNextSibling(state.vertex)) {
 						state_stack.back().vertex = graph.nextSibling(std::move(state_stack.back().vertex));
 						break;
 					} else {
