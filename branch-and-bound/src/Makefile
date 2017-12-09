@@ -117,10 +117,10 @@ build_info:
 	@echo "In build mode ${BUILD_MODE}"
 ifeq ($(MAKE_COMPAT),yes)
 ifneq ($(NO_MAKE_VER_WARN),yes)
-	@echo -e "WARNING: #############################################################################################"
-	@echo -e "WARNING: You seem to be  building with an old version of Make. Building may require multiple attempts."
-	@echo -e "WARNING: Set NO_MAKE_VER_WARN=yes to hide this"
-	@echo -e "WARNING: #############################################################################################"
+	@echo -en " WARNING: #############################################################################################\n" \
+	           "WARNING: You seem to be  building with an old version of Make. Building may require multiple attempts.\n" \
+	           "WARNING: Set NO_MAKE_VER_WARN=yes to hide this\n" \
+	           "WARNING: #############################################################################################\n"
 endif
 endif
 
