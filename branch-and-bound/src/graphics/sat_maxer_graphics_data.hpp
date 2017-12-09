@@ -16,9 +16,16 @@ struct SatMaxerGraphicsData {
 	void addPath(std::vector<Literal>&& path);
 
 	void drawAll();
+
+	struct TreeNode {
+		TreeNode(Literal lit) : lit(lit), children() { }
+		TreeNode() : lit(), children() { }
+
+		Literal lit;
+		std::vector<std::unique_ptr<TreeNode>> children;
+	};
 private:
-	static const int QUEUE_SIZE = 65534; // this appears to be the maximum size allowed
-	boost::lockfree::queue<std::vector<Literal>*, boost::lockfree::capacity<QUEUE_SIZE>> paths_to_draw;
+	TreeNode explored_tree;
 	int num_levels_visible;
 	float width;
 	float level_step;
