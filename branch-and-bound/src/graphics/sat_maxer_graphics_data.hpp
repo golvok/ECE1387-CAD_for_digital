@@ -4,6 +4,7 @@
 #include <datastructures/literal_id.hpp>
 
 #include <vector>
+#include <memory>
 
 struct SatMaxerGraphicsData {
 	SatMaxerGraphicsData();
