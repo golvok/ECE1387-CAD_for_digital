@@ -43,13 +43,11 @@ boost::variant<ParseResult, std::string> parse_data(std::istream& is) {
 	> 
 	parse_results;
 
-	auto optional_comment = -x3::omit['#' >> *(x3::char_ - x3::eol)];
-
 	auto it = begin(is_as_string);
 	const auto it_end = end(is_as_string);
 	const bool is_match = x3::phrase_parse( it, it_end,
-		x3::int_ >> x3::int_ >> optional_comment >> x3::eol >>
-		*(*x3::int_ >> optional_comment >> x3::eol)
+		x3::int_ >> x3::int_ >> x3::eol >>
+		*(*x3::int_ >> x3::eol)
 		>> x3::omit[*chars::space]
 		>> x3::eoi,
 		chars::blank,
