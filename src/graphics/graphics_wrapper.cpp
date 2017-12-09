@@ -70,6 +70,7 @@ public:
 					},
 					[this]() noexcept {
 						// drawscreen
+						graphics::clearscreen();
 						graphics_interface->drawAll();
 					}
 				);

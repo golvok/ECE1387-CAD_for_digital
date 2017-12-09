@@ -376,7 +376,6 @@ void FPGAGraphicsData::do_graphics_refresh(bool reset_view, const geom::BoundBox
 }
 
 void FPGAGraphicsData::drawAll() {
-	graphics::clearscreen();
 	const auto& data_and_lock_copy = dataAndLock();
 	const auto& data = data_and_lock_copy.first;
 
