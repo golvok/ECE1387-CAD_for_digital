@@ -34,6 +34,11 @@ struct CNFTree {
 		);
 	}
 
+	Vertex firstFanout(const Vertex& source) const {
+		auto src_lit_pos = source.lit_pos;
+		return { std::next(src_lit_pos), false };
+	}
+
 	bool hasNextSibling(const Vertex& v) const {
 		return v.inverted == false;
 	}
