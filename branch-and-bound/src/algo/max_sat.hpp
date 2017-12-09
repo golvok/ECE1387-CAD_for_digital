@@ -6,10 +6,10 @@
 
 namespace maxsat {
 
-template<typename Vertex>
+template<typename Vertex, bool USE_INCREMENTAL>
 struct DefaultVisitor {
 	const CNFExpression& expression;
-	CNFEvaluation<std::vector> evaluator;
+	CNFEvaluation<USE_INCREMENTAL, std::vector> evaluator;
 	int num_partial_settings_explored = 0;
 	int num_complete_settings_explored = 0;
 	std::vector<Literal> best_solution = {};

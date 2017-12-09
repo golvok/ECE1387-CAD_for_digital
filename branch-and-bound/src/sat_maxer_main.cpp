@@ -49,16 +49,17 @@ int main(int argc, char const** argv) { try{
 } catch (std::exception& e) { std::cerr << "Uncaught exception: .what() = \"" << e.what() << '"' << std::endl; return -1; } }
 
 
-template<typename Vertex>
-struct GraphicsVisitor : maxsat::DefaultVisitor<Vertex> {
-	using maxsat::DefaultVisitor<Vertex>::DefaultVisitor;
-	using maxsat::DefaultVisitor<Vertex>::expression;
+template<typename Vertex, bool USE_INCREMENTAL>
+struct GraphicsVisitor : maxsat::DefaultVisitor<Vertex, USE_INCREMENTAL> {
+	using Base = maxsat::DefaultVisitor<Vertex, USE_INCREMENTAL>;
+	using Base::DefaultVisitor;
+	using Base::expression;
 
 	bool did_graphics_init = false;
 
 	template<typename StateStack>
 	void onExplore(const Vertex& vertex, const StateStack& state_stack) {
-		maxsat::DefaultVisitor<Vertex>::onExplore(vertex, state_stack);
+		Base::onExplore(vertex, state_stack);
 
 		if (not did_graphics_init) {
 			did_graphics_init = true;
@@ -95,12 +96,22 @@ int program_main(const ProgramConfig& config, bool enable_graphics_calls) {
 			const auto graph = CNFTree{expression.all_literals()};
 			using ID = decltype(graph)::Vertex;
 
-			if (enable_graphics_calls) {
-				GraphicsVisitor<ID> visitor { expression };
-				branchAndBound<ID>(visitor, graph);
+			if (config.shouldUseIncremental()) {
+				if (enable_graphics_calls) {
+					GraphicsVisitor<ID, true> visitor { expression };
+					branchAndBound<ID>(visitor, graph);
+				} else {
+					maxsat::DefaultVisitor<ID, true> visitor { expression };
+					branchAndBound<ID>(visitor, graph);
+				}
 			} else {
-				maxsat::DefaultVisitor<ID> visitor { expression };
-				branchAndBound<ID>(visitor, graph);
+				if (enable_graphics_calls) {
+					GraphicsVisitor<ID, false> visitor { expression };
+					branchAndBound<ID>(visitor, graph);
+				} else {
+					maxsat::DefaultVisitor<ID, false> visitor { expression };
+					branchAndBound<ID>(visitor, graph);
+				}
 			}
 		}
 	);

@@ -20,6 +20,7 @@ MetaConfig::MetaConfig()
 ProgramConfig::ProgramConfig()
 	: m_dataFileName()
 	, m_variableOrder()
+	, m_shouldUseIncremental(false)
 { }
 
 ParsedArguments::ParsedArguments(int argc_int, char const** argv)
@@ -53,6 +54,7 @@ ParsedArguments::ParsedArguments(int argc_int, char const** argv)
 		("help,h", "print help message")
 		("problem-file,f", po::value(&m_programConfig.m_dataFileName)->required(), "The file with the SAT-MAX problem to solve")
 		("variable-order,r", po::value<std::string>()->default_value("GBD,MCF,F"), ("Comma or (single-token) space separated list of sort orders, interpreted as a hierarchy with top level first. Valid strings: " + vo_helpstring).c_str())
+		("incremental", po::bool_switch(&m_programConfig.m_shouldUseIncremental), "Use incremental mode for computing costs")
 	;
 
 	po::options_description allopts;

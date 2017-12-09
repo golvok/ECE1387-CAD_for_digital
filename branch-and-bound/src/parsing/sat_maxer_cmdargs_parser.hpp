@@ -42,6 +42,7 @@ private:
 struct ProgramConfig {
 	const std::string& dataFileName() const { return m_dataFileName; }
 	const auto& variableOrder() const { return m_variableOrder; }
+	auto shouldUseIncremental() const { return m_shouldUseIncremental; }
 
 private:
 	friend struct ParsedArguments;
@@ -51,6 +52,7 @@ private:
 
 	std::string m_dataFileName;
 	std::vector<VariableOrder> m_variableOrder;
+	bool m_shouldUseIncremental;
 };
 
 struct ParsedArguments {

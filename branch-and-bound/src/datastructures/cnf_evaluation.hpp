@@ -72,6 +72,7 @@ auto eval_disjunctions(const CNFExpression& expression, const T& literal_setting
 }
 
 template<
+	bool USE_INCREMENTAL,
 	template <typename...> class LiteralMap
 >
 struct CNFEvaluation {
@@ -184,8 +185,8 @@ struct CNFEvaluation {
 		return current_result;
 	}
 
-	const Counts& getCounts() const { return current_result; }
-	// auto getCounts() const { return eval_disjunctions(expression, literal_status); }
+	const auto getCounts(typename std::enable_if_t<USE_INCREMENTAL>* = {}) const { return current_result; }
+	const auto getCounts(typename std::enable_if_t<not USE_INCREMENTAL>* = {}) const { return eval_disjunctions(expression, literal_status); }
 
 private:
 	template<typename DisjunctionList, typename DisjunctionStatusList, typename LiteralList>
