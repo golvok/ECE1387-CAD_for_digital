@@ -41,7 +41,10 @@ int main(int argc, char const** argv) { try{
 	}
 
 	const auto result = program_main(parsed_args.programConfig(), parsed_args.meta().shouldEnableGraphics());
-	// graphics::get().close();
+
+	graphics::get().refresh();
+	graphics::get().waitForPress();
+	graphics::get().close();
 	graphics::get().join();
 
 	return result;
