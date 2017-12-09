@@ -16,8 +16,22 @@ void branchAndBound(Visitor&& visitor, Graph&& graph) {
 		-100,
 	});
 
-	const auto initial_solution = std::vector<State>();
-	auto best_cost = visitor.evalPartialSolution(initial_solution).upper_bound;
+	auto initial_solution = std::vector<State>();
+	{
+		auto curr_vertex = *std::next(begin(graph.roots()));
+		initial_solution.emplace_back(State{
+			curr_vertex,
+			-100
+		});
+		while (graph.hasFanout(curr_vertex)) {
+			curr_vertex = graph.nextSibling(graph.firstFanout(curr_vertex));
+			initial_solution.emplace_back(State{
+				curr_vertex,
+				-100
+			});
+		}
+	}
+	auto best_cost = visitor.evalPartialSolutionFromScratch(initial_solution).lower_bound;
 	visitor.onNewBest(best_cost, initial_solution);
 
 	for (const auto& seed_state : seed_states) {

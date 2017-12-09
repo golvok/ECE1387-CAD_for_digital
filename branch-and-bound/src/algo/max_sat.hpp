@@ -67,6 +67,34 @@ struct DefaultVisitor {
 		return result;
 	}
 
+	template<typename T>
+	auto evalPartialSolutionFromScratch(const T& complete_solution) const {
+		struct LocalLiteralStatus {
+			bool unset() const { return false; }
+			bool valueIfSet() const { return v; }
+			bool v;
+		};
+
+		std::vector<LocalLiteralStatus> settings(expression.max_literal() + 1);
+		for (const auto& state : complete_solution) {
+			settings[state.vertex.literal().id().getValue()] = LocalLiteralStatus{not state.vertex.literal().inverted()};
+		}
+
+		const auto& counts = eval_disjunctions(expression, settings);
+
+		struct Result {
+			int lower_bound;
+			int upper_bound;
+			bool is_complete_solution;
+		} result {
+			counts.falseCount(),
+			counts.falseCount() + counts.undecidableCount(),
+			counts.undecidableCount() == 0,
+		};
+
+		return result;
+	}
+
 	template<typename Cost, typename StateStack>
 	void onNewBest(const Cost& best_cost, const StateStack& state_stack) {
 		best_solution.clear();
