@@ -5,9 +5,6 @@
 
 #include <vector>
 
-#include <boost/lockfree/queue.hpp>
-#include <boost/lockfree/policies.hpp>
-
 struct SatMaxerGraphicsData {
 	SatMaxerGraphicsData();
 
