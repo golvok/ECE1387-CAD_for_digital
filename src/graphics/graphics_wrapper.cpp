@@ -87,6 +87,10 @@ public:
 		}
 	}
 
+	void refresh() {
+		graphics::refresh_graphics();
+	}
+
 	void close() {
 		close_requested = true;
 		graphics::simulate_proceed();
@@ -102,6 +106,10 @@ public:
 
 void Graphics::waitForPress() {
 	if (impl) impl->waitForPress();
+}
+
+void Graphics::refresh() {
+	if (impl) impl->refresh();
 }
 
 void Graphics::close() {

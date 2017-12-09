@@ -32,6 +32,11 @@ public:
 	void waitForPress();
 
 	/**
+	 * cause the screen to redraw
+	 */
+	void refresh();
+
+	/**
 	 * Exit the graphics. .join() will return soon after
 	 */
 	void close();
