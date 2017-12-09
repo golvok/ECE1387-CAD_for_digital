@@ -62,7 +62,7 @@ struct GraphicsVisitor : maxsat::DefaultVisitor<Vertex> {
 
 		if (not did_graphics_init) {
 			did_graphics_init = true;
-			graphics::get().tree().setNumLevelsVisible((int)expression.all_disjunctions().size());
+			graphics::get().tree().setNumLevelsVisible((int)expression.all_literals().size());
 		}
 
 		std::vector<Literal> path;
