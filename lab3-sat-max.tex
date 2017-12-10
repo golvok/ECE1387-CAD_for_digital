@@ -28,10 +28,10 @@
 %1) DONETODO program flow
 %   DONETODO initial "best"
 %   DONETODO bounding function
-%2) TODO plot of decision trees for all but 4
+%2) DONETODO plot of decision trees for all but 4
 %   DONETODO counts of tree nodes visited
 %   DONETODO runtime
-%3) TODO summarize and discuss
+%3) DONETODO summarize and discuss
 
 \begin{document}
 
@@ -76,18 +76,18 @@ All but one in disjunction (\texttt{ABOID}) & Splits the variables into two grou
 \subsection{Performance}
 \label{sec:scratch-vs-incremental}
 \begin{table}[H] \centering
-\begin{tabular}{r | *2{r r} }
+\begin{tabular}{r | *2{r r} | r }
 \hline\hline
-        & \multicolumn{2}{c|}{"from-scratch"} & \multicolumn{2}{c}{"incremental"} \\
-Problem & Nodes Visited & \multicolumn{1}{c|}{Time} & Nodes Visited & Time \\
+        & \multicolumn{2}{c|}{"from-scratch"} & \multicolumn{2}{c|}{"incremental"} \\
+Problem & Nodes Visited & \multicolumn{1}{c|}{Time} & Nodes Visited & Time & max. clauses sat.\\
 \hline
-1.cnf & 6          &   10 ms &         14 & 7 ms \\
-2.cnf & 212628     &  216 ms &     592784 & 74 ms \\
-3.cnf & 88080375   &   2m 8s &   92274678 & 12.7 s\\
-4.cnf & 1677721591 & 47m 46s & 1744830454 & 4m 2s\\
+1.cnf & 6          &   10 ms &         14 & 7 ms & 7 \\
+2.cnf & 212628     &  216 ms &     592784 & 74 ms & 79 \\
+3.cnf & 88080375   &   2m 8s &   92274678 & 12.7 s & 159 \\
+4.cnf & 1677721591 & 47m 46s & 1744830454 & 4m 2s & 191 \\
 \hline
 \end{tabular}
-\caption{Nodes visited and times taken for }
+\caption{Nodes visited, times taken and maximum number satisfiable disjunctions for the problems}
 \end{table}
 
 \subsection{Visualizations}
