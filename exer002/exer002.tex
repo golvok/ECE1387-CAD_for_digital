@@ -47,22 +47,91 @@
 
 \part{FPGA Technology Mapping}
 \section{FPGA Technology Mapping for Logic Depth}
-\todo{for each circuit: number of LUTs, and their max depth}
+%\todo{for each circuit: number of LUTs, and their max depth}
+\begin{table}[H]\centering\begin{tabular}{ r | *2c }
+\hline\hline
+Circuit & \#LUTs & Max LUT depth \\
+\hline
+\texttt{alu4}    &  823 & 6 \\
+\texttt{apex2}   & 1042 & 6 \\
+\texttt{ex1010}  & 2944 & 6 \\
+\texttt{misex3}  &  817 & 5 \\
+\texttt{pdc}     & 2397 & 7 \\
+\hline\hline
+\end{tabular}\caption{}\label{tab:fpga-map-for-depth}\end{table}
 
 \section{FPGA Technology Mapping for Logic Area}
-\todo{for each circuit: amount of area reduction, depth difference}
-\todo{average area \& depth redution}
+%\todo{for each circuit: amount of area reduction, depth difference}
+%\todo{average area \& depth redution}
+\begin{table}[H]\centering\begin{tabular}{ r | c | r l || c | r l }
+\hline\hline
+Circuit &
+	\#LUTs &
+	\multicolumn{2}{p{3.5cm} || }{\raggedright\#LUT Difference from \cref{tab:fpga-map-for-depth}.} &
+	\multicolumn{1}{p{1.85cm} | }{\raggedright Max LUT depth} &
+	\multicolumn{2}{p{5cm}      }{\raggedright Max LUT Depth Difference from \cref{tab:fpga-map-for-depth}.} \\
+\hline
+\texttt{alu4}   &  806 &  -17 & (-2.1\%) &  9 & +3 & (+50\%) \\
+\texttt{apex2}  &  962 &  -80 & (-7.7\%) & 11 & +5 & (+83\%) \\
+\texttt{ex1010} & 2835 & -109 & (-3.7\%) & 11 & +5 & (+83\%) \\
+\texttt{misex3} &  776 &  -41 & (-5.0\%) &  9 & +4 & (+80\%) \\
+\texttt{pdc}    & 2317 &  -80 & (-3.3\%) & 12 & +5 & (+71\%) \\
+\hline
+\textbf{Average} & & & \textbf{\ -4.4\%} & & & \textbf{\ +74\%} \\
+\hline\hline
+\end{tabular}\caption{}\label{tab:fpga-map-for-min-area}\end{table}
 
 \part{Standard Cell Technology Mapping}
-\section{}
-\todo{for each circuit: area, delay \& No. cells on crit path}
+\section{Unmodified \texttt{mcnc.genlib}}
+%\todo{for each circuit: area, delay \& No. cells on crit path}
+\begin{table}[H]\centering\begin{tabular}{ r | *3c }
+\hline\hline
+Circuit & Area & \(T_{min}\) & Logic Depth on Crit. Path \\
+\hline
+\texttt{alu4}   &  4573.00 & 12.90 & 11 \\
+\texttt{apex2}  &  5276.00 & 14.40 & 13 \\
+\texttt{ex1010} & 14292.00 & 13.80 & 11 \\
+\texttt{misex3} &  4265.00 & 12.00 & 11 \\
+\texttt{pdc}    & 12944.00 & 15.20 & 13 \\
+\hline\hline
+\end{tabular}\caption{}\label{tab:sc-map-on-full-lib}\end{table}
 
-\section{minimal gate lib}
-\todo{for each circuit: area, delay \& No. cells on crit path}
+\section{Minimal \texttt{mcnc.genlib}}
+%\todo{for each circuit: area, delay \& No. cells on crit path}
+\begin{table}[H]\centering\begin{tabular}{ r | *3c }
+\hline\hline
+Circuit & Area & \(T_{min}\) & Logic Depth on Crit. Path \\
+\hline
+\texttt{alu4}   &  6006.00 & 23.80 & 25 \\
+\texttt{apex2}  &  6888.00 & 27.60 & 29 \\
+\texttt{ex1010} & 19881.00 & 25.70 & 27 \\
+\texttt{misex3} &  5646.00 & 21.90 & 23 \\
+\texttt{pdc}    & 17010.00 & 29.50 & 31 \\
+\hline\hline
+\end{tabular}\caption{}\label{tab:sc-map-on-minimal-lib}\end{table}
 
 \part{NAND-LUT Equivalency}
 \section{}
-\todo{for each circuit: No. LUTs in both earlier FPGA mappings, NAND-equiv number, NAND-equiv to LUT ratio}
+% \todo{for each circuit: No. LUTs in both earlier FPGA mappings, NAND-equiv number, NAND-equiv to LUT ratio}
+%\todo{average nand-equiv}
+\begin{table}[H]\centering\begin{tabular}{ r *3c || l  r | c }
+\hline\hline
+Circuit & \#NAND-2 & \#INV1 & Nand-Equiv & Optim'ion & \#LUTs & \({\text{Nand-Equiv}}/{\text{\#LUT}}\) \\
+\hline
+\texttt{alu4}   & 2365 & 1276 & 3003.0 & delay &  823 &  3.6 \\
+                &      &      &        & area  &  806 &  4.3 \\
+\texttt{apex2}  & 2610 & 1668 & 3444.0 & delay & 1042 &  9.5 \\
+                &      &      &        & area  &  962 &  2.9 \\
+\texttt{ex1010} & 7269 & 5343 & 9940.5 & delay & 2944 &  2.9 \\
+                &      &      &        & area  & 2835 &  1.0 \\
+\texttt{misex3} & 2166 & 1314 & 2823.0 & delay &  817 &  4.2 \\
+                &      &      &        & area  &  776 &  13{\ \ \ } \\
+\texttt{pdc}    & 6627 & 3756 & 8505.0 & delay & 2397 &  1.2 \\
+                &      &      &        & area  & 2317 &  3.7 \\
+\hline
+\textbf{Average}&      &      &        &       &      & \textbf{4.6} \\
+\hline\hline
+\end{tabular}\caption{}\label{tab:nand-equiv}\end{table}
 
 \part{Lineal Programming Placement}
 \section{}

@@ -33,17 +33,33 @@ CIRCUITS = \
 
 FPGA6_OUPUT = $(patsubst %,work/circuits/%.6.k.blif.out,$(CIRCUITS))
 FORAREA_FPGA6_OUPUT = $(patsubst %,work/circuits/%.forarea.6.k.blif.out,$(CIRCUITS))
+FULL_SC_OUTPUT = $(patsubst %,work/circuits/%.full.mapped.sc.blif.out,$(CIRCUITS))
+MINIMAL_SC_OUTPUT = $(patsubst %,work/circuits/%.minimal.mapped.sc.blif.out,$(CIRCUITS))
 
-all: work/6.k.summary work/forarea.6.k.summary
-	for f in $^; do echo "=== $$f ==="; cat "$$f" | grep net; done
+FPGA_TARGETS ?= work/6.k.summary work/forarea.6.k.summary
+STDC_TARGETS ?= work/full.mapped.sc.summary work/minimal.mapped.sc.summary
+
+all: $(FPGA_TARGETS) $(STDC_TARGETS)
+	@for f in $^; do echo "=== $$f ==="; cat "$$f" | grep -P 'net|inv1|nand2'; done
+
+fpga: $(FPGA_TARGETS)
+	@for f in $^; do echo "=== $$f ==="; cat "$$f" | grep net; done
+
+stdc: $(STDC_TARGETS)
+	@for f in $^; do echo "=== $$f ==="; cat "$$f" | grep net; done
 
 work/forarea.6.k.summary: $(FORAREA_FPGA6_OUPUT)
 work/6.k.summary: $(FPGA6_OUPUT)
+work/full.mapped.sc.summary: $(FULL_SC_OUTPUT)
+work/minimal.mapped.sc.summary: $(MINIMAL_SC_OUTPUT)
 
 %.summary:
-	grep --after-context 1 --with-filename -F 'print_stats' $^ | grep lat > '$@'
+	( \
+		grep --after-context 1 --with-filename -F 'print_stats' $^ \
+		grep --after-context 100 --with-filename -F 'print_gates' $^ || exit 0 \
+	) | grep -P "lat|inv1|nand2" > '$@'
 
-work/%.6.k.blif.out: work/%.6.k.blif
+work/%.blif.out: work/%.blif
 	@true
 
 work/%.6.k.blif: %.blif DIR_work
@@ -66,8 +82,33 @@ work/%.forarea.6.k.blif: %.blif DIR_work
 		echo 'write_blif $@'; \
 	) | '$(ABC_EXE)' > '$@.out'
 
+work/%.full.mapped.sc.blif: %.blif DIR_work
+	cp 'genlibs/mcnc.genlib' '$@.genlib'
+	( \
+		echo 'read_blif '"'"'$(abspath $<)'"'"; \
+		echo 'resyn2'; \
+		echo 'read_library $(notdir $@).genlib'; \
+		echo 'map -v'; \
+		echo 'print_stats'; \
+		echo 'print_gates'; \
+		echo 'write_blif $(notdir $@)'; \
+	) | ( cd '$(dir $@)' && '$(ABC_EXE)' ) > '$@.out'
+
+work/%.minimal.mapped.sc.blif: %.blif DIR_work
+	cp 'genlibs/minimal_mcnc.genlib' '$@.genlib'
+	( \
+		echo 'read_blif '"'"'$(abspath $<)'"'"; \
+		echo 'resyn2'; \
+		echo 'read_library $(notdir $@).genlib'; \
+		echo 'map -v'; \
+		echo 'print_stats'; \
+		echo 'print_gates'; \
+		echo 'write_blif $(notdir $@)'; \
+	) | ( cd '$(dir $@)' && '$(ABC_EXE)' ) > '$@.out'
+
 DIR_%:
 	mkdir -p '$*/circuits'
+	cp abc.rc '$*/circuits'
 
 clean:
 	rm -rf work

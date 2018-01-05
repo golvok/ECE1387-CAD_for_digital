@@ -5,10 +5,10 @@ MAKEFLAGS+=" -r "
 build: exer002.pdf
 
 %.pdf: %.tex
-	pdflatex "$*"
-	# bibtex "$*"
-	pdflatex "$*"
-	# pdflatex "$*"
+	pdflatex '$*'
+	# bibtex '$*'
+	pdflatex '$*'
+	# pdflatex '$*'
 
 clean:
 	rm -f \
