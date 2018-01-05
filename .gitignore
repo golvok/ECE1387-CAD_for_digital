@@ -20,8 +20,13 @@ test/runs/*
 *.xoj.bak
 *.autosave.xoj
 *.swp
-lab*-*.pdf
+lab*.pdf
 exer*.pdf
+exer*/exer*.aux
+exer*/exer*.bbl
+exer*/exer*.blg
+exer*/exer*.log
+exer*/exer*.out
 .~lock*.ods#
 
 #suitesparse
