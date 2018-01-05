@@ -1,0 +1,72 @@
+\documentclass[12pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{csquotes}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage[margin=2cm]{geometry}
+\usepackage{listings}
+\usepackage{siunitx}
+\usepackage{tabularx}
+\usepackage{titlesec}
+\usepackage[colorinlistoftodos, textsize=footnotesize]{todonotes}
+
+\usepackage[colorlinks=true, allcolors=blue, pdfusetitle]{hyperref}
+\usepackage[]{cleveref}
+
+% \bibliographystyle{IEEEtran}
+
+% tone down the part command
+\makeatletter
+\titleformat{\part}[hang]
+  {\LARGE\bf\filright}
+  {}
+  {0mm}
+  {}
+\makeatother
+
+\lstset{
+    tabsize=3,
+    breakatwhitespace=true,
+    breaklines=true,
+    frame=simple
+}
+
+\title{Exercise \#2 - ECE1387 - Standard Cell and FPGA Technology Mapping with the ABC Logic Synthesis Framework \& Linear Programming Placement}
+\author{Matthew J.P. Walker <matthewjp.walker@mail.utoronto.ca>}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\part{FPGA Technology Mapping}
+\section{FPGA Technology Mapping for Logic Depth}
+\todo{for each circuit: number of LUTs, and their max depth}
+
+\section{FPGA Technology Mapping for Logic Area}
+\todo{for each circuit: amount of area reduction, depth difference}
+\todo{average area \& depth redution}
+
+\part{Standard Cell Technology Mapping}
+\section{}
+\todo{for each circuit: area, delay \& No. cells on crit path}
+
+\section{minimal gate lib}
+\todo{for each circuit: area, delay \& No. cells on crit path}
+
+\part{NAND-LUT Equivalency}
+\section{}
+\todo{for each circuit: No. LUTs in both earlier FPGA mappings, NAND-equiv number, NAND-equiv to LUT ratio}
+
+\part{Lineal Programming Placement}
+\section{}
+\todo{LP file}
+\todo{final placed positions (lower left corners)}
+
+\end{document}

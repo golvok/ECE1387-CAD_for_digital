@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# (
+# 	echo cd '~/Documents/ECE1387/abc70930'
+# 	echo "'./abc'"
+# 	cat
+# ) | ssh walker82@ecf.utoronto.ca
+
+ssh walker82@ecf.utoronto.ca 'bash -ic "cd ~/Documents/ECE1387/abc70930 && ./abc"'

@@ -1,0 +1,75 @@
+
+# add parallelism equal to number of cores every time.
+# it seems that adding -jX to MAKEFLAGS directly doesn't work any more.
+# included some "random" strings to ensure uniqueness
+ifneq ($(PARALELL_WRAPPER_ABXCOEOEKCOEBMQJKHTOEUB),done)
+
+NUM_CORES ?= $(shell grep -c "vendor_id" /proc/cpuinfo)
+MAKEFLAGS +=" -j$(NUM_CORES) -l$(NUM_CORES) "
+
+# for the default target case
+parallel_wrapper_default_target_anthsqjkshbeohcbmeuthnoethoaeou:
+	$(MAKE) PARALELL_WRAPPER_ABXCOEOEKCOEBMQJKHTOEUB=done
+
+# catches everything else
+% :
+	$(MAKE) $@ PARALELL_WRAPPER_ABXCOEOEKCOEBMQJKHTOEUB=done
+
+# the match for this else is at the end of the file
+else
+
+.PHONY: all clean
+
+# remove ALL implicit rules & all suffixes
+MAKEFLAGS+=" -r "
+ABC_EXE ?= abc
+
+CIRCUITS = \
+	alu4 \
+	apex2 \
+	ex1010 \
+	misex3 \
+	pdc \
+
+FPGA6_OUPUT = $(patsubst %,work/circuits/%.6.k.blif.out,$(CIRCUITS))
+FORAREA_FPGA6_OUPUT = $(patsubst %,work/circuits/%.forarea.6.k.blif.out,$(CIRCUITS))
+
+all: work/6.k.summary work/forarea.6.k.summary
+	for f in $^; do echo "=== $$f ==="; cat "$$f" | grep net; done
+
+work/forarea.6.k.summary: $(FORAREA_FPGA6_OUPUT)
+work/6.k.summary: $(FPGA6_OUPUT)
+
+%.summary:
+	grep --after-context 1 --with-filename -F 'print_stats' $^ | grep lat > '$@'
+
+work/%.6.k.blif.out: work/%.6.k.blif
+	@true
+
+work/%.6.k.blif: %.blif DIR_work
+	( \
+		echo 'read_blif $<'; \
+		echo 'resyn2'; \
+		echo 'print_stats'; \
+		echo 'if -K 6'; \
+		echo 'print_stats'; \
+		echo 'write_blif $@'; \
+	) | '$(ABC_EXE)' > '$@.out'
+
+work/%.forarea.6.k.blif: %.blif DIR_work
+	( \
+		echo 'read_blif $<'; \
+		echo 'resyn2'; \
+		echo 'print_stats'; \
+		echo 'if -K 6 -a'; \
+		echo 'print_stats'; \
+		echo 'write_blif $@'; \
+	) | '$(ABC_EXE)' > '$@.out'
+
+DIR_%:
+	mkdir -p '$*/circuits'
+
+clean:
+	rm -rf work
+
+endif
