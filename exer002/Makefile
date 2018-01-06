@@ -4,7 +4,7 @@ MAKEFLAGS+=" -r "
 
 build: exer002.pdf
 
-%.pdf: %.tex
+%.pdf: %.tex part6-4x4chip.lp
 	pdflatex '$*'
 	# bibtex '$*'
 	pdflatex '$*'

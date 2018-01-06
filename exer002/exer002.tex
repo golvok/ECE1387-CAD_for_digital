@@ -12,8 +12,11 @@
 \usepackage[margin=2cm]{geometry}
 \usepackage{listings}
 \usepackage{siunitx}
+\usepackage{subcaption}
 \usepackage{tabularx}
 \usepackage{titlesec}
+\usepackage{tikz}
+	\usetikzlibrary{arrows,calc,fit}
 \usepackage[colorinlistoftodos, textsize=footnotesize]{todonotes}
 
 \usepackage[colorlinks=true, allcolors=blue, pdfusetitle]{hyperref}
@@ -133,9 +136,73 @@ Circuit & \#NAND-2 & \#INV1 & Nand-Equiv & Optim'ion & \#LUTs & \({\text{Nand-Eq
 \hline\hline
 \end{tabular}\caption{}\label{tab:nand-equiv}\end{table}
 
+\newcommand{\placementpicture}[3]{
+	\begin{tikzpicture}[
+		net1line/.style={red,thick},
+		net2line/.style={blue,thick},
+		net3line/.style={green,thick},
+		blockport/.style={shape=circle,draw,inner sep=0.5mm}
+	]
+	\coordinate (A1) at (#1);
+	\coordinate (B1) at (#2);
+	\coordinate (C1) at (#3);
+	\coordinate (A2) at ($ ( (1,1) + (A1) $);
+	\coordinate (B2) at ($ ( (1,2) + (B1) $);
+	\coordinate (C2) at ($ ( (2,1) + (C1) $);
+
+	\draw[step=1,black] (0,0) grid (4,4);
+	\node[fit={(A1) (A2)},draw,fill=gray,inner sep=0] (A) {}; \node at (A.base) {A};
+	\node[fit={(B1) (B2)},draw,fill=gray,inner sep=0] (B) {}; \node at (B.base) {B};
+	\node[fit={(C1) (C2)},draw,fill=gray,inner sep=0] (C) {}; \node at (C.base) {C};
+
+	\foreach \blockports [count=\net] in
+		{{A/north,C/west},
+		 {A/east,B/west,C/south},
+		 {B/east,C/east}}
+	{
+		\foreach \blockid/\direction in \blockports {
+			\node[blockport,net\net line,anchor=\direction] (\blockid Port\direction) at (\blockid.\direction) {};
+		}
+		\def\portN{test}
+		\foreach[count=\ii] \blockid/\direction in \blockports {
+			\global\edef\portN{\blockid Port\direction}
+		}
+
+		\foreach \blockid/\direction [remember={{\blockid Port\direction}} as \prevport (initially \portN)] in \blockports {
+			\draw[net\net line] (\prevport) -- (\blockid Port\direction);
+		}
+	}
+
+	\end{tikzpicture}
+}
+
 \part{Lineal Programming Placement}
 \section{}
-\todo{LP file}
-\todo{final placed positions (lower left corners)}
+%\todo{LP file}
+%\todo{final placed positions (lower left corners)}
+\vspace{-0.75cm}
+\begin{figure}[H]\centering
+\subcaptionbox{
+	A solution with \(x_i,y_i \in \mathbb{R}\). \(cost = 3.5\). \\
+	\((x_A,y_A) = (0.0, 1.0)\) \\
+	\((x_B,y_B) = (1.5, 0.0)\) \\
+	\((x_C,y_C) = (0.5, 2.0)\) \\
+}{
+	\placementpicture{0,1}{1.5,0}{0.5,2}
+}
+\hspace{1cm}
+\subcaptionbox{
+	A solution with \(x_i,y_i \in \mathbb{Z}\). \(cost = 3.5\). \\
+	\((x_A,y_A) = (1, 1)\) \\
+	\((x_B,y_B) = (2, 0)\) \\
+	\((x_C,y_C) = (1, 2)\) \\
+}{
+	\placementpicture{1,1}{2,0}{1,2}
+}
+\end{figure}
+
+The LP file used follows
+
+\lstinputlisting{part6-4x4chip.lp}
 
 \end{document}
