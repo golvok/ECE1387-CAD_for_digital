@@ -8,13 +8,13 @@ namespace util {
 
 namespace detail {
 
-	template<size_t... Is>
+	template<std::size_t... Is>
 	struct seq { };
 
-	template<size_t N, size_t... Is>
+	template<std::size_t N, std::size_t... Is>
 	struct gen_seq : gen_seq<N - 1, N - 1, Is...> { };
 
-	template<size_t... Is>
+	template<std::size_t... Is>
 	struct gen_seq<0, Is...> : seq<Is...> { };
 
 	struct recursive_combiner {
@@ -36,7 +36,7 @@ namespace detail {
 
 }
 
-template<size_t INDEX>
+template<std::size_t INDEX>
 struct getter {
 	template<typename TUPLE>
 	auto& operator()(TUPLE& t) {
@@ -46,7 +46,7 @@ struct getter {
 
 namespace detail {
 
-	template<typename TUPLE_IN, typename F, size_t... Is>
+	template<typename TUPLE_IN, typename F, std::size_t... Is>
 	auto map_tuple_impl(TUPLE_IN&& t, F f, seq<Is...>) {
 		return std::make_tuple(
 			(f(
@@ -55,7 +55,7 @@ namespace detail {
 		);
 	}
 
-	template<typename TUPLE_IN, typename... OTHER_ARGS, size_t... Is, typename F>
+	template<typename TUPLE_IN, typename... OTHER_ARGS, std::size_t... Is, typename F>
 	auto unpack_into_impl(F f, seq<Is...>, TUPLE_IN&& t, OTHER_ARGS&&... other_args) {
 		return f(
 			other_args..., std::get<Is>(t)...
@@ -71,7 +71,7 @@ auto unpack_into(F f, TUPLE_IN&& t, OTHER_ARGS&&... other_args) {
 
 namespace detail {
 
-	template<typename TUPLE_OUT, typename TUPLE_IN, typename F, size_t... Is>
+	template<typename TUPLE_OUT, typename TUPLE_IN, typename F, std::size_t... Is>
 	TUPLE_OUT map_tuple_impl(TUPLE_IN&& t, F f, seq<Is...>) {
 		return TUPLE_OUT( (f(std::get<Is>(t)))... );
 	}
@@ -90,7 +90,7 @@ auto map_tuple(const TUPLE_IN& t, F f) {
 
 namespace detail {
 
-	template<size_t INDEX, typename... TUPLES_IN>
+	template<std::size_t INDEX, typename... TUPLES_IN>
 	auto one_from_each(std::tuple<TUPLES_IN&...>&& tuples) {
 		return map_tuple(tuples, getter<INDEX>());
 	}
@@ -99,7 +99,7 @@ namespace detail {
 
 namespace detail {
 
-	template<typename F, size_t... Is, typename... TUPLES_IN>
+	template<typename F, std::size_t... Is, typename... TUPLES_IN>
 	auto map_multi_tuple_impl(F f, seq<Is...>, TUPLES_IN&&... tuples) {
 		return std::make_tuple(
 			(unpack_into(f, one_from_each<Is>(std::tie(tuples...))))...

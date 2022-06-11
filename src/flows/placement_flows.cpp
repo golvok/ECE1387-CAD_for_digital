@@ -329,12 +329,12 @@ struct CliqueAndSpreadFLow : public APLFlowBase<CliqueAndSpreadFLow<Device, Fixe
 			);
 
 			{const auto indent = dout(DL::APL_D3).indentWithTitle("New Assignments");
-			for (const auto new_net : assignments.new_nets) {
+			for (const auto& new_net : assignments.new_nets) {
 				dout(DL::APL_D3) << new_net[0] << " -> " << new_net[1] << '\n';
 			}}
 
 			{ const auto indent = dout(DL::APL_D1).indentWithTitle("New Anchors");
-			for (const auto anchor_info : anchor_infos) {
+			for (const auto& anchor_info : anchor_infos) {
 				dout(DL::APL_D1) << anchor_info.id << " @ " << anchor_info.anchor_location << " <- " << anchor_info.filter << '\n';
 				current_anchor_locations.emplace(
 					anchor_info.id,

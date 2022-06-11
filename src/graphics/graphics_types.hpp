@@ -195,6 +195,7 @@ public:
      * colours (color_types) if you don't want to make your own rgb colours.
      */
     t_color(color_types src);
+    t_color& operator=(const t_color&) = default;
     t_color& operator=(color_types color_enum);
     bool operator==(color_types rhs) const;
     bool operator!=(color_types rhs) const;

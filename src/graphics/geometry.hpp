@@ -334,6 +334,8 @@ public:
 		, maxpoint()
 	{ }
 
+	BoundBox(const BoundBox&) = default;
+
 	template<typename THEIR_PRECISION>
 	BoundBox(const BoundBox<THEIR_PRECISION>& src)
 		: minpoint(src.min_point())
