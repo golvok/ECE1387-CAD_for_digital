@@ -44,7 +44,7 @@ void SurfaceImpl::setSurface(
             std::cerr << "Invalid Visual" << std::endl;
             break;
         default:
-            std::cerr << "Invalid Error" << std::endl;
+            std::cerr << cairo_status_to_string(cairo_surface_status(mSurface.get())) << std::endl;
             break;
     }
 #endif
