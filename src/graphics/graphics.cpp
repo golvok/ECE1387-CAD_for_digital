@@ -333,22 +333,22 @@ typedef enum {
  */
 typedef struct {
 	using CallbackType = void(std::function<void()>);
-    int width;
-    int height;
-    int xleft;
-    int ytop;
+    int width{};
+    int height{};
+    int xleft{};
+    int ytop{};
     std::function<CallbackType> fcn = nullptr;
 #ifdef X11
-    Window win;
-    XftDraw* draw;
+    Window win{};
+    XftDraw* draw{};
 #else
-    HWND hwnd;
+    HWND hwnd{};
 #endif
-    t_button_type type;
-    char text[BUTTON_TEXT_LEN]; //Space for terminator
-    int poly[3][2];
-    bool ispressed;
-    bool enabled;
+    t_button_type type{};
+    char text[BUTTON_TEXT_LEN]{}; //Space for terminator
+    int poly[3][2]{};
+    bool ispressed{};
+    bool enabled{};
 } t_button;
 
 /* Structure used to store all the buttons created in the menu region.
@@ -2936,7 +2936,7 @@ close_graphics(void) {
     for (int i = 0; i < button_state.num_buttons; ++i) {
         unmap_button(i);
     }
-    free(button_state.button);
+    delete[] button_state.button;
     button_state.button = nullptr;
     button_state.num_buttons = 0;
 
@@ -3198,7 +3198,7 @@ build_default_menu(void) {
     XMapWindow(x11_state.display, x11_state.menu);
 #endif
 
-    button_state.button = static_cast<t_button *>(my_malloc(NUM_STANDARD_BUTTONS * sizeof (t_button)));
+    button_state.button = new t_button[NUM_STANDARD_BUTTONS];
 
     /* Now do the arrow buttons */
     bwid = 28;
