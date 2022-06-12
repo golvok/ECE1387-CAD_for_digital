@@ -185,8 +185,10 @@ struct CNFEvaluation {
 		return current_result;
 	}
 
-	const auto getCounts(typename std::enable_if_t<USE_INCREMENTAL>* = {}) const { return current_result; }
-	const auto getCounts(typename std::enable_if_t<not USE_INCREMENTAL>* = {}) const { return eval_disjunctions(expression, literal_status); }
+	decltype(auto) getCounts() const {
+		if constexpr (USE_INCREMENTAL) return current_result;
+		else return eval_disjunctions(expression, literal_status);
+	}
 
 private:
 	template<typename DisjunctionList, typename DisjunctionStatusList, typename LiteralList>
